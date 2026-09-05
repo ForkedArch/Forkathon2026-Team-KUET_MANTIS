@@ -11,7 +11,6 @@
 | Member 1 | 2K25XXXX | CSE        | @username |
 | Member 2 | 2K25XXXX | CSE        | @username |
 | Member 3 | 2K25XXXX | CSE        | @username |
-| Member 4 | 2K25XXXX | CSE        | @username |
 
 ---
 
