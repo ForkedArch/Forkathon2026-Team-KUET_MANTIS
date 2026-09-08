@@ -23,5 +23,5 @@ Use clear commit messages.
 
 # Code Ownership
 
-The following repository completely owned by ForkedArch for Forkathon 2026 and Code credintials goes to the participating team TEAM_NAME
+The following repository completely owned by ForkedArch for Forkathon 2026 and Code credintials goes to the participating team KUET_MANTIS
 ```
