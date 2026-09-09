@@ -32,7 +32,9 @@ export default function ItemDetail() {
         <span className="text-sm bg-green-100 text-green-800 px-3 py-1 rounded-full">
           {item.is_available ? 'Available' : 'Not Available'}
         </span>
-        <span className="text-sm">⭐ {item.owner?.trust_score?.toFixed(1) || 4.5}</span>
+        <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-200">
+          ⚡ {item.owner?.karma ?? item.karma ?? 100} Karma
+        </span>
       </div>
       <div className="mt-6 border-t pt-4">
         <p className="font-semibold">Owner: {item.owner?.name} ({item.owner?.dept})</p>

@@ -19,6 +19,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # Swagger UI's built-in "Authorize" button silently fail, even though real
 # clients calling the JSON endpoint directly worked fine.
 bearer_scheme = HTTPBearer(auto_error=True)
+bearer_scheme_optional = HTTPBearer(auto_error=False)
 
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 SECRET_KEY = os.getenv("SECRET_KEY")
@@ -71,3 +72,20 @@ async def get_current_user(
     if user is None:
         raise credentials_exception
     return user
+
+
+async def get_current_user_optional(
+    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme_optional),
+    db: Session = Depends(database.get_db),
+):
+    if not credentials:
+        return None
+    try:
+        payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = payload.get("sub")
+        if user_id is None:
+            return None
+        return db.query(models.User).filter(models.User.id == int(user_id)).first()
+    except (JWTError, ValueError):
+        return None
+

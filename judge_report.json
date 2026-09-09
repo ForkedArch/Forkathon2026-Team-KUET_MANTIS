@@ -1,0 +1,134 @@
+{
+  "score": 20,
+  "max_score": 20,
+  "passed": true,
+  "sections": {
+    "architecture_integration": 4,
+    "ui_layout": 4,
+    "kuet_auth": 4,
+    "karma_protocol": 4,
+    "e2e_ux": 4
+  },
+  "checks": [
+    {
+      "name": "Tanvir/ folder deleted from root",
+      "status": "\u2705 PASS",
+      "earned": 1,
+      "max": 1
+    },
+    {
+      "name": "backend/app/data/kuet_landmarks.json present",
+      "status": "\u2705 PASS",
+      "earned": 1,
+      "max": 1
+    },
+    {
+      "name": "GodsEyeMap.jsx component exists",
+      "status": "\u2705 PASS",
+      "earned": 1,
+      "max": 1
+    },
+    {
+      "name": "DashboardLayout.jsx component exists",
+      "status": "\u2705 PASS",
+      "earned": 1,
+      "max": 1
+    },
+    {
+      "name": "DashboardLayout has sidebar navigation",
+      "status": "\u2705 PASS",
+      "earned": 1,
+      "max": 1
+    },
+    {
+      "name": "AddItemModal.jsx exists (item add flow)",
+      "status": "\u2705 PASS",
+      "earned": 1,
+      "max": 1
+    },
+    {
+      "name": "ItemHoverCard.jsx exists (hover cards/popovers)",
+      "status": "\u2705 PASS",
+      "earned": 1,
+      "max": 1
+    },
+    {
+      "name": "Frontend uses Tailwind CSS",
+      "status": "\u2705 PASS",
+      "earned": 1,
+      "max": 1
+    },
+    {
+      "name": "Backend rejects non-KUET emails",
+      "status": "\u2705 PASS",
+      "earned": 1,
+      "max": 1
+    },
+    {
+      "name": "Backend auto-decodes batch/dept/roll from email",
+      "status": "\u2705 PASS",
+      "earned": 1,
+      "max": 1
+    },
+    {
+      "name": "Frontend Roll Decoder function present",
+      "status": "\u2705 PASS",
+      "earned": 1,
+      "max": 1
+    },
+    {
+      "name": "User model defaults karma to 100",
+      "status": "\u2705 PASS",
+      "earned": 1,
+      "max": 1
+    },
+    {
+      "name": "Owner earns +10 karma on successful lend",
+      "status": "\u2705 PASS",
+      "earned": 1,
+      "max": 1
+    },
+    {
+      "name": "Borrower earns +5 karma on on-time return",
+      "status": "\u2705 PASS",
+      "earned": 1,
+      "max": 1
+    },
+    {
+      "name": "Borrower loses -30 karma on late return",
+      "status": "\u2705 PASS",
+      "earned": 1,
+      "max": 1
+    },
+    {
+      "name": "Frontend Profile page displays Karma",
+      "status": "\u2705 PASS",
+      "earned": 1,
+      "max": 1
+    },
+    {
+      "name": "All required DB tables exist",
+      "status": "\u2705 PASS",
+      "earned": 1,
+      "max": 1
+    },
+    {
+      "name": "QR code utility present for handover",
+      "status": "\u2705 PASS",
+      "earned": 1,
+      "max": 1
+    },
+    {
+      "name": "Transaction.jsx has OTP/QR handover + return flow",
+      "status": "\u2705 PASS",
+      "earned": 1,
+      "max": 1
+    },
+    {
+      "name": "Requests.jsx (accept/decline borrow requests) exists",
+      "status": "\u2705 PASS",
+      "earned": 1,
+      "max": 1
+    }
+  ]
+}

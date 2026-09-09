@@ -4,7 +4,7 @@ from .. import schemas, models, auth, database
 from ..utils.qr_code import generate_qr_base64
 import random
 import string
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 router = APIRouter(prefix="/api/transactions", tags=["transactions"])
 
@@ -28,6 +28,8 @@ def start_transaction(
     qr_base64 = generate_qr_base64(qr_data)
     # Create or update transaction
     trans = db.query(models.Transaction).filter(models.Transaction.request_id == data.request_id).first()
+    if trans and trans.status in ["borrowed", "returned"]:
+        raise HTTPException(status_code=400, detail="Transaction is already in progress or completed")
     if not trans:
         trans = models.Transaction(request_id=data.request_id)
         db.add(trans)
@@ -50,10 +52,16 @@ def verify_handover(
     if req.borrower_id != current_user.id:
         raise HTTPException(status_code=403, detail="Only borrower can verify")
     trans = db.query(models.Transaction).filter(models.Transaction.request_id == data.request_id).first()
-    if not trans or trans.otp != data.otp:
+    if not trans:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    if trans.status != "pending":
+        raise HTTPException(status_code=400, detail="Transaction is not pending verification")
+    if not trans.otp or trans.otp != data.otp:
         raise HTTPException(status_code=400, detail="Invalid OTP")
     trans.status = "borrowed"
     trans.borrowed_at = datetime.now(timezone.utc)
+    trans.otp = None
+    trans.qr_code = None
     # Update item status (already unavailable from accept)
     db.commit()
     return {"detail": "Handover verified, item borrowed"}
@@ -72,25 +80,53 @@ def request_return(
     trans = db.query(models.Transaction).filter(models.Transaction.request_id == request_id).first()
     if not trans or trans.status != "borrowed":
         raise HTTPException(status_code=400, detail="Item not currently borrowed")
-    # In a real system, owner would confirm return with another OTP.
-    # For MVP, we auto-confirm and update trust.
+
+    now = datetime.now(timezone.utc)
     trans.status = "returned"
-    trans.returned_at = datetime.now(timezone.utc)
+    trans.returned_at = now
+
     # Make item available again
     item = db.query(models.Item).filter(models.Item.id == req.item_id).first()
     if item:
         item.is_available = True
-    # Update trust scores (simplified)
+        item.status = "available"
+
+    # Check on-time status: borrowed_at + duration_hours
+    borrowed_at = trans.borrowed_at or now
+    if borrowed_at.tzinfo is None:
+        borrowed_at = borrowed_at.replace(tzinfo=timezone.utc)
+
+    duration = req.duration_hours or 0
+    due_time = borrowed_at + timedelta(hours=duration)
+    is_on_time = (now <= due_time)
+
+    # KUET Karma Protocol: Owner +10, Borrower +5 (on-time) or -30 (late)
+    owner_gain = 10
+    borrower_change = 5 if is_on_time else -30
+
     owner = db.query(models.User).filter(models.User.id == req.owner_id).first()
     borrower = db.query(models.User).filter(models.User.id == req.borrower_id).first()
+
     if owner:
-        owner.total_lends += 1
-        # Increase trust slightly
-        owner.trust_score = min(5.0, owner.trust_score + 0.05)
+        owner.total_lends = (owner.total_lends or 0) + 1
+        owner.karma = (owner.karma if owner.karma is not None else 100) + owner_gain
+        owner.trust_score = float(owner.karma)
     if borrower:
-        borrower.total_borrows += 1
-        borrower.trust_score = min(5.0, borrower.trust_score + 0.03)
-    # Update request status to completed
+        borrower.total_borrows = (borrower.total_borrows or 0) + 1
+        borrower.karma = (borrower.karma if borrower.karma is not None else 100) + borrower_change
+        borrower.trust_score = float(borrower.karma)
+
     req.status = "completed"
     db.commit()
-    return {"detail": "Return confirmed, item available again"}
+    db.refresh(trans)
+
+    return {
+        "message": "Item returned successfully",
+        "detail": "Return confirmed, item available again",
+        "karma_updated": {
+            "owner_gain": owner_gain,
+            "borrower_change": borrower_change,
+            "is_on_time": is_on_time
+        }
+    }
+

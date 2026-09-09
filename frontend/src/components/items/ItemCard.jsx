@@ -15,8 +15,10 @@ export default function ItemCard({ item }) {
         <h3 className="font-bold text-lg truncate">{item.title}</h3>
         <p className="text-sm text-gray-600">{item.category} · {item.zone || 'Anywhere'}</p>
         <div className="flex items-center justify-between mt-2">
-          <span className="text-sm text-green-600 font-semibold">Available</span>
-          <span className="text-sm">⭐ {item.owner?.trust_score?.toFixed(1) || 4.5}</span>
+          <span className="text-sm text-green-600 font-semibold">{item.type === 'borrow' ? '🚨 Beacon' : '🟢 Available'}</span>
+          <span className="inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200">
+            ⚡ {item.owner?.karma ?? item.karma ?? 100} Karma
+          </span>
         </div>
         <Link to={`/item/${item.id}`} className="mt-3 inline-block w-full text-center bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">
           View Details

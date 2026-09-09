@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, ForeignKey, Text, JSON, UniqueConstraint
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 from .database import Base
@@ -16,13 +16,18 @@ class User(Base):
     name = Column(String, nullable=False)
     dept = Column(String, nullable=False)
     batch = Column(String, nullable=False)
-    roll = Column(String, unique=True, nullable=False)
+    roll = Column(String, nullable=False)
     hashed_password = Column(String, nullable=False)
     is_verified = Column(Boolean, default=True)  # simplified
-    trust_score = Column(Float, default=4.5)
+    karma = Column(Integer, default=100, nullable=False)
+    trust_score = Column(Float, default=100.0)
     total_lends = Column(Integer, default=0)
     total_borrows = Column(Integer, default=0)
     created_at = Column(DateTime, default=utcnow)
+
+    __table_args__ = (
+        UniqueConstraint('batch', 'dept', 'roll', name='uq_user_batch_dept_roll'),
+    )
 
     items = relationship("Item", back_populates="owner", cascade="all, delete-orphan")
     sent_requests = relationship("BorrowRequest", foreign_keys="BorrowRequest.borrower_id", back_populates="borrower")
@@ -34,15 +39,28 @@ class Item(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
     category = Column(String, nullable=False)
+    type = Column(String, default="lend")  # "lend" or "borrow"
     description = Column(Text, nullable=True)
+    specs = Column(Text, nullable=True)
     condition = Column(String, nullable=True)
     image_url = Column(String, nullable=True)
     latitude = Column(Float, nullable=True)
     longitude = Column(Float, nullable=True)
     zone = Column(String, nullable=True)
+    zone_id = Column(String, nullable=True)
+    tags = Column(JSON, default=list, nullable=True)
+    status = Column(String, default="available")  # "available", "borrowed", "beacon"
     is_available = Column(Boolean, default=True)
     owner_id = Column(Integer, ForeignKey("users.id"))
     created_at = Column(DateTime, default=utcnow)
+
+    @property
+    def lat(self):
+        return self.latitude
+
+    @property
+    def lng(self):
+        return self.longitude
 
     owner = relationship("User", back_populates="items")
     requests = relationship("BorrowRequest", back_populates="item", cascade="all, delete-orphan")

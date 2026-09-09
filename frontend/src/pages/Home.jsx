@@ -1,52 +1,60 @@
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
 import api from '../api/client';
-import ItemCard from '../components/items/ItemCard';
-import Loader from '../components/common/Loader';
+import GodsEyeMap from '../components/map/GodsEyeMap';
+import { useDashboard } from '../components/layout/DashboardLayout';
 
 export default function Home() {
-  const [category, setCategory] = useState('');
-  const [search, setSearch] = useState('');
+  const {
+    search,
+    category,
+    listingType,
+    isPinMode,
+    onSelectLocation,
+    onCancelPinMode,
+    onRequestBorrow
+  } = useDashboard();
 
-  const { data: items, isLoading, error } = useQuery({
-    queryKey: ['items', { category, search }],
-    queryFn: () => api.get('/items', { params: { category, search } }).then(res => res.data)
+  const [selectedItemId, setSelectedItemId] = useState(null);
+
+  const { data: items = [], isLoading } = useQuery({
+    queryKey: ['items', { category, search, listingType }],
+    queryFn: async () => {
+      const params = {};
+      if (search && search.trim() !== '') params.search = search.trim();
+      if (category && category !== 'ALL') params.category = category;
+      if (listingType && listingType !== 'ALL') params.type = listingType;
+      const res = await api.get('/items', { params });
+      return res.data;
+    }
   });
 
-  if (isLoading) return <Loader />;
-  if (error) return <div className="text-red-500">Failed to load items</div>;
-
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6">Available Items</h1>
-      <div className="flex flex-wrap gap-4 mb-6">
-        <input
-          type="text"
-          placeholder="Search..."
-          className="border rounded px-4 py-2 flex-1"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
+    <div className="relative w-full h-full overflow-hidden flex flex-col">
+      {/* MapLibre Canvas Viewport */}
+      <div className="flex-1 w-full h-full relative">
+        <GodsEyeMap
+          items={items}
+          selectedItemId={selectedItemId}
+          isPinMode={isPinMode}
+          onSelectLocation={onSelectLocation}
+          onCancelPinMode={onCancelPinMode}
+          onSelectItem={(item) => setSelectedItemId(item.id)}
+          onRequestBorrow={onRequestBorrow}
+          activeTypeFilter={listingType}
+          activeCategoryFilter={category}
+          searchQuery={search}
+          className="w-full h-full"
         />
-        <select
-          className="border rounded px-4 py-2"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-        >
-          <option value="">All Categories</option>
-          <option value="Calculators">Calculators</option>
-          <option value="Chargers">Chargers</option>
-          <option value="Books">Books</option>
-          <option value="Lab Equipment">Lab Equipment</option>
-          <option value="Others">Others</option>
-        </select>
-      </div>
-      {items?.length === 0 ? (
-        <p>No items available.</p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {items?.map(item => <ItemCard key={item.id} item={item} />)}
+
+        {/* Floating Quick Stats Pill (Top-Left under header) */}
+        <div className="absolute top-4 left-4 z-10 hidden sm:flex items-center gap-2 bg-white/90 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-slate-200/80 shadow-sm text-xs text-slate-700">
+          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span className="font-semibold">
+            {isLoading ? 'Scanning campus...' : `${items.length} Active Items on KUET Map`}
+          </span>
         </div>
-      )}
+      </div>
     </div>
   );
 }

@@ -1,0 +1,556 @@
+{
+  "total": 61,
+  "passed": 60,
+  "failed": 1,
+  "findings": [
+    {
+      "category": "Email Domain Attacks",
+      "title": "Suffix append (.evil.com)",
+      "attack_input": "user2507028@stud.kuet.ac.bd.evil.com",
+      "status_code": 400,
+      "expected_status": "400 or 422",
+      "details": "{\"detail\":\"Only @stud.kuet.ac.bd email addresses are allowed\"}",
+      "is_bug": false
+    },
+    {
+      "category": "Email Domain Attacks",
+      "title": "Subdomain prefix (sub.stud)",
+      "attack_input": "user2507028@sub.stud.kuet.ac.bd",
+      "status_code": 400,
+      "expected_status": "400 or 422",
+      "details": "{\"detail\":\"Only @stud.kuet.ac.bd email addresses are allowed\"}",
+      "is_bug": false
+    },
+    {
+      "category": "Email Domain Attacks",
+      "title": "Fake stud domain (fake-stud)",
+      "attack_input": "user2507028@fake-stud.kuet.ac.bd",
+      "status_code": 400,
+      "expected_status": "400 or 422",
+      "details": "{\"detail\":\"Only @stud.kuet.ac.bd email addresses are allowed\"}",
+      "is_bug": false
+    },
+    {
+      "category": "Email Domain Attacks",
+      "title": "Official faculty domain (@kuet.ac.bd)",
+      "attack_input": "user2507028@kuet.ac.bd",
+      "status_code": 400,
+      "expected_status": "400 or 422",
+      "details": "{\"detail\":\"Only @stud.kuet.ac.bd email addresses are allowed\"}",
+      "is_bug": false
+    },
+    {
+      "category": "Email Domain Attacks",
+      "title": "Generic domain (@gmail.com)",
+      "attack_input": "user2507028@gmail.com",
+      "status_code": 400,
+      "expected_status": "400 or 422",
+      "details": "{\"detail\":\"Only @stud.kuet.ac.bd email addresses are allowed\"}",
+      "is_bug": false
+    },
+    {
+      "category": "Email Domain Attacks",
+      "title": "Similar domain (@stud_kuet.ac.bd)",
+      "attack_input": "user2507028@stud_kuet.ac.bd",
+      "status_code": 422,
+      "expected_status": "400 or 422",
+      "details": "{\"detail\":[{\"type\":\"value_error\",\"loc\":[\"body\",\"email\"],\"msg\":\"value is not a valid email address: The part after the @-sign contains invalid characte",
+      "is_bug": false
+    },
+    {
+      "category": "Email Domain Attacks",
+      "title": "Similar TLD (@stud.kuet.edu.bd)",
+      "attack_input": "user2507028@stud.kuet.edu.bd",
+      "status_code": 400,
+      "expected_status": "400 or 422",
+      "details": "{\"detail\":\"Only @stud.kuet.ac.bd email addresses are allowed\"}",
+      "is_bug": false
+    },
+    {
+      "category": "Email Domain Attacks",
+      "title": "Dot typo (@studkuet.ac.bd)",
+      "attack_input": "user2507028@studkuet.ac.bd",
+      "status_code": 400,
+      "expected_status": "400 or 422",
+      "details": "{\"detail\":\"Only @stud.kuet.ac.bd email addresses are allowed\"}",
+      "is_bug": false
+    },
+    {
+      "category": "Email Domain Attacks",
+      "title": "Trailing dot domain (@stud.kuet.ac.bd.)",
+      "attack_input": "user2507028@stud.kuet.ac.bd.",
+      "status_code": 422,
+      "expected_status": "400 or 422",
+      "details": "{\"detail\":[{\"type\":\"value_error\",\"loc\":[\"body\",\"email\"],\"msg\":\"value is not a valid email address: An email address cannot end with a period.\",\"input\"",
+      "is_bug": false
+    },
+    {
+      "category": "Bad Local Parts",
+      "title": "No digits at all",
+      "attack_input": "tanvir@stud.kuet.ac.bd",
+      "status_code": 400,
+      "expected_status": "400 or 422",
+      "details": "{\"detail\":\"Invalid KUET student email: must end with 7-digit student ID: 2-digit batch, 2-digit dept, 3-digit roll (e.g. siddique2307010@stud.kuet.ac.",
+      "is_bug": false
+    },
+    {
+      "category": "Bad Local Parts",
+      "title": "Only 1 digit",
+      "attack_input": "tanvir1@stud.kuet.ac.bd",
+      "status_code": 400,
+      "expected_status": "400 or 422",
+      "details": "{\"detail\":\"Invalid KUET student email: must end with 7-digit student ID: 2-digit batch, 2-digit dept, 3-digit roll (e.g. siddique2307010@stud.kuet.ac.",
+      "is_bug": false
+    },
+    {
+      "category": "Bad Local Parts",
+      "title": "Only 2 digits (batch only)",
+      "attack_input": "tanvir25@stud.kuet.ac.bd",
+      "status_code": 400,
+      "expected_status": "400 or 422",
+      "details": "{\"detail\":\"Invalid KUET student email: must end with 7-digit student ID: 2-digit batch, 2-digit dept, 3-digit roll (e.g. siddique2307010@stud.kuet.ac.",
+      "is_bug": false
+    },
+    {
+      "category": "Bad Local Parts",
+      "title": "Only 4 digits (batch+dept)",
+      "attack_input": "tanvir2507@stud.kuet.ac.bd",
+      "status_code": 400,
+      "expected_status": "400 or 422",
+      "details": "{\"detail\":\"Invalid KUET student email: must end with 7-digit student ID: 2-digit batch, 2-digit dept, 3-digit roll (e.g. siddique2307010@stud.kuet.ac.",
+      "is_bug": false
+    },
+    {
+      "category": "Bad Local Parts",
+      "title": "Only 6 digits (missing roll digit)",
+      "attack_input": "tanvir250701@stud.kuet.ac.bd",
+      "status_code": 400,
+      "expected_status": "400 or 422",
+      "details": "{\"detail\":\"Invalid KUET student email: must end with 7-digit student ID: 2-digit batch, 2-digit dept, 3-digit roll (e.g. siddique2307010@stud.kuet.ac.",
+      "is_bug": false
+    },
+    {
+      "category": "Bad Local Parts",
+      "title": "7 digits with trailing letters",
+      "attack_input": "tanvir2507028xyz@stud.kuet.ac.bd",
+      "status_code": 400,
+      "expected_status": "400 or 422",
+      "details": "{\"detail\":\"Invalid KUET student email: must end with 7-digit student ID: 2-digit batch, 2-digit dept, 3-digit roll (e.g. siddique2307010@stud.kuet.ac.",
+      "is_bug": false
+    },
+    {
+      "category": "Bad Local Parts",
+      "title": "Empty local part",
+      "attack_input": "@stud.kuet.ac.bd",
+      "status_code": 422,
+      "expected_status": "400 or 422",
+      "details": "{\"detail\":[{\"type\":\"value_error\",\"loc\":[\"body\",\"email\"],\"msg\":\"value is not a valid email address: There must be something before the @-sign.\",\"input\"",
+      "is_bug": false
+    },
+    {
+      "category": "Bad Local Parts",
+      "title": "Whitespace in local part",
+      "attack_input": "tanvir 2507028@stud.kuet.ac.bd",
+      "status_code": 422,
+      "expected_status": "400 or 422",
+      "details": "{\"detail\":[{\"type\":\"value_error\",\"loc\":[\"body\",\"email\"],\"msg\":\"value is not a valid email address: The email address contains invalid characters befor",
+      "is_bug": false
+    },
+    {
+      "category": "Bad Local Parts",
+      "title": "Multiple @ symbols",
+      "attack_input": "tanvir2507028@evil@stud.kuet.ac.bd",
+      "status_code": 422,
+      "expected_status": "400 or 422",
+      "details": "{\"detail\":[{\"type\":\"value_error\",\"loc\":[\"body\",\"email\"],\"msg\":\"value is not a valid email address: The part after the @-sign contains invalid characte",
+      "is_bug": false
+    },
+    {
+      "category": "Boundary Rolls",
+      "title": "Minimum boundary: batch 00, dept 00, roll 000 (Existing)",
+      "attack_input": "min_af240000000@stud.kuet.ac.bd",
+      "status_code": 400,
+      "expected_status": "200 (stored correctly)",
+      "details": "DB values: batch=00, dept=00, roll=000",
+      "is_bug": false
+    },
+    {
+      "category": "Boundary Rolls",
+      "title": "Maximum boundary: batch 99, dept 99, roll 999 (Existing)",
+      "attack_input": "max_e6be9999999@stud.kuet.ac.bd",
+      "status_code": 400,
+      "expected_status": "200 (stored correctly)",
+      "details": "DB values: batch=99, dept=99, roll=999",
+      "is_bug": false
+    },
+    {
+      "category": "Boundary Rolls",
+      "title": "Zero leading roll: roll 001",
+      "attack_input": "zero01_6007001@stud.kuet.ac.bd",
+      "status_code": 200,
+      "expected_status": "200",
+      "details": "Correctly decoded strings: 60-07-001",
+      "is_bug": false
+    },
+    {
+      "category": "Boundary Rolls",
+      "title": "Zero leading roll: roll 010",
+      "attack_input": "zero10_6007010@stud.kuet.ac.bd",
+      "status_code": 200,
+      "expected_status": "200",
+      "details": "Correctly decoded strings: 60-07-010",
+      "is_bug": false
+    },
+    {
+      "category": "Unicode Handling",
+      "title": "Bangla Bengali script in Name",
+      "attack_input": "\u09ae\u09c1\u09b9\u09be\u09ae\u09cd\u09ae\u09a6 \u09a4\u09be\u09a8\u09ad\u09c0\u09b0 \u0986\u09b9\u09ae\u09c7\u09a6",
+      "status_code": 200,
+      "expected_status": "200 (No 500)",
+      "details": "{\"email\":\"bangla_name6007126@stud.kuet.ac.bd\",\"name\":\"\u09ae\u09c1\u09b9\u09be\u09ae\u09cd\u09ae\u09a6 \u09a4\u09be\u09a8\u09ad\u09c0\u09b0 \u0986\u09b9\u09ae\u09c7\u09a6\",\"dept\":\"07\",\"batch\":\"60\",\"roll\":\"126\",\"id\":117,\"karma\":100,\"trust_score\":",
+      "is_bug": false
+    },
+    {
+      "category": "Unicode Handling",
+      "title": "Arabic script in Name",
+      "attack_input": "\u0645\u062d\u0645\u062f \u0639\u0628\u062f \u0627\u0644\u0644\u0647",
+      "status_code": 200,
+      "expected_status": "200 (No 500)",
+      "details": "{\"email\":\"arabic_name6007127@stud.kuet.ac.bd\",\"name\":\"\u0645\u062d\u0645\u062f \u0639\u0628\u062f \u0627\u0644\u0644\u0647\",\"dept\":\"07\",\"batch\":\"60\",\"roll\":\"127\",\"id\":118,\"karma\":100,\"trust_score\":100.0,\"t",
+      "is_bug": false
+    },
+    {
+      "category": "Unicode Handling",
+      "title": "CJK Chinese script in Name",
+      "attack_input": "\u738b\u4f1f",
+      "status_code": 200,
+      "expected_status": "200 (No 500)",
+      "details": "{\"email\":\"chinese_name6007128@stud.kuet.ac.bd\",\"name\":\"\u738b\u4f1f\",\"dept\":\"07\",\"batch\":\"60\",\"roll\":\"128\",\"id\":119,\"karma\":100,\"trust_score\":100.0,\"total_lends",
+      "is_bug": false
+    },
+    {
+      "category": "Unicode Handling",
+      "title": "Emoji in Name",
+      "attack_input": "Student \ud83c\udf93\ud83d\udd25 Kuet",
+      "status_code": 200,
+      "expected_status": "200 (No 500)",
+      "details": "{\"email\":\"emoji_name6007129@stud.kuet.ac.bd\",\"name\":\"Student \ud83c\udf93\ud83d\udd25 Kuet\",\"dept\":\"07\",\"batch\":\"60\",\"roll\":\"129\",\"id\":120,\"karma\":100,\"trust_score\":100.0,\"",
+      "is_bug": false
+    },
+    {
+      "category": "Unicode Handling",
+      "title": "RTL direction override in Name",
+      "attack_input": "\u202ereversed_name\u202c",
+      "status_code": 200,
+      "expected_status": "200 (No 500)",
+      "details": "{\"email\":\"rtl_name6007130@stud.kuet.ac.bd\",\"name\":\"\u202ereversed_name\u202c\",\"dept\":\"07\",\"batch\":\"60\",\"roll\":\"130\",\"id\":121,\"karma\":100,\"trust_score\":100.0,\"to",
+      "is_bug": false
+    },
+    {
+      "category": "Unicode Handling",
+      "title": "Zero-width space in Name",
+      "attack_input": "John\u200bDoe",
+      "status_code": 200,
+      "expected_status": "200 (No 500)",
+      "details": "{\"email\":\"zwsp_name6007131@stud.kuet.ac.bd\",\"name\":\"John\u200bDoe\",\"dept\":\"07\",\"batch\":\"60\",\"roll\":\"131\",\"id\":122,\"karma\":100,\"trust_score\":100.0,\"total_le",
+      "is_bug": false
+    },
+    {
+      "category": "Unicode Roll Spoofing",
+      "title": "Bengali digits in student email ID (\u09e8\u09eb\u09e6\u09ed...)",
+      "attack_input": "tanvir\u09e8\u09eb\u09e6\u09ed674@stud.kuet.ac.bd",
+      "status_code": 400,
+      "expected_status": "400 (Only ASCII digits 0-9 allowed)",
+      "details": "{\"detail\":\"Invalid KUET student email: must end with 7-digit student ID: 2-digit batch, 2-digit dept, 3-digit roll (e.g.",
+      "is_bug": false
+    },
+    {
+      "category": "SQL Injection Auth",
+      "title": "SQLi tautology in name",
+      "attack_input": "' OR '1'='1",
+      "status_code": 200,
+      "expected_status": "200 or 400/422 (No 500)",
+      "details": "{\"email\":\"sqli_name5207041@stud.kuet.ac.bd\",\"name\":\"' OR '1'='1\",\"dept\":\"07\",\"batch\":\"52\",\"roll\":\"041\",\"id\":123,\"karma\":100,\"trust_score\":100.0,\"total",
+      "is_bug": false
+    },
+    {
+      "category": "SQL Injection Auth",
+      "title": "SQLi drop table in name",
+      "attack_input": "Admin'; DROP TABLE users; --",
+      "status_code": 200,
+      "expected_status": "200 or 400/422 (No 500)",
+      "details": "{\"email\":\"sqli_name5607042@stud.kuet.ac.bd\",\"name\":\"Admin'; DROP TABLE users; --\",\"dept\":\"07\",\"batch\":\"56\",\"roll\":\"042\",\"id\":124,\"karma\":100,\"trust_sc",
+      "is_bug": false
+    },
+    {
+      "category": "SQL Injection Auth",
+      "title": "SQLi in password",
+      "attack_input": "' OR 1=1; --",
+      "status_code": 400,
+      "expected_status": "200 or 400/422 (No 500)",
+      "details": "{\"detail\":\"Email already registered\"}",
+      "is_bug": false
+    },
+    {
+      "category": "SQL Injection Auth",
+      "title": "SQLi in email local part",
+      "attack_input": "admin'OR'1'='1'2507044@stud.kuet.ac.bd",
+      "status_code": 400,
+      "expected_status": "200 or 400/422 (No 500)",
+      "details": "{\"detail\":\"Email already registered\"}",
+      "is_bug": false
+    },
+    {
+      "category": "SQL Injection Items Query",
+      "title": "Search tautology",
+      "attack_input": "' OR 1=1; --",
+      "status_code": 200,
+      "expected_status": "200 (Parameterized query, No 500)",
+      "details": "Returned 0 items",
+      "is_bug": false
+    },
+    {
+      "category": "SQL Injection Items Query",
+      "title": "Search drop table",
+      "attack_input": "'; DROP TABLE items; --",
+      "status_code": 200,
+      "expected_status": "200 (Parameterized query, No 500)",
+      "details": "Returned 9 items",
+      "is_bug": false
+    },
+    {
+      "category": "SQL Injection Items Query",
+      "title": "Search UNION SELECT",
+      "attack_input": "' UNION SELECT 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15; --",
+      "status_code": 200,
+      "expected_status": "200 (Parameterized query, No 500)",
+      "details": "Returned 0 items",
+      "is_bug": false
+    },
+    {
+      "category": "SQL Injection Items Query",
+      "title": "Search wildcards %",
+      "attack_input": "%%%%%%%%%%",
+      "status_code": 200,
+      "expected_status": "200 (Parameterized query, No 500)",
+      "details": "Returned 215 items",
+      "is_bug": false
+    },
+    {
+      "category": "SQL Injection Items Query",
+      "title": "Search wildcards _",
+      "attack_input": "__________",
+      "status_code": 200,
+      "expected_status": "200 (Parameterized query, No 500)",
+      "details": "Returned 215 items",
+      "is_bug": false
+    },
+    {
+      "category": "SQL Injection Items Query",
+      "title": "Search escape characters",
+      "attack_input": "'\\'; --",
+      "status_code": 200,
+      "expected_status": "200 (Parameterized query, No 500)",
+      "details": "Returned 0 items",
+      "is_bug": false
+    },
+    {
+      "category": "SQL Injection Items Query",
+      "title": "Category SQLi injection",
+      "attack_input": "Lab Equipment' OR '1'='1",
+      "status_code": 200,
+      "expected_status": "200 (Parameterized query, No 500)",
+      "details": "Returned 0 items",
+      "is_bug": false
+    },
+    {
+      "category": "SQL Injection Items Query",
+      "title": "Type SQLi injection",
+      "attack_input": "lend'; DROP TABLE items; --",
+      "status_code": 200,
+      "expected_status": "200 (Parameterized query, No 500)",
+      "details": "Returned 0 items",
+      "is_bug": false
+    },
+    {
+      "category": "SQL Injection Item Creation",
+      "title": "Item creation with SQLi strings",
+      "attack_input": "Oscilloscope'; DROP TABLE items; --",
+      "status_code": 201,
+      "expected_status": "201 (Stored as literal text, No 500)",
+      "details": "{\"success\":true,\"item\":{\"title\":\"Oscilloscope'; DROP TABLE items; --\",\"category\":\"Lab Equipment' UNION SELECT 1--\",\"type\":\"lend\",\"description\":\"' OR 1",
+      "is_bug": false
+    },
+    {
+      "category": "Items Validation",
+      "title": "Missing title in Item creation",
+      "attack_input": "{'type': 'lend'}",
+      "status_code": 422,
+      "expected_status": "422",
+      "details": "{\"detail\":\"Title is required and cannot be empty\"}",
+      "is_bug": false
+    },
+    {
+      "category": "Items Validation",
+      "title": "Whitespace title in Item creation",
+      "attack_input": "title='   '",
+      "status_code": 422,
+      "expected_status": "422 or 400",
+      "details": "{\"detail\":\"Title is required and cannot be empty\"}",
+      "is_bug": false
+    },
+    {
+      "category": "Items Validation",
+      "title": "Invalid item type ('destroy' instead of lend/borrow)",
+      "attack_input": "type='destroy'",
+      "status_code": 422,
+      "expected_status": "422 or 400",
+      "details": "{\"detail\":\"Item type must be 'lend' or 'borrow'\"}",
+      "is_bug": false
+    },
+    {
+      "category": "Item Authentication",
+      "title": "Unauthenticated item creation with roll spoofing",
+      "attack_input": "roll='010' without Authorization header",
+      "status_code": 201,
+      "expected_status": "401 Unauthorized",
+      "details": "Attributed to: Siddique Ahmed",
+      "is_bug": true
+    },
+    {
+      "category": "Item Authorization",
+      "title": "Non-owner PUT /api/items/1",
+      "attack_input": "User 1 editing User 2's item",
+      "status_code": 403,
+      "expected_status": "403",
+      "details": "{\"detail\":\"Not authorized\"}",
+      "is_bug": false
+    },
+    {
+      "category": "Item Authorization",
+      "title": "Non-owner DELETE /api/items/1",
+      "attack_input": "User 1 deleting User 2's item",
+      "status_code": 403,
+      "expected_status": "403",
+      "details": "{\"detail\":\"Not authorized\"}",
+      "is_bug": false
+    },
+    {
+      "category": "Item Non-Existent",
+      "title": "GET /api/items/999999",
+      "attack_input": "item_id=999999",
+      "status_code": 404,
+      "expected_status": "404",
+      "details": "{\"detail\":\"Item not found\"}",
+      "is_bug": false
+    },
+    {
+      "category": "Concurrency Stress",
+      "title": "5 Concurrent Registrations for Identical Email (Unhandled 500 Crash)",
+      "attack_input": "race_exact_f817944507585@stud.kuet.ac.bd x 5 threads",
+      "status_code": "[400, 200, 400, 400, 400]",
+      "expected_status": "One 200, Four 400s (NO 500s)",
+      "details": "Successes: 1, 400 errors: 4, 500 errors: 0. Sample: ['{\"detail\":\"Email or roll number already registered for this ', '{\"email\":\"race_exact_f817944507585@stud.kuet.ac.bd\",\"name\":\"', '{\"detail\":\"Email or roll number already registered for this ', '{\"detail\":\"Email or roll number already registered for this ', '{\"detail\":\"Email or roll number already registered for this ']",
+      "is_bug": false
+    },
+    {
+      "category": "Concurrency Stress",
+      "title": "3 Concurrent Registrations with Same Roll but Diff Emails (Unhandled 500 Crash)",
+      "attack_input": "Same (46, 07, 882) x 3 threads",
+      "status_code": "[400, 200, 400]",
+      "expected_status": "One 200, Two 400s (NO 500s)",
+      "details": "Successes: 1, 500 errors: 0. Sample: ['{\"detail\":\"Email or roll number already registered for this ', '{\"email\":\"bob_95984607882@stud.kuet.ac.bd\",\"name\":\"Diff User', '{\"detail\":\"Email or roll number already registered for this ']",
+      "is_bug": false
+    },
+    {
+      "category": "Schema Validation Auth",
+      "title": "Empty password registration accepted",
+      "attack_input": "password=''",
+      "status_code": 422,
+      "expected_status": "422 or 400",
+      "details": "{\"detail\":[{\"type\":\"string_too_short\",\"loc\":[\"body\",\"password\"],\"msg\":\"String should have at least 4 characters\",\"input\"",
+      "is_bug": false
+    },
+    {
+      "category": "Schema Validation Auth",
+      "title": "Whitespace-only name registration accepted",
+      "attack_input": "name='   '",
+      "status_code": 422,
+      "expected_status": "422 or 400",
+      "details": "{\"detail\":[{\"type\":\"value_error\",\"loc\":[\"body\",\"name\"],\"msg\":\"Value error, Name cannot be empty or whitespace only\",\"inp",
+      "is_bug": false
+    },
+    {
+      "category": "Schema Validation Requests",
+      "title": "Negative borrow duration allowed (-5 hours)",
+      "attack_input": "duration_hours=-5",
+      "status_code": 422,
+      "expected_status": "422 (Duration must be > 0)",
+      "details": "{\"detail\":[{\"type\":\"greater_than\",\"loc\":[\"body\",\"duration_hours\"],\"msg\":\"Input should be greater than 0\",\"input\":-5,\"ctx",
+      "is_bug": false
+    },
+    {
+      "category": "Schema Validation Auth",
+      "title": "Empty body {}",
+      "attack_input": "Empty body {}",
+      "status_code": 422,
+      "expected_status": "422 (No 500)",
+      "details": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"name\"],\"msg\":\"Field required\",\"input\":{}},{\"type\":\"missing\",\"loc\":[\"body\",\"e",
+      "is_bug": false
+    },
+    {
+      "category": "Schema Validation Auth",
+      "title": "Missing password",
+      "attack_input": "Missing password",
+      "status_code": 422,
+      "expected_status": "422 (No 500)",
+      "details": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"password\"],\"msg\":\"Field required\",\"input\":{\"name\":\"No Pwd\",\"email\":\"nopwd470",
+      "is_bug": false
+    },
+    {
+      "category": "Schema Validation Auth",
+      "title": "Missing email",
+      "attack_input": "Missing email",
+      "status_code": 422,
+      "expected_status": "422 (No 500)",
+      "details": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"email\"],\"msg\":\"Field required\",\"input\":{\"name\":\"No Email\",\"password\":\"Passwo",
+      "is_bug": false
+    },
+    {
+      "category": "Schema Validation Auth",
+      "title": "Missing name",
+      "attack_input": "Missing name",
+      "status_code": 422,
+      "expected_status": "422 (No 500)",
+      "details": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"name\"],\"msg\":\"Field required\",\"input\":{\"email\":\"noname4707062@stud.kuet.ac.b",
+      "is_bug": false
+    },
+    {
+      "category": "Schema Validation Auth",
+      "title": "Boolean for email",
+      "attack_input": "Boolean for email",
+      "status_code": 422,
+      "expected_status": "422 (No 500)",
+      "details": "{\"detail\":[{\"type\":\"string_type\",\"loc\":[\"body\",\"email\"],\"msg\":\"Input should be a valid string\",\"input\":true}]}",
+      "is_bug": false
+    },
+    {
+      "category": "Schema Validation Auth",
+      "title": "List for name",
+      "attack_input": "List for name",
+      "status_code": 422,
+      "expected_status": "422 (No 500)",
+      "details": "{\"detail\":[{\"type\":\"string_type\",\"loc\":[\"body\",\"name\"],\"msg\":\"Input should be a valid string\",\"input\":[\"User\"]}]}",
+      "is_bug": false
+    },
+    {
+      "category": "Schema Validation Auth",
+      "title": "Integer for name",
+      "attack_input": "Integer for name",
+      "status_code": 422,
+      "expected_status": "422 (No 500)",
+      "details": "{\"detail\":[{\"type\":\"string_type\",\"loc\":[\"body\",\"name\"],\"msg\":\"Input should be a valid string\",\"input\":12345}]}",
+      "is_bug": false
+    }
+  ]
+}

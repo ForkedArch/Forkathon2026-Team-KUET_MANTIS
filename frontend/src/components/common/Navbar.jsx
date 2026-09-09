@@ -21,7 +21,12 @@ export default function Navbar() {
           <>
             <Link to="/add" className="text-blue-600 hover:underline">+ Add Item</Link>
             <Link to="/requests" className="hover:underline">Requests</Link>
-            <Link to="/profile" className="hover:underline">{user.name}</Link>
+            <Link to="/profile" className="hover:underline flex items-center gap-1.5">
+              <span>{user.name}</span>
+              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200">
+                ⚡ {user.karma ?? 100}
+              </span>
+            </Link>
             <button onClick={handleLogout} className="text-red-500 hover:underline">Logout</button>
           </>
         ) : (

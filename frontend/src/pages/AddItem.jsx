@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '../api/client';
 import toast from 'react-hot-toast';
 
@@ -8,20 +8,38 @@ export default function AddItem() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
+  const [type, setType] = useState('lend');
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Calculators');
-  const [description, setDescription] = useState('');
+  const [specs, setSpecs] = useState('');
   const [condition, setCondition] = useState('Good');
   const [zone, setZone] = useState('');
+  const [coords, setCoords] = useState(null);
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
+
+  // Fetch landmarks for dropdown
+  const { data: landmarksData } = useQuery({
+    queryKey: ['landmarks'],
+    queryFn: () => api.get('/landmarks').then(res => res.data).catch(() => ({ zones: [] }))
+  });
+  const landmarks = landmarksData?.zones || [];
+
+  const handleLandmarkSelect = (e) => {
+    const selected = e.target.value;
+    setZone(selected);
+    const match = landmarks.find(l => l.name === selected);
+    if (match && match.coords) {
+      setCoords({ lat: match.coords[0], lng: match.coords[1] });
+    }
+  };
 
   const mutation = useMutation({
     mutationFn: (formData) => api.post('/items', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     }),
     onSuccess: () => {
-      toast.success('Item added successfully!');
+      toast.success(type === 'borrow' ? '🚨 Demand Beacon broadcasted!' : '🟢 Item listed successfully!');
       queryClient.invalidateQueries({ queryKey: ['items'] });
       navigate('/');
     },
@@ -41,11 +59,20 @@ export default function AddItem() {
   const handleSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData();
-    formData.append('title', title);
+    formData.append('title', title.trim());
     formData.append('category', category);
-    formData.append('description', description);
+    formData.append('type', type);
+    formData.append('specs', specs.trim());
+    formData.append('description', specs.trim());
     formData.append('condition', condition);
-    formData.append('zone', zone);
+    formData.append('zone', zone || 'KUET Main Campus');
+    if (coords) {
+      formData.append('latitude', coords.lat);
+      formData.append('longitude', coords.lng);
+    } else {
+      formData.append('latitude', 22.9006);
+      formData.append('longitude', 89.5024);
+    }
     if (image) {
       formData.append('image', image);
     }
@@ -53,83 +80,173 @@ export default function AddItem() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Add New Item</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="max-w-2xl mx-auto p-6 space-y-6 h-full overflow-y-auto">
+      <div className="flex items-center justify-between">
         <div>
-          <label className="block text-sm font-medium mb-1">Title *</label>
+          <h1 className="text-2xl font-bold text-slate-900">Add New Campus Listing</h1>
+          <p className="text-xs text-slate-500">List an item for sharing or broadcast an active demand beacon</p>
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit} className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-4">
+        {/* Listing Mode Toggle */}
+        <div>
+          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+            Listing Mode
+          </label>
+          <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl border border-slate-200">
+            <button
+              type="button"
+              onClick={() => setType('lend')}
+              className={`py-2 px-4 rounded-lg text-xs font-bold transition ${
+                type === 'lend'
+                  ? 'bg-emerald-600 text-white shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              🟢 I have an item to Lend
+            </button>
+            <button
+              type="button"
+              onClick={() => setType('borrow')}
+              className={`py-2 px-4 rounded-lg text-xs font-bold transition ${
+                type === 'borrow'
+                  ? 'bg-rose-600 text-white shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              🚨 I need to Borrow (Beacon)
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Title *</label>
           <input
             type="text"
             required
-            className="w-full border rounded px-3 py-2"
+            className="w-full border border-slate-300 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder={type === 'borrow' ? 'e.g. Need Casio fx-991EX Calculator' : 'e.g. Casio fx-991EX ClassWiz Calculator'}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Category *</label>
-          <select
-            required
-            className="w-full border rounded px-3 py-2"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-          >
-            <option>Calculators</option>
-            <option>Chargers</option>
-            <option>Books</option>
-            <option>Lab Equipment</option>
-            <option>Others</option>
-          </select>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Category *</label>
+            <select
+              required
+              className="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            >
+              <option>Calculators</option>
+              <option>Electronics & Power</option>
+              <option>Chargers</option>
+              <option>Books & Notes</option>
+              <option>Lab Equipment</option>
+              <option>Cables & Adapters</option>
+              <option>Stationery & Drawing</option>
+              <option>Other</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Condition</label>
+            <select
+              className="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={condition}
+              onChange={(e) => setCondition(e.target.value)}
+            >
+              <option>Like New</option>
+              <option>Good</option>
+              <option>Fair</option>
+              <option>Needs Repair</option>
+            </select>
+          </div>
         </div>
+
         <div>
-          <label className="block text-sm font-medium mb-1">Description</label>
+          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Specifications & Notes</label>
           <textarea
-            className="w-full border rounded px-3 py-2"
+            className="w-full border border-slate-300 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             rows="3"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            placeholder="e.g. Fully functional, available for lab classes near CSE building."
+            value={specs}
+            onChange={(e) => setSpecs(e.target.value)}
           />
         </div>
+
         <div>
-          <label className="block text-sm font-medium mb-1">Condition</label>
-          <select
-            className="w-full border rounded px-3 py-2"
-            value={condition}
-            onChange={(e) => setCondition(e.target.value)}
-          >
-            <option>Like New</option>
-            <option>Good</option>
-            <option>Fair</option>
-            <option>Needs Repair</option>
-          </select>
+          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Campus Zone / Landmark</label>
+          {landmarks.length > 0 ? (
+            <select
+              className="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={zone}
+              onChange={handleLandmarkSelect}
+            >
+              <option value="">-- Choose KUET Landmark --</option>
+              {landmarks.map(lm => (
+                <option key={lm.id} value={lm.name}>{lm.name} ({lm.category})</option>
+              ))}
+            </select>
+          ) : (
+            <input
+              type="text"
+              className="w-full border border-slate-300 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="e.g. CSE Building, Central Library"
+              value={zone}
+              onChange={(e) => setZone(e.target.value)}
+            />
+          )}
+          {coords && (
+            <p className="text-[11px] text-emerald-600 mt-1 font-medium">
+              📍 Selected Coordinates: {coords.lat.toFixed(4)}°N, {coords.lng.toFixed(4)}°E (within 700m KUET boundary)
+            </p>
+          )}
         </div>
+
         <div>
-          <label className="block text-sm font-medium mb-1">Zone (e.g., CSE Building)</label>
-          <input
-            type="text"
-            className="w-full border rounded px-3 py-2"
-            value={zone}
-            onChange={(e) => setZone(e.target.value)}
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Image</label>
+          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Item Photo (Optional)</label>
           <input
             type="file"
             accept="image/*"
+            className="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
             onChange={handleImageChange}
           />
           {imagePreview && (
-            <img src={imagePreview} alt="Preview" className="mt-2 h-40 object-cover rounded" />
+            <div className="mt-2 relative w-28 h-28 rounded-lg overflow-hidden border border-slate-200">
+              <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+              <button
+                type="button"
+                onClick={() => { setImage(null); setImagePreview(''); }}
+                className="absolute top-1 right-1 bg-slate-900/80 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px]"
+              >
+                ✕
+              </button>
+            </div>
           )}
         </div>
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
-          disabled={mutation.isPending}
-        >
-          {mutation.isPending ? 'Adding...' : 'Add Item'}
-        </button>
+
+        <div className="pt-2 flex items-center justify-end gap-3">
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-xl hover:bg-slate-100 transition"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={mutation.isPending}
+            className={`px-6 py-2.5 text-xs font-bold text-white rounded-xl shadow-xs transition ${
+              type === 'borrow' ? 'bg-rose-600 hover:bg-rose-700' : 'bg-blue-600 hover:bg-blue-700'
+            }`}
+          >
+            {mutation.isPending ? 'Publishing...' : (type === 'borrow' ? '🚨 Broadcast Beacon' : '🟢 List Item')}
+          </button>
+        </div>
       </form>
     </div>
   );

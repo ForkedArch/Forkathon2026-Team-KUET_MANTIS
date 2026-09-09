@@ -1,14 +1,22 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from .database import engine, Base
-from .routes import auth, items, borrow_requests, chat, transactions
+from .database import engine, Base, migrate_db
+from .seed import seed_db
+from .routes import auth, items, borrow_requests, chat, transactions, landmarks
 import os
 
-# Create tables
-Base.metadata.create_all(bind=engine)
+# Create & migrate tables
+migrate_db()
 
 app = FastAPI(title="CampusShare KUET API")
+
+
+@app.on_event("startup")
+def on_startup():
+    migrate_db()
+    seed_db()
+
 
 # CORS
 allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173").split(",")
@@ -31,6 +39,7 @@ app.include_router(items.router)
 app.include_router(borrow_requests.router)
 app.include_router(chat.router)
 app.include_router(transactions.router)
+app.include_router(landmarks.router)
 
 @app.get("/")
 def root():

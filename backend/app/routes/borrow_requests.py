@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Body, Query
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from .. import schemas, models, auth, database
 
 router = APIRouter(prefix="/api/requests", tags=["requests"])
 
+@router.post("", response_model=schemas.BorrowRequestOut)
 @router.post("/", response_model=schemas.BorrowRequestOut)
 def create_request(
     req: schemas.BorrowRequestCreate,
@@ -59,11 +60,24 @@ def get_my_requests(
 @router.put("/{request_id}/status")
 def update_request_status(
     request_id: int,
-    body: schemas.BorrowRequestStatusUpdate,
+    body: Optional[schemas.BorrowRequestStatusUpdate] = Body(None),
+    status: Optional[str] = Query(None),
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(auth.get_current_user)
 ):
-    status = body.status  # already validated to be "accepted" or "declined"
+    resolved_status = None
+    if body and body.status:
+        resolved_status = body.status
+    elif status:
+        resolved_status = status
+
+    if not resolved_status or resolved_status not in ["accepted", "declined"]:
+        raise HTTPException(
+            status_code=400,
+            detail="status must be 'accepted' or 'declined', provided via JSON body or query parameter"
+        )
+
+    status_val = resolved_status
 
     req = db.query(models.BorrowRequest).filter(models.BorrowRequest.id == request_id).first()
     if not req:
@@ -73,7 +87,7 @@ def update_request_status(
     if req.status != "pending":
         raise HTTPException(status_code=400, detail="This request has already been resolved")
 
-    if status == "accepted":
+    if status_val == "accepted":
         # Re-check availability right before accepting: without this, two
         # pending requests for the same item could both be accepted by the
         # owner (e.g. from two open browser tabs), leaving the item "lent"
@@ -100,4 +114,4 @@ def update_request_status(
         req.status = "declined"
         db.commit()
 
-    return {"detail": f"Request {status}"}
+    return {"detail": f"Request {status_val}"}
