@@ -1,0 +1,2692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KUET CampusShare // Lending & Borrowing Map Interface</title>
+
+  <!-- MapLibre GL & Turf.js -->
+  <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
+  <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+  <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
+
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-light: #dbeafe;
+      --lend-color: #10b981;
+      --lend-hover: #059669;
+      --lend-light: #d1fae5;
+      --borrow-color: #ef4444;
+      --borrow-hover: #dc2626;
+      --borrow-light: #fee2e2;
+      --landmark-color: #3b82f6;
+      --bg: #0f172a;
+      --surface: #ffffff;
+      --surface-glass: rgba(255, 255, 255, 0.88);
+      --surface-glass-dark: rgba(15, 23, 42, 0.85);
+      --border: #e2e8f0;
+      --border-glass: rgba(226, 232, 240, 0.8);
+      --text-main: #0f172a;
+      --text-dim: #64748b;
+      --text-light: #94a3b8;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f1f5f9;
+      color: var(--text-main);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Modern Glassmorphic Top Navbar */
+    header {
+      height: 64px;
+      background: var(--surface-glass);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo-badge {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 1.25rem;
+      font-weight: 800;
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.35);
+    }
+    .brand-title {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 1.2rem;
+      letter-spacing: -0.02em;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-sub {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      font-weight: 500;
+    }
+    .radius-pill {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1d4ed8;
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .radius-dot {
+      width: 8px;
+      height: 8px;
+      background: #2563eb;
+      border-radius: 50%;
+      animation: pulse-dot 2s infinite;
+    }
+    @keyframes pulse-dot {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); }
+      70% { transform: scale(1.1); box-shadow: 0 0 0 6px rgba(37, 99, 235, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Header Student Profile Badge (CampusAuth) */
+    .user-profile-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      padding: 5px 12px;
+      border-radius: var(--radius-full);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .user-profile-badge:hover {
+      border-color: #93c5fd;
+      box-shadow: 0 2px 8px rgba(37,99,235,0.12);
+    }
+    .profile-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #ffffff;
+      font-size: 0.8rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 2px 4px rgba(37,99,235,0.25);
+    }
+    .profile-meta {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.25;
+    }
+    .profile-name-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .profile-name {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-main);
+      white-space: nowrap;
+    }
+    .profile-dept-badge {
+      font-size: 0.68rem;
+      font-weight: 600;
+      background: #eff6ff;
+      color: #1d4ed8;
+      padding: 1px 6px;
+      border-radius: 6px;
+    }
+    .profile-sub-row {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      font-weight: 500;
+    }
+    .profile-roll {
+      color: #475569;
+    }
+    .profile-divider {
+      color: #cbd5e1;
+    }
+    .profile-karma {
+      color: #d97706;
+      font-weight: 600;
+    }
+
+    /* Modal Profile Strip */
+    .modal-profile-strip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 8px 12px;
+      margin-bottom: 14px;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      font-weight: 600;
+      font-size: 0.875rem;
+      padding: 9px 18px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+    }
+    .btn:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+    }
+    .btn-lend {
+      background: linear-gradient(135deg, #10b981, #059669);
+      box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
+    }
+    .btn-lend:hover {
+      background: linear-gradient(135deg, #059669, #047857);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+    }
+    .btn-outline {
+      background: #ffffff;
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+    .btn-outline:hover {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+      transform: translateY(-1px);
+    }
+
+    /* Main Workspace Layout */
+    .main-container {
+      flex: 1;
+      display: flex;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Sidebar with Glassmorphism */
+    .sidebar {
+      width: 380px;
+      background: var(--surface-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border-glass);
+      display: flex;
+      flex-direction: column;
+      z-index: 20;
+      box-shadow: 4px 0 20px rgba(0,0,0,0.06);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .sidebar-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .search-box {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      font-size: 0.95rem;
+      color: var(--text-dim);
+      pointer-events: none;
+    }
+    .search-input {
+      width: 100%;
+      padding: 9px 12px 9px 36px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      font-size: 0.875rem;
+      background: #f8fafc;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .search-input:focus {
+      background: #fff;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    /* Segmented Filter Controls */
+    .filter-tabs {
+      display: flex;
+      background: #f1f5f9;
+      padding: 4px;
+      border-radius: var(--radius-md);
+      gap: 4px;
+    }
+    .filter-tab {
+      flex: 1;
+      text-align: center;
+      padding: 7px 4px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      border-radius: 6px;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      transition: all 0.18s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+    .filter-tab.active {
+      background: #ffffff;
+      color: var(--text-main);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .filter-tab.active[data-type="lend"] {
+      color: var(--lend-color);
+    }
+    .filter-tab.active[data-type="borrow"] {
+      color: var(--borrow-color);
+    }
+
+    /* Sub-filters bar */
+    .sub-filter-row {
+      display: flex;
+      width: 100%;
+    }
+    .category-filter-wrapper {
+      position: relative;
+      width: 100%;
+      display: flex;
+      align-items: center;
+    }
+    .category-icon {
+      position: absolute;
+      left: 10px;
+      font-size: 0.85rem;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .category-select {
+      width: 100%;
+      padding: 9px 12px 9px 34px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      font-size: 0.82rem;
+      font-weight: 500;
+      background: #ffffff;
+      color: var(--text-main);
+      outline: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+    .category-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+    }
+
+    /* Refined Empty State Component */
+    .empty-state-card {
+      text-align: center;
+      padding: 44px 20px;
+      background: #ffffff;
+      border: 1.5px dashed #cbd5e1;
+      border-radius: var(--radius-lg);
+      margin: 12px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+    .empty-state-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: #eff6ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      color: var(--primary);
+      margin-bottom: 2px;
+    }
+    .empty-state-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .empty-state-desc {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      line-height: 1.45;
+      max-width: 250px;
+    }
+    .empty-state-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+    }
+    .btn-reset-filters {
+      background: #f1f5f9;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+      padding: 7px 14px;
+      border-radius: var(--radius-md);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-reset-filters:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    /* Stats bar */
+    .stats-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      font-weight: 600;
+      padding: 0 2px;
+    }
+    .badge-count {
+      background: #e2e8f0;
+      color: var(--text-main);
+      padding: 1px 6px;
+      border-radius: 10px;
+      font-size: 0.7rem;
+    }
+
+    /* Items Feed List */
+    .item-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      scroll-behavior: smooth;
+    }
+    .item-list::-webkit-scrollbar {
+      width: 6px;
+    }
+    .item-list::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
+
+    /* Item Card */
+    .item-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 14px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      position: relative;
+      overflow: hidden;
+    }
+    .item-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px -2px rgba(0,0,0,0.08);
+    }
+    .item-card.beacon-card {
+      border-left: 4px solid var(--borrow-color);
+      background: #fffafa;
+    }
+    .item-card.lend-card {
+      border-left: 4px solid var(--lend-color);
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+    .card-type-tag {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .tag-lend {
+      background: var(--lend-light);
+      color: #065f46;
+    }
+    .tag-borrow {
+      background: var(--borrow-light);
+      color: #991b1b;
+    }
+    .card-condition-tag {
+      font-size: 0.68rem;
+      color: var(--text-dim);
+      background: #f1f5f9;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      font-weight: 600;
+    }
+
+    .card-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.35;
+      margin-bottom: 6px;
+    }
+    .card-specs {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      line-height: 1.4;
+      margin-bottom: 12px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-user-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 10px;
+      border-top: 1px solid #f1f5f9;
+      font-size: 0.78rem;
+    }
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .user-avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.68rem;
+      font-weight: 700;
+    }
+    .user-name {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    .user-dept {
+      color: var(--text-dim);
+      font-size: 0.72rem;
+    }
+    .trust-rating {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      font-weight: 700;
+      color: #d97706;
+      font-size: 0.75rem;
+    }
+
+    /* Map Container */
+    #map {
+      flex: 1;
+      height: 100%;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Crosshair Pin Mode */
+    body.pin-mode #map {
+      cursor: crosshair !important;
+    }
+    .pin-banner {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: #ffffff;
+      padding: 12px 24px;
+      border-radius: var(--radius-full);
+      font-weight: 600;
+      font-size: 0.9rem;
+      z-index: 150;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      display: none;
+      align-items: center;
+      gap: 12px;
+      border: 1px solid rgba(255,255,255,0.15);
+      animation: bounce-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes bounce-in {
+      0% { opacity: 0; transform: translate(-50%, -20px); }
+      100% { opacity: 1; transform: translate(-50%, 0); }
+    }
+    body.pin-mode .pin-banner {
+      display: flex;
+    }
+    .btn-cancel-pin {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .btn-cancel-pin:hover {
+      background: rgba(255,255,255,0.35);
+    }
+
+    /* Map HUD Floating Controls - Neatly Docked Bottom-Right */
+    .map-hud {
+      position: absolute;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 10;
+    }
+    .hud-card {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(226, 232, 240, 0.85);
+      border-radius: var(--radius-md);
+      padding: 8px 12px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      font-size: 0.78rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .hud-label {
+      font-weight: 700;
+      color: #334155;
+    }
+    .hud-layer-toggle {
+      display: flex;
+      gap: 6px;
+    }
+    .layer-btn {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      padding: 6px 11px;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text-dim);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .layer-btn:hover {
+      border-color: #93c5fd;
+      color: var(--primary);
+    }
+    .layer-btn.active {
+      background: var(--primary-light);
+      border-color: #93c5fd;
+      color: var(--primary);
+      box-shadow: 0 1px 3px rgba(37, 99, 235, 0.15);
+    }
+
+    /* Custom Map Markers */
+    .marker-pin {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-size: 1rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      cursor: pointer;
+      transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 2.5px solid #ffffff;
+    }
+    .marker-pin:hover {
+      transform: scale(1.2) translateY(-2px);
+      z-index: 100 !important;
+    }
+
+    .marker-lend {
+      background: linear-gradient(135deg, #10b981, #059669);
+    }
+
+    /* Demand Beacon Pulsing Animation */
+    .marker-beacon {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      position: relative;
+    }
+    .beacon-pulse {
+      position: absolute;
+      top: -8px;
+      left: -8px;
+      right: -8px;
+      bottom: -8px;
+      border-radius: 50%;
+      border: 2px solid #ef4444;
+      animation: radar-pulse 2s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+      pointer-events: none;
+    }
+    .beacon-pulse-inner {
+      position: absolute;
+      top: -16px;
+      left: -16px;
+      right: -16px;
+      bottom: -16px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(239, 68, 68, 0.6);
+      animation: radar-pulse 2s infinite 0.6s cubic-bezier(0.215, 0.61, 0.355, 1);
+      pointer-events: none;
+    }
+    @keyframes radar-pulse {
+      0% { transform: scale(0.6); opacity: 1; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+
+    /* Landmark Markers */
+    .marker-landmark {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .marker-landmark:hover {
+      transform: scale(1.1);
+      z-index: 90 !important;
+    }
+    .landmark-icon-bubble {
+      width: 30px;
+      height: 30px;
+      background: #ffffff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+      border: 2px solid #3b82f6;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+    }
+    .landmark-icon-academic { border-color: #3b82f6; background: #eff6ff; }
+    .landmark-icon-residential { border-color: #10b981; background: #ecfdf5; }
+    .landmark-icon-hotspot { border-color: #f59e0b; background: #fffbeb; }
+    .landmark-icon-perimeter_700m { border-color: #f97316; background: #fff7ed; }
+    
+    .landmark-label {
+      background: rgba(15, 23, 42, 0.85);
+      color: #ffffff;
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+      margin-top: 2px;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    /* Rich Popup Styles */
+    .maplibregl-popup {
+      max-width: 340px !important;
+      z-index: 120;
+    }
+    .maplibregl-popup-content {
+      padding: 0;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--border);
+      background: #ffffff;
+    }
+    .maplibregl-popup-close-button {
+      font-size: 1.2rem;
+      color: #ffffff;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+      right: 8px;
+      top: 6px;
+      z-index: 10;
+      padding: 4px;
+    }
+
+    .popup-card {
+      display: flex;
+      flex-direction: column;
+    }
+    .popup-img-wrap {
+      width: 100%;
+      height: 140px;
+      background: #0f172a;
+      position: relative;
+      overflow: hidden;
+    }
+    .popup-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .popup-status-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .status-badge-lend {
+      background: #10b981;
+      color: #ffffff;
+    }
+    .status-badge-beacon {
+      background: #ef4444;
+      color: #ffffff;
+      animation: pulse-dot 1.5s infinite;
+    }
+
+    .popup-body {
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .popup-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.3;
+    }
+    .popup-specs {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      line-height: 1.45;
+      background: #f8fafc;
+      padding: 8px 10px;
+      border-radius: var(--radius-md);
+      border: 1px solid #edf2f7;
+    }
+
+    .popup-user-section {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-top: 1px solid #f1f5f9;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .popup-user-detail {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .popup-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .popup-user-text {
+      display: flex;
+      flex-direction: column;
+    }
+    .popup-user-name {
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #0f172a;
+    }
+    .popup-user-sub {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+    .popup-trust-box {
+      text-align: right;
+    }
+    .popup-trust-score {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #d97706;
+    }
+    .popup-trust-label {
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .popup-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .btn-popup-action {
+      flex: 1;
+      padding: 8px 0;
+      font-size: 0.8rem;
+    }
+
+    /* Modal for Manual Entry */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 250;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+    .modal-overlay.active {
+      display: flex;
+      opacity: 1;
+    }
+    .modal-window {
+      width: 540px;
+      max-width: 92vw;
+      max-height: 90vh;
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-xl);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transform: scale(0.95);
+      transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .modal-overlay.active .modal-window {
+      transform: scale(1);
+    }
+    .modal-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f8fafc;
+    }
+    .modal-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.6rem;
+      cursor: pointer;
+      color: var(--text-dim);
+      transition: color 0.2s;
+      line-height: 1;
+    }
+    .modal-close:hover {
+      color: var(--text-main);
+    }
+    .modal-body {
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+    }
+
+    /* Type Switcher in Modal */
+    .type-switcher {
+      display: flex;
+      background: #f1f5f9;
+      border-radius: var(--radius-md);
+      padding: 4px;
+      gap: 6px;
+    }
+    .type-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--text-dim);
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .type-btn.active[data-val="lend"] {
+      background: #ffffff;
+      color: #059669;
+      box-shadow: var(--shadow-sm);
+    }
+    .type-btn.active[data-val="borrow"] {
+      background: #ffffff;
+      color: #dc2626;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #334155;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      font-size: 0.9rem;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.2s;
+      background: #ffffff;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    /* Image Upload Drag Box */
+    .img-upload-box {
+      border: 2px dashed #cbd5e1;
+      border-radius: var(--radius-md);
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      background: #f8fafc;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .img-upload-box:hover {
+      border-color: var(--primary);
+      background: #f0f7ff;
+    }
+    #preview-img {
+      max-height: 140px;
+      border-radius: 6px;
+      display: none;
+      margin: 0 auto;
+      box-shadow: var(--shadow-sm);
+      object-fit: contain;
+    }
+    #upload-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .coord-preview-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 8px 12px;
+      border-radius: var(--radius-md);
+      font-size: 0.8rem;
+      color: #1e40af;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      background: #f8fafc;
+    }
+
+    /* Toast Notification */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 300;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+    .toast {
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: #ffffff;
+      padding: 10px 20px;
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+      border: 1px solid rgba(255,255,255,0.15);
+      animation: slide-up 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    @keyframes slide-up {
+      0% { opacity: 0; transform: translateY(15px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 100%;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .header-actions .radius-pill {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navbar -->
+  <header>
+    <div class="brand-group">
+      <div class="logo-badge">K</div>
+      <div>
+        <div class="brand-title">
+          KUET CampusShare
+          <span style="font-size: 0.75rem; font-weight: 600; background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 12px;">MANTIS 2026</span>
+        </div>
+        <div class="brand-sub">Peer-to-Peer Campus Lending, Borrowing & Demand Beacon Map</div>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <!-- Active Student Profile Badge (Modular CampusAuth) -->
+      <div class="user-profile-badge" id="header-user-profile" title="Active Student Session (Demo Mode)">
+        <div class="profile-avatar" id="header-user-avatar">TR</div>
+        <div class="profile-meta">
+          <div class="profile-name-row">
+            <span class="profile-name" id="header-user-name">Tanvir Rahman</span>
+            <span class="profile-dept-badge" id="header-user-dept">CSE '22</span>
+          </div>
+          <div class="profile-sub-row">
+            <span class="profile-roll" id="header-user-roll">Roll: 2207001</span>
+            <span class="profile-divider">•</span>
+            <span class="profile-karma" id="header-user-karma">⭐ 4.9 Karma</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="radius-pill" id="radius-badge" title="Campus Perimeter Ring Radius">
+        <span class="radius-dot"></span>
+        <span>📍 700m Campus Perimeter</span>
+      </div>
+      <button class="btn btn-lend" id="open-add-modal-btn">
+        <span>+ Add Item or Request</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Workspace -->
+  <div class="main-container">
+
+    <!-- Left Sidebar: Filters & Live Item Feed -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="search-input" id="search-input" placeholder="Search calculators, chargers, books, users..." />
+        </div>
+
+        <!-- Type Filter Tabs -->
+        <div class="filter-tabs">
+          <button class="filter-tab active" data-type="ALL" id="tab-all">
+            All Items <span class="badge-count" id="count-all">0</span>
+          </button>
+          <button class="filter-tab" data-type="lend" id="tab-lend">
+            🟢 Lending <span class="badge-count" id="count-lend">0</span>
+          </button>
+          <button class="filter-tab" data-type="borrow" id="tab-borrow">
+            🚨 Beacons <span class="badge-count" id="count-borrow">0</span>
+          </button>
+        </div>
+
+        <!-- Secondary Filters (Clean full-width category selector) -->
+        <div class="sub-filter-row">
+          <div class="category-filter-wrapper">
+            <span class="category-icon">🏷️</span>
+            <select class="category-select" id="filter-category" title="Filter by Category">
+              <option value="ALL">All Categories</option>
+              <option value="Calculators">🧮 Calculators</option>
+              <option value="Electronics & Power">🔌 Electronics & Power</option>
+              <option value="Lab Equipment">🔬 Lab Equipment</option>
+              <option value="Cables & Adapters">🔗 Cables & Adapters</option>
+              <option value="Books & Notes">📖 Books & Notes</option>
+              <option value="Stationery & Drawing">📐 Stationery & Drawing</option>
+              <option value="Other">📦 Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="stats-bar">
+          <span id="active-filter-label">Showing all campus listings</span>
+          <span id="results-count" style="font-weight: 700; color: var(--primary);">0 items</span>
+        </div>
+      </div>
+
+      <!-- Feed Container -->
+      <div class="item-list" id="item-list-container">
+        <!-- Injected via JavaScript -->
+      </div>
+    </aside>
+
+    <!-- Map Canvas -->
+    <div id="map"></div>
+
+    <!-- Crosshair Pinpoint Instruction Banner -->
+    <div class="pin-banner" id="pin-banner">
+      <span>📍 <strong>Pinpoint Mode:</strong> Click anywhere on KUET campus map to drop item location</span>
+      <button class="btn-cancel-pin" id="btn-cancel-pin">Cancel</button>
+    </div>
+
+    <!-- Floating Map Layer HUD - Docked Bottom-Right -->
+    <div class="map-hud">
+      <div class="hud-card">
+        <span class="hud-label">Map:</span>
+        <div class="hud-layer-toggle">
+          <button class="layer-btn active" id="toggle-ring-btn" title="Toggle 700m Campus Perimeter Ring">⭕ 700m Ring</button>
+          <button class="layer-btn active" id="toggle-beacons-btn" title="Toggle Demand Beacons">🚨 Beacons</button>
+          <button class="layer-btn" id="recenter-kuet-btn" title="Recenter Map to KUET Campus">🎯 Recenter</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Manual Item Entry Modal -->
+  <div class="modal-overlay" id="add-item-modal">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="modal-title" id="modal-heading">Log Item to Lend or Request</div>
+        <button class="modal-close" id="close-modal-btn">&times;</button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- Active Student Profile Context -->
+        <div class="modal-profile-strip" id="modal-auth-profile">
+          <div class="profile-avatar" id="modal-user-avatar" style="width: 32px; height: 32px; font-size: 0.75rem;">TR</div>
+          <div style="display: flex; flex-direction: column; gap: 2px;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="font-weight: 700; color: #0f172a; font-size: 0.82rem;" id="modal-user-name">Tanvir Rahman</span>
+              <span style="font-size: 0.7rem; background: #e0f2fe; color: #0369a1; padding: 1px 6px; border-radius: 4px; font-weight: 600;">Active Student Session</span>
+            </div>
+            <div style="font-size: 0.72rem; color: #64748b;" id="modal-user-details">
+              Dept: CSE • Roll: 2207001 • Karma: ⭐ 4.9 • Trust: 4.9/5.0
+            </div>
+          </div>
+        </div>
+
+        <!-- Type Selector -->
+        <div class="form-group">
+          <label class="form-label">Listing Type</label>
+          <div class="type-switcher">
+            <button type="button" class="type-btn active" data-val="lend" id="type-btn-lend">
+              🟢 Willing to Lend (Offer)
+            </button>
+            <button type="button" class="type-btn" data-val="borrow" id="type-btn-borrow">
+              🚨 Need to Borrow (Demand Beacon)
+            </button>
+          </div>
+        </div>
+
+        <!-- Photo Upload Box with Immediate Preview -->
+        <div class="form-group">
+          <label class="form-label">
+            <span>Item Photo / Thumbnail</span>
+            <span style="font-size:0.7rem; font-weight:normal; color:var(--text-dim);">Optional</span>
+          </label>
+          <div class="img-upload-box" id="img-upload-box">
+            <div id="upload-placeholder">
+              <span style="font-size: 1.5rem;">📸</span>
+              <span>Click to Upload Photo or Drag & Drop</span>
+              <span style="font-size: 0.72rem; color: #94a3b8;">PNG, JPG, or WebP preview supported</span>
+            </div>
+            <img id="preview-img" alt="Item preview" src="" />
+            <input type="file" id="file-input" style="display:none" accept="image/*" />
+          </div>
+        </div>
+
+        <!-- Title -->
+        <div class="form-group">
+          <label class="form-label">Item Title *</label>
+          <input type="text" class="form-input" id="item-title" placeholder="e.g. Casio fx-991CW, Baseus 65W GaN Charger, Lab Coat" required />
+        </div>
+
+        <!-- Category & Condition -->
+        <div style="display: flex; gap: 12px;">
+          <div class="form-group" style="flex: 1;">
+            <label class="form-label">Category *</label>
+            <select class="form-select" id="item-category">
+              <option value="Calculators">Calculators</option>
+              <option value="Electronics & Power">Electronics & Power</option>
+              <option value="Lab Equipment">Lab Equipment</option>
+              <option value="Cables & Adapters">Cables & Adapters</option>
+              <option value="Books & Notes">Books & Notes</option>
+              <option value="Stationery & Drawing">Stationery & Drawing</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="flex: 1;" id="condition-group">
+            <label class="form-label">Condition</label>
+            <select class="form-select" id="item-condition">
+              <option value="Like New">Like New</option>
+              <option value="Good" selected>Good</option>
+              <option value="Fair">Fair</option>
+              <option value="N/A">Not Applicable</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Student Profile Details -->
+        <div style="display: flex; gap: 12px;">
+          <div class="form-group" style="flex: 1.2;">
+            <label class="form-label">Your Name</label>
+            <input type="text" class="form-input" id="item-lender-name" value="Tanvir Rahman" placeholder="Student name" readonly />
+          </div>
+          <div class="form-group" style="flex: 0.8;">
+            <label class="form-label">Dept & Batch</label>
+            <input type="text" class="form-input" id="item-dept" value="CSE '22" placeholder="e.g. CSE '22" readonly />
+          </div>
+        </div>
+
+        <!-- Specifications / Description -->
+        <div class="form-group">
+          <label class="form-label">Specifications / Notes / Urgency</label>
+          <textarea class="form-textarea" id="item-specs" rows="2" placeholder="Mention compatibility, required time duration, or pickup location..."></textarea>
+        </div>
+
+        <!-- Location Selection (100% Manual Pinpoint Required) -->
+        <div class="form-group">
+          <label class="form-label">
+            <span>Exchange Location on Campus</span>
+            <span id="coord-status-text" style="color: var(--primary); font-size: 0.75rem; font-weight: 600;">100% Manual Pinpointing</span>
+          </label>
+          <div class="coord-preview-box">
+            <span id="coord-display">🎯 Click "Select Location on Map" to pinpoint exchange spot</span>
+            <button type="button" class="btn btn-outline" style="padding: 4px 10px; font-size: 0.75rem;" id="btn-reselect-location">
+              🎯 Pinpoint on Map
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" id="cancel-modal-btn">Cancel</button>
+        <button type="button" class="btn btn-primary" id="proceed-pin-btn" style="flex: 1;">
+          📍 Select Location on Map
+        </button>
+        <button type="button" class="btn btn-lend" id="direct-submit-btn" style="display:none;">Save & Post Item ✅</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Application Logic -->
+  <script>
+    // KUET Campus Center (22.9006° N, 89.5024° E)
+    const KUET_CENTER = [89.5024, 22.9006]; // [lng, lat] for MapLibre
+    const CAMPUS_PERIMETER_RADIUS = 700; // Explicit 700 meters requirement
+
+    // =========================================================================
+    // Modular Campus Auth & Student Session Model (CampusAuth - Demo Mode)
+    // Pluggable user session model for KUET Student Auth integration
+    // =========================================================================
+    const CampusAuth = {
+      isDemoMode: true,
+
+      currentUser: {
+        id: "student_kuet_2207001",
+        name: "Tanvir Rahman",
+        dept: "CSE",
+        batch: "2022",
+        roll: "2207001",
+        karma: 4.9,
+        trust_rating: 4.9,
+        total_exchanges: 38,
+        badge: "Verified Student",
+        avatar: "TR"
+      },
+
+      mockUsers: [
+        {
+          id: "student_kuet_2207001",
+          name: "Tanvir Rahman",
+          dept: "CSE",
+          batch: "2022",
+          roll: "2207001",
+          karma: 4.9,
+          trust_rating: 4.9,
+          total_exchanges: 38,
+          badge: "Verified Student",
+          avatar: "TR"
+        },
+        {
+          id: "student_kuet_2103042",
+          name: "Anik Sen",
+          dept: "EEE",
+          batch: "2021",
+          roll: "2103042",
+          karma: 4.95,
+          trust_rating: 4.95,
+          total_exchanges: 52,
+          badge: "Lab Champion",
+          avatar: "AS"
+        },
+        {
+          id: "student_kuet_2205018",
+          name: "Anonnya Roy",
+          dept: "ECE",
+          batch: "2022",
+          roll: "2205018",
+          karma: 4.85,
+          trust_rating: 4.85,
+          total_exchanges: 29,
+          badge: "Verified Student",
+          avatar: "AR"
+        },
+        {
+          id: "student_kuet_2407089",
+          name: "Farhan Kabir",
+          dept: "CSE",
+          batch: "2024",
+          roll: "2407089",
+          karma: 4.75,
+          trust_rating: 4.75,
+          total_exchanges: 12,
+          badge: "Active Borrower",
+          avatar: "FK"
+        }
+      ],
+
+      getCurrentUser() {
+        return this.currentUser;
+      },
+
+      setCurrentUser(user) {
+        this.currentUser = { ...this.currentUser, ...user };
+        updateUserProfileUI();
+      },
+
+      switchUser(userId) {
+        const user = this.mockUsers.find(u => u.id === userId);
+        if (user) this.setCurrentUser(user);
+      },
+
+      async authenticate(credentials) {
+        if (this.isDemoMode) {
+          console.log("[CampusAuth] Demo mode session authenticated:", this.currentUser.name);
+          return this.currentUser;
+        }
+      }
+    };
+
+    function updateUserProfileUI() {
+      const u = CampusAuth.getCurrentUser();
+      const avatarEl = document.getElementById('header-user-avatar');
+      const nameEl = document.getElementById('header-user-name');
+      const deptEl = document.getElementById('header-user-dept');
+      const rollEl = document.getElementById('header-user-roll');
+      const karmaEl = document.getElementById('header-user-karma');
+
+      if (avatarEl) avatarEl.textContent = u.avatar || (u.name ? u.name.slice(0, 2).toUpperCase() : 'KU');
+      if (nameEl) nameEl.textContent = u.name;
+      if (deptEl) deptEl.textContent = `${u.dept} '${u.batch ? u.batch.slice(-2) : '22'}`;
+      if (rollEl) rollEl.textContent = `Roll: ${u.roll}`;
+      if (karmaEl) karmaEl.textContent = `⭐ ${u.karma ? u.karma.toFixed(1) : '4.9'} Karma`;
+
+      // Modal elements
+      const mAvatar = document.getElementById('modal-user-avatar');
+      const mName = document.getElementById('modal-user-name');
+      const mDetails = document.getElementById('modal-user-details');
+      const mLenderName = document.getElementById('item-lender-name');
+      const mDept = document.getElementById('item-dept');
+
+      if (mAvatar) mAvatar.textContent = u.avatar || 'KU';
+      if (mName) mName.textContent = u.name;
+      if (mDetails) mDetails.textContent = `Dept: ${u.dept} • Roll: ${u.roll} • Karma: ⭐ ${u.karma} • Trust: ${u.trust_rating}/5.0`;
+      if (mLenderName) mLenderName.value = u.name;
+      if (mDept) mDept.value = `${u.dept} '${u.batch ? u.batch.slice(-2) : '22'}`;
+    }
+
+    // State Variables
+    let map = null;
+    let campusLandmarks = [];
+    let campusItems = [];
+    let landmarkMarkers = [];
+    let itemMarkers = [];
+    let activeTypeFilter = "ALL";
+    let activeCategoryFilter = "ALL";
+    let searchQuery = "";
+    let showLandmarks = false; // R1: Landmarks natively embedded on map tiles
+    let showPerimeterRing = true;
+    let showBeacons = true;
+
+    // Pinning state
+    let isPinMode = false;
+    let pendingFormData = null;
+    let selectedCoords = null; // R3: 100% manual pinpointing required
+    let temporaryPinMarker = null;
+    let currentUploadedImage = "";
+
+    // Embedded Fallback Landmarks (covers full academic, halls, facilities, gates)
+    const EMBEDDED_LANDMARKS = [
+      { id: "cse_bldg", name: "CSE Building (Computer Science & Engineering)", category: "academic", coords: [22.9003, 89.5024], icon: "💻", description: "Dept. of Computer Science & Engineering, Software Labs, Hardware Labs", popular_items: ["Type-C GaN Chargers", "HDMI Adapters", "Arduino Kits"] },
+      { id: "eee_bldg", name: "EEE Building (Electrical & Electronic Engineering)", category: "academic", coords: [22.8998, 89.5031], icon: "⚡", description: "Dept. of Electrical & Electronic Engineering, Power Systems & Circuit Labs", popular_items: ["Multimeters", "Breadboards", "Casio 991CW"] },
+      { id: "me_bldg", name: "Mechanical Building (ME)", category: "academic", coords: [22.8990, 89.5032], icon: "⚙️", description: "Dept. of Mechanical Engineering, Machine Workshop, Fluid Labs", popular_items: ["Engineering Mini Drafters", "Vernier Calipers"] },
+      { id: "civil_bldg", name: "Civil Engineering Building", category: "academic", coords: [22.8984, 89.5022], icon: "🏛️", description: "Dept. of Civil Engineering, Surveying Lab, Concrete Lab", popular_items: ["Surveying Tapes", "Drafting Tables", "Casio fx-991EX"] },
+      { id: "central_library", name: "Central Library", category: "academic", coords: [22.9000, 89.5012], icon: "📚", description: "KUET Central Library, Digital Archive, and Quiet Study Zone", popular_items: ["Laptop Chargers", "Headphones", "Engineering Textbooks"] },
+      { id: "central_cafeteria", name: "Student Cafeteria", category: "hotspot", coords: [22.8992, 89.5015], icon: "☕", description: "Central student hub and prime exchange meetup spot", popular_items: ["Power Banks", "Phone Chargers", "Calculators"] },
+      { id: "ekushey_hall", name: "Amar Ekushey Hall", category: "residential", coords: [22.9015, 89.5036], icon: "🏠", description: "Male Residential Hall (North-East campus area)", popular_items: ["Scientific Calculators", "Hot Water Kettles"] },
+      { id: "fazlul_haque_hall", name: "Fazlul Haque Hall", category: "residential", coords: [22.9009, 89.4996], icon: "🏠", description: "Male Residential Hall (North-West campus area)", popular_items: ["Multimeters", "HDMI Cables", "Calculators"] },
+      { id: "lalan_shah_hall", name: "Lalan Shah Hall", category: "residential", coords: [22.8988, 89.4993], icon: "🏠", description: "Male Residential Hall (Mid-West campus area)", popular_items: ["Calculators", "Cables", "Lab Gear"] },
+      { id: "khan_jahan_ali_hall", name: "Khan Jahan Ali Hall", category: "residential", coords: [22.8982, 89.4996], icon: "🏠", description: "Male Residential Hall (South-West campus area)", popular_items: ["Lab Coats", "Arduino Kits", "Fast Chargers"] },
+      { id: "rashid_hall", name: "Dr. M. A. Rashid Hall", category: "residential", coords: [22.8974, 89.5001], icon: "🏠", description: "Male Residential Hall (South perimeter area)", popular_items: ["Calculators", "Breadboards", "Multi-plugs"] },
+      { id: "rokeya_hall", name: "Rokeya Hall", category: "residential", coords: [22.9026, 89.5010], icon: "🏡", description: "Female Residential Hall (North perimeter area)", popular_items: ["Engineering Textbooks", "Scientific Drafters", "USB-C Chargers"] },
+      { id: "bangabandhu_hall", name: "Bangabandhu Sheikh Mujibur Rahman Hall", category: "residential", coords: [22.8968, 89.5028], icon: "🏠", description: "Male Residential Hall (South-East campus boundary)", popular_items: ["Power Banks", "Lab Coats", "Calculators"] },
+      { id: "main_gate", name: "KUET Main Entry Gate", category: "perimeter_700m", coords: [22.9029, 89.5022], icon: "🚪", description: "Main entry gate connecting KUET to Fulbarigate Road", popular_items: ["Stationery", "Components"] },
+      { id: "second_gate", name: "KUET South 2nd Gate", category: "perimeter_700m", coords: [22.8970, 89.5042], icon: "🚪", description: "South boundary gate connecting campus to student messes", popular_items: ["Keys", "Notes"] },
+      { id: "auditorium", name: "KUET Auditorium", category: "academic", coords: [22.9006, 89.5008], icon: "🎭", description: "Central auditorium for seminars and events", popular_items: ["Adapters", "Pointers"] },
+      { id: "admin_bldg", name: "Administrative Building", category: "academic", coords: [22.9010, 89.5018], icon: "🏢", description: "VC Office, Registrar, Academic Section", popular_items: ["Paper", "Forms"] },
+      { id: "medical_gym", name: "Medical Center & Gymnasium", category: "hotspot", coords: [22.8978, 89.5012], icon: "🏥", description: "Campus Medical Health Center and Student Gymnasium", popular_items: ["First Aid", "Sports Gear"] },
+      { id: "fulbarigate_junction", name: "Fulbarigate Commercial Junction", category: "perimeter_700m", coords: [22.9052, 89.5034], icon: "🏬", description: "Transit & electronics retail hub (~520m North within 700m perimeter)", popular_items: ["ICs", "Printing", "Components"] },
+      { id: "teligati_mess_zone", name: "Teligati Student Mess Zone", category: "perimeter_700m", coords: [22.8948, 89.5009], icon: "🏘️", description: "Student residential messes cluster (~660m South within 700m perimeter)", popular_items: ["Extension Cords", "Room Heaters", "Calculators"] },
+      { id: "tech_stationary_corner", name: "Engineering Stationary Hub", category: "perimeter_700m", coords: [22.9038, 89.5027], icon: "📐", description: "Supplies offering lab notebooks, tracing papers, drafters, ICs", popular_items: ["Tracing Papers", "Scales"] }
+    ];
+
+    // Embedded Fallback Mock Items (8+ students, Lenders & Borrowers)
+    const EMBEDDED_ITEMS = [
+      {
+        id: "item_101",
+        user_id: "student_kuet_2023_001",
+        roll: "2207010",
+        karma: 4.8,
+        type: "lend",
+        title: "Casio fx-991CW ClassWiz Scientific Calculator",
+        category: "Calculators",
+        zone_id: "ekushey_hall",
+        lat: 22.9015,
+        lng: 89.5036,
+        lender_name: "Siddique Ahmed",
+        dept: "CSE",
+        batch: "2023",
+        trust_rating: 4.8,
+        total_exchanges: 24,
+        user_badge: "Verified Student",
+        status: "available",
+        image: "https://images.unsplash.com/photo-1594980596870-8aa52a78d8cd?w=400",
+        condition: "Like New",
+        specs: "High-res 4-tone natural textbook display, approved for KUET semester final examinations.",
+        tags: ["#ExamReady", "#Casio991CW", "#CSE"]
+      },
+      {
+        id: "item_102",
+        user_id: "student_kuet_2207001",
+        roll: "2207001",
+        karma: 4.9,
+        type: "lend",
+        title: "Baseus 65W GaN Fast Charger (Type-C + USB-A)",
+        category: "Electronics & Power",
+        zone_id: "cse_bldg",
+        lat: 22.9003,
+        lng: 89.5024,
+        lender_name: "Tanvir Rahman",
+        dept: "CSE",
+        batch: "2022",
+        trust_rating: 4.9,
+        total_exchanges: 38,
+        user_badge: "KUET Top Lender",
+        status: "available",
+        image: "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=400",
+        condition: "Good",
+        specs: "PD 3.0 / QC 4.0 fast charging. Charges MacBooks, Dell, ThinkPads, and smartphones smoothly.",
+        tags: ["#FastCharge", "#65W", "#LaptopCharger"]
+      },
+      {
+        id: "item_103",
+        user_id: "student_kuet_2103042",
+        roll: "2103042",
+        karma: 4.95,
+        type: "lend",
+        title: "Arduino Mega 2560 R3 + Jumper Wires & Sensor Kit",
+        category: "Lab Equipment",
+        zone_id: "eee_bldg",
+        lat: 22.8998,
+        lng: 89.5031,
+        lender_name: "Anik Sen",
+        dept: "EEE",
+        batch: "2021",
+        trust_rating: 4.95,
+        total_exchanges: 52,
+        user_badge: "Lab Champion",
+        status: "available",
+        image: "https://images.unsplash.com/photo-1553406830-ef2513450d76?w=400",
+        condition: "Good",
+        specs: "54 digital I/O pins, 16 analog inputs with USB programming cable and assorted sensor pack.",
+        tags: ["#Arduino", "#LabKit", "#Robotics"]
+      },
+      {
+        id: "item_104",
+        user_id: "student_kuet_2205018",
+        roll: "2205018",
+        karma: 4.85,
+        type: "lend",
+        title: "UGREEN 4K 60Hz Type-C to HDMI Adapter",
+        category: "Cables & Adapters",
+        zone_id: "central_library",
+        lat: 22.9000,
+        lng: 89.5012,
+        lender_name: "Anonnya Roy",
+        dept: "ECE",
+        batch: "2022",
+        trust_rating: 4.85,
+        total_exchanges: 29,
+        user_badge: "Verified Student",
+        status: "available",
+        image: "https://images.unsplash.com/photo-1544652478-6653e09f18a2?w=400",
+        condition: "Like New",
+        specs: "Aluminum space gray casing, 4K@60Hz plug-and-play for seminar room displays.",
+        tags: ["#HDMI", "#PresentationReady", "#TypeC"]
+      },
+      {
+        id: "item_105",
+        user_id: "student_kuet_2005012",
+        roll: "2005012",
+        karma: 4.7,
+        type: "lend",
+        title: "Rotring Engineering Mini Drafter with Clamp",
+        category: "Stationery & Drawing",
+        zone_id: "me_bldg",
+        lat: 22.8990,
+        lng: 89.5032,
+        lender_name: "Rafiul Islam",
+        dept: "ME",
+        batch: "2023",
+        trust_rating: 4.7,
+        total_exchanges: 18,
+        user_badge: "Workshop Tech",
+        status: "available",
+        image: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=400",
+        condition: "Fair",
+        specs: "Steel scale bar, smooth dual-pivot joints for ME & Civil engineering drawing sessionals.",
+        tags: ["#Drafter", "#Sessional", "#EngineeringDrawing"]
+      },
+      {
+        id: "item_106",
+        user_id: "student_kuet_2315007",
+        roll: "2315007",
+        karma: 4.8,
+        type: "lend",
+        title: "Heavy Cotton Lab Coat (Size L, Sanitized)",
+        category: "Lab Equipment",
+        zone_id: "khan_jahan_ali_hall",
+        lat: 22.8982,
+        lng: 89.4996,
+        lender_name: "Mahir Faisal",
+        dept: "BME",
+        batch: "2023",
+        trust_rating: 4.8,
+        total_exchanges: 16,
+        user_badge: "Verified Student",
+        status: "available",
+        image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400",
+        condition: "Like New",
+        specs: "100% heavyweight white cotton with KUET insignia, flame and chemical stain resistant.",
+        tags: ["#LabCoat", "#Chemistry", "#Workshop"]
+      },
+      {
+        id: "item_107",
+        user_id: "student_kuet_2201044",
+        roll: "2201044",
+        karma: 4.9,
+        type: "lend",
+        title: "Higher Engineering Mathematics (44th Ed.) - B.S. Grewal",
+        category: "Books & Notes",
+        zone_id: "rokeya_hall",
+        lat: 22.9026,
+        lng: 89.5010,
+        lender_name: "Sadia Afrin",
+        dept: "Civil",
+        batch: "2022",
+        trust_rating: 4.9,
+        total_exchanges: 31,
+        user_badge: "Verified Student",
+        status: "available",
+        image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400",
+        condition: "Good",
+        specs: "Comprehensive engineering mathematics reference textbook with solved sessional question papers.",
+        tags: ["#Textbook", "#Calculus", "#Civil"]
+      },
+      {
+        id: "item_108",
+        user_id: "student_kuet_2407089",
+        roll: "2407089",
+        karma: 4.75,
+        type: "borrow",
+        title: "URGENT BEACON: MacBook MagSafe 3 Cable (2 Hours)",
+        category: "Cables & Adapters",
+        zone_id: "central_cafeteria",
+        lat: 22.8992,
+        lng: 89.5015,
+        lender_name: "Farhan Kabir",
+        dept: "CSE",
+        batch: "2024",
+        trust_rating: 4.75,
+        total_exchanges: 12,
+        user_badge: "Active Borrower",
+        status: "beacon",
+        image: "https://images.unsplash.com/photo-1616469829941-c7200edec809?w=400",
+        condition: "N/A",
+        specs: "🚨 URGENT DEMAND BEACON: MacBook at 4% battery right before 3:00 PM lab evaluation! Can exchange at cafeteria.",
+        tags: ["#Beacon", "#Urgent", "#MagSafe", "#DemandBeacon"]
+      },
+      {
+        id: "item_109",
+        user_id: "student_kuet_2005012",
+        roll: "2005012",
+        karma: 4.7,
+        type: "borrow",
+        title: "DEMAND BEACON: Casio fx-991EX for Calculus Term Final",
+        category: "Calculators",
+        zone_id: "lalan_shah_hall",
+        lat: 22.8988,
+        lng: 89.4993,
+        lender_name: "Rafiul Islam",
+        dept: "ME",
+        batch: "2023",
+        trust_rating: 4.7,
+        total_exchanges: 18,
+        user_badge: "Workshop Tech",
+        status: "beacon",
+        image: "https://images.unsplash.com/photo-1594980596870-8aa52a78d8cd?w=400",
+        condition: "N/A",
+        specs: "🚨 NEED TO BORROW: Left calculator at home over the weekend. Required for 10:00 AM exam tomorrow morning.",
+        tags: ["#Beacon", "#Calculators", "#ExamEmergency"]
+      },
+      {
+        id: "item_110",
+        user_id: "student_kuet_2103042",
+        roll: "2103042",
+        karma: 4.95,
+        type: "borrow",
+        title: "DEMAND BEACON: Digital Multimeter with Probes",
+        category: "Lab Equipment",
+        zone_id: "fazlul_haque_hall",
+        lat: 22.9009,
+        lng: 89.4996,
+        lender_name: "Anik Sen",
+        dept: "EEE",
+        batch: "2021",
+        trust_rating: 4.95,
+        total_exchanges: 52,
+        user_badge: "Lab Champion",
+        status: "beacon",
+        image: "https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=400",
+        condition: "N/A",
+        specs: "🚨 NEED TO BORROW: Troubleshooting embedded IoT circuit project tonight. Will return early tomorrow!",
+        tags: ["#Beacon", "#EEE", "#Multimeter", "#LabHardware"]
+      }
+    ];
+
+    // Initialize Application
+    window.addEventListener('DOMContentLoaded', async () => {
+      updateUserProfileUI();
+      initMap();
+      setupEventListeners();
+      await loadInitialData();
+    });
+
+    // 1. Initialize MapLibre GL with OSM Tiles and 700m Radius
+    function initMap() {
+      // Free OpenStreetMap Raster Style (reliable, zero API-key dependencies, 100% uptime)
+      const osmStyle = {
+        version: 8,
+        sources: {
+          'osm-tiles': {
+            type: 'raster',
+            tiles: [
+              'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+            ],
+            tileSize: 256,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors | KUET Campus Map'
+          }
+        },
+        layers: [
+          {
+            id: 'osm-tiles-layer',
+            type: 'raster',
+            source: 'osm-tiles',
+            minzoom: 0,
+            maxzoom: 19
+          }
+        ]
+      };
+
+      map = new maplibregl.Map({
+        container: 'map',
+        style: osmStyle,
+        center: KUET_CENTER,
+        zoom: 16.2,
+        pitch: 0,
+        bearing: 0
+      });
+
+      // Add standard navigation controls
+      map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
+      map.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-left');
+
+      map.on('load', () => {
+        // Draw 700m Perimeter Circle explicitly
+        drawPerimeterCircle(700);
+
+        // Render active student items on map (relying on OSM native tiles for KUET landmark labels)
+        renderItems();
+      });
+
+      // Handle map clicks for pinpoint mode
+      map.on('click', handleMapClick);
+    }
+
+    // 2. Draw Visual 700m Perimeter Circle
+    function drawPerimeterCircle(radiusMeters) {
+      if (!window.turf) return;
+
+      const circleGeoJSON = turf.circle(KUET_CENTER, radiusMeters, { steps: 64, units: 'meters' });
+
+      map.addSource('campus-perimeter-700m', {
+        type: 'geojson',
+        data: circleGeoJSON
+      });
+
+      map.addLayer({
+        id: 'perimeter-fill',
+        type: 'fill',
+        source: 'campus-perimeter-700m',
+        paint: {
+          'fill-color': '#2563eb',
+          'fill-opacity': 0.05
+        }
+      });
+
+      map.addLayer({
+        id: 'perimeter-line',
+        type: 'line',
+        source: 'campus-perimeter-700m',
+        paint: {
+          'line-color': '#2563eb',
+          'line-width': 2.5,
+          'line-dasharray': [3, 2]
+        }
+      });
+
+      // Outer halo line
+      map.addLayer({
+        id: 'perimeter-halo',
+        type: 'line',
+        source: 'campus-perimeter-700m',
+        paint: {
+          'line-color': '#3b82f6',
+          'line-width': 6,
+          'line-opacity': 0.2
+        }
+      });
+    }
+
+    // 3. Data Loading (Fetch from server with fallback)
+    async function loadInitialData() {
+      // Try fetching landmarks from server
+      try {
+        const res = await fetch('/api/landmarks');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.zones && data.zones.length > 0) {
+            campusLandmarks = data.zones;
+          } else {
+            campusLandmarks = EMBEDDED_LANDMARKS;
+          }
+        } else {
+          campusLandmarks = EMBEDDED_LANDMARKS;
+        }
+      } catch (e) {
+        campusLandmarks = EMBEDDED_LANDMARKS;
+      }
+
+      // Try fetching items from server
+      try {
+        const res = await fetch('/api/items');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.items && data.items.length > 0) {
+            campusItems = data.items;
+          } else {
+            campusItems = EMBEDDED_ITEMS;
+          }
+        } else {
+          campusItems = EMBEDDED_ITEMS;
+        }
+      } catch (e) {
+        campusItems = EMBEDDED_ITEMS;
+      }
+
+      if (map && map.loaded()) {
+        renderItems();
+      }
+    }
+
+    // Populate Jump-to-Landmark selector (no-op in R2 refinement)
+    function populateLandmarkDropdown() {
+      // Redundant dropdown removed in R2; native OSM map labels guide navigation
+    }
+
+    // 4. Clean Map: KUET Landmarks are natively labeled on OpenStreetMap tiles
+    function renderLandmarks() {
+      // Intentionally do not render floating landmark markers on map canvas.
+      // OpenStreetMap cartographic labels are already embedded on tiles.
+      // Only active user items (Lending emerald pins, Need to Borrow red beacons) appear as pins.
+      landmarkMarkers.forEach(m => m.remove());
+      landmarkMarkers = [];
+    }
+
+    // Shortcut stub (relying on 100% manual pinpointing)
+    window.logItemAtLandmark = function(landmarkId, lat, lng) {
+      openModal();
+    };
+
+    // 5. Render Items on Map & Live Sidebar
+    function renderItems() {
+      // Filter items based on active filters & search query
+      const filtered = campusItems.filter(item => {
+        // Type filter
+        if (activeTypeFilter !== "ALL" && item.type !== activeTypeFilter) return false;
+
+        // Category filter
+        if (activeCategoryFilter !== "ALL" && item.category !== activeCategoryFilter) return false;
+
+        // Search Query
+        if (searchQuery.trim() !== "") {
+          const q = searchQuery.toLowerCase();
+          const matchTitle = (item.title || "").toLowerCase().includes(q);
+          const matchSpecs = (item.specs || "").toLowerCase().includes(q);
+          const matchUser = (item.lender_name || "").toLowerCase().includes(q);
+          const matchDept = (item.dept || "").toLowerCase().includes(q);
+          const matchCat = (item.category || "").toLowerCase().includes(q);
+          if (!matchTitle && !matchSpecs && !matchUser && !matchDept && !matchCat) return false;
+        }
+
+        return true;
+      });
+
+      // Update counters in UI
+      updateCounts();
+
+      // Render Sidebar Feed
+      renderSidebarList(filtered);
+
+      // Render Map Markers
+      renderMapItemMarkers(filtered);
+    }
+
+    function updateCounts() {
+      const allCount = campusItems.length;
+      const lendCount = campusItems.filter(i => i.type === 'lend').length;
+      const borrowCount = campusItems.filter(i => i.type === 'borrow').length;
+
+      document.getElementById('count-all').textContent = allCount;
+      document.getElementById('count-lend').textContent = lendCount;
+      document.getElementById('count-borrow').textContent = borrowCount;
+
+      const filteredCount = campusItems.filter(item => {
+        if (activeTypeFilter !== "ALL" && item.type !== activeTypeFilter) return false;
+        if (activeCategoryFilter !== "ALL" && item.category !== activeCategoryFilter) return false;
+        if (searchQuery.trim() !== "") {
+          const q = searchQuery.toLowerCase();
+          return (item.title || "").toLowerCase().includes(q) ||
+                 (item.specs || "").toLowerCase().includes(q) ||
+                 (item.lender_name || "").toLowerCase().includes(q) ||
+                 (item.category || "").toLowerCase().includes(q);
+        }
+        return true;
+      }).length;
+
+      document.getElementById('results-count').textContent = `${filteredCount} item${filteredCount === 1 ? '' : 's'}`;
+    }
+
+    function renderSidebarList(items) {
+      const container = document.getElementById('item-list-container');
+      container.innerHTML = '';
+
+      if (items.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state-card" id="empty-state">
+            <div class="empty-state-icon">🔍</div>
+            <div class="empty-state-title">No items match your criteria</div>
+            <div class="empty-state-desc">Try adjusting your search or clearing active filters to see all available campus listings.</div>
+            <div class="empty-state-actions">
+              <button class="btn-reset-filters" id="reset-filters-btn" onclick="resetFilters()">🔄 Reset Filters</button>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+    window.resetFilters = function() {
+      activeTypeFilter = "ALL";
+      activeCategoryFilter = "ALL";
+      searchQuery = "";
+
+      const searchInput = document.getElementById('search-input');
+      const catSelect = document.getElementById('filter-category');
+      if (searchInput) searchInput.value = "";
+      if (catSelect) catSelect.value = "ALL";
+
+      document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+      const tabAll = document.getElementById('tab-all');
+      if (tabAll) tabAll.classList.add('active');
+
+      const filterLabel = document.getElementById('active-filter-label');
+      if (filterLabel) filterLabel.textContent = "Showing all campus listings";
+
+      renderItems();
+      showToast("🔄 Filters reset to show all listings");
+    };
+
+      items.forEach(item => {
+        const card = document.createElement('div');
+        const isBeacon = item.type === 'borrow';
+        card.className = `item-card ${isBeacon ? 'beacon-card' : 'lend-card'}`;
+
+        const initials = (item.lender_name || 'Anonymous')
+          .split(' ')
+          .map(n => n[0])
+          .slice(0, 2)
+          .join('')
+          .toUpperCase();
+
+        const typeBadge = isBeacon
+          ? `<span class="card-type-tag tag-borrow">🚨 Need to Borrow (Beacon)</span>`
+          : `<span class="card-type-tag tag-lend">🟢 Willing to Lend</span>`;
+
+        card.innerHTML = `
+          <div class="card-top">
+            ${typeBadge}
+            <span class="card-condition-tag">${item.condition || 'Good'}</span>
+          </div>
+          <div class="card-title">${item.title}</div>
+          <div class="card-specs">${item.specs || 'No additional specifications provided.'}</div>
+          <div class="card-user-row">
+            <div class="user-info">
+              <div class="user-avatar">${initials}</div>
+              <div>
+                <div class="user-name">${item.lender_name}</div>
+                <div class="user-dept">${item.dept || 'KUET'} • ${item.category}</div>
+              </div>
+            </div>
+            <div class="trust-rating">
+              <span>⭐</span>
+              <span>${item.trust_rating ? item.trust_rating.toFixed(1) : '4.8'}</span>
+            </div>
+          </div>
+        `;
+
+        card.onclick = () => {
+          if (item.lng && item.lat) {
+            map.flyTo({
+              center: [item.lng, item.lat],
+              zoom: 17.5,
+              pitch: 35,
+              essential: true
+            });
+
+            // Find matching marker to open popup
+            const markerObj = itemMarkers.find(m => m.itemId === item.id);
+            if (markerObj && markerObj.marker) {
+              markerObj.marker.togglePopup();
+            }
+          }
+        };
+
+        container.appendChild(card);
+      });
+    }
+
+    function renderMapItemMarkers(items) {
+      itemMarkers.forEach(m => m.marker.remove());
+      itemMarkers = [];
+
+      items.forEach(item => {
+        if (!item.lng || !item.lat) return;
+        const isBeacon = item.type === 'borrow';
+
+        // Respect layer toggle for beacons
+        if (isBeacon && !showBeacons) return;
+
+        const el = document.createElement('div');
+        el.className = `marker-pin ${isBeacon ? 'marker-beacon' : 'marker-lend'}`;
+        el.setAttribute('data-item-id', item.id);
+
+        if (isBeacon) {
+          el.innerHTML = `
+            <div class="beacon-pulse"></div>
+            <div class="beacon-pulse-inner"></div>
+            <span>⚡</span>
+          `;
+        } else {
+          // Category-specific icons
+          let icon = '📦';
+          if (item.category === 'Calculators') icon = '🧮';
+          else if (item.category === 'Electronics & Power') icon = '🔌';
+          else if (item.category === 'Lab Equipment') icon = '🔬';
+          else if (item.category === 'Cables & Adapters') icon = '🔗';
+          else if (item.category === 'Books & Notes') icon = '📖';
+          else if (item.category === 'Stationery & Drawing') icon = '📐';
+          el.innerHTML = `<span>${icon}</span>`;
+        }
+
+        // Rich Interactive Popup Card
+        const initials = (item.lender_name || 'Anonymous')
+          .split(' ')
+          .map(n => n[0])
+          .slice(0, 2)
+          .join('')
+          .toUpperCase();
+
+        const defaultImage = isBeacon
+          ? 'https://images.unsplash.com/photo-1616469829941-c7200edec809?w=400'
+          : 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=400';
+
+        const imgSrc = item.image && item.image.trim() !== "" ? item.image : defaultImage;
+
+        const statusBadge = isBeacon
+          ? `<span class="popup-status-badge status-badge-beacon">🚨 Active Demand Beacon</span>`
+          : `<span class="popup-status-badge status-badge-lend">🟢 Available to Borrow</span>`;
+
+        const actionBtnText = isBeacon ? "⚡ Offer to Lend This Item" : "🤝 Request to Borrow";
+
+        const popupHtml = `
+          <div class="popup-card">
+            <div class="popup-img-wrap">
+              <img class="popup-img" src="${imgSrc}" alt="${item.title}" onerror="this.src='https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=400';" />
+              ${statusBadge}
+            </div>
+            <div class="popup-body">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:0.72rem; font-weight:700; color:var(--primary); text-transform:uppercase;">${item.category}</span>
+                <span style="font-size:0.72rem; background:#f1f5f9; padding:2px 8px; border-radius:10px; font-weight:600; color:#475569;">${item.condition || 'Good'}</span>
+              </div>
+              <div class="popup-title">${item.title}</div>
+              <div class="popup-specs">${item.specs || 'No specific notes provided.'}</div>
+              
+              <div class="popup-user-section">
+                <div class="popup-user-detail">
+                  <div class="popup-avatar">${initials}</div>
+                  <div class="popup-user-text">
+                    <span class="popup-user-name">${item.lender_name}</span>
+                    <span class="popup-user-sub">${item.dept || 'KUET'} • ${item.user_badge || 'Verified Student'}</span>
+                  </div>
+                </div>
+                <div class="popup-trust-box">
+                  <div class="popup-trust-score">⭐ ${item.trust_rating ? item.trust_rating.toFixed(1) : '4.8'}/5</div>
+                  <div class="popup-trust-label">${item.total_exchanges || 15} Exchanges</div>
+                </div>
+              </div>
+
+              <div class="popup-actions">
+                <button class="btn btn-popup-action ${isBeacon ? 'btn-lend' : ''}" onclick="handleItemAction('${item.id}', '${item.type}')">
+                  ${actionBtnText}
+                </button>
+                <button class="btn btn-outline btn-popup-action" style="flex:0.6;" onclick="handleChatWithUser('${item.lender_name}')">
+                  💬 Chat
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+
+        const popup = new maplibregl.Popup({ offset: 25, closeButton: true }).setHTML(popupHtml);
+
+        const marker = new maplibregl.Marker({ element: el })
+          .setLngLat([item.lng, item.lat])
+          .setPopup(popup)
+          .addTo(map);
+
+        itemMarkers.push({ itemId: item.id, marker: marker });
+      });
+    }
+
+    // Popup Interactive Action Handlers
+    window.handleItemAction = function(itemId, type) {
+      const item = campusItems.find(i => i.id === itemId);
+      if (!item) return;
+      if (type === 'borrow') {
+        showToast(`🎉 Notification sent to ${item.lender_name}: You offered to lend "${item.title}"!`);
+      } else {
+        showToast(`📬 Borrow request sent to ${item.lender_name} for "${item.title}"!`);
+      }
+    };
+
+    window.handleChatWithUser = function(userName) {
+      showToast(`💬 Opening campus instant message channel with ${userName}...`);
+    };
+
+    // 6. Setup All Event Listeners & Filter Logic
+    function setupEventListeners() {
+      // Type Filter Tabs
+      const tabs = [
+        { btn: document.getElementById('tab-all'), type: "ALL" },
+        { btn: document.getElementById('tab-lend'), type: "lend" },
+        { btn: document.getElementById('tab-borrow'), type: "borrow" }
+      ];
+
+      tabs.forEach(t => {
+        t.btn.addEventListener('click', () => {
+          tabs.forEach(o => o.btn.classList.remove('active'));
+          t.btn.classList.add('active');
+          activeTypeFilter = t.type;
+          renderItems();
+        });
+      });
+
+      // Category Filter Select
+      document.getElementById('filter-category').addEventListener('change', (e) => {
+        activeCategoryFilter = e.target.value;
+        renderItems();
+      });
+
+      // Live Search Input
+      document.getElementById('search-input').addEventListener('input', (e) => {
+        searchQuery = e.target.value;
+        renderItems();
+      });
+
+      // Jump to Landmark Select
+      document.getElementById('jump-landmark').addEventListener('change', (e) => {
+        const id = e.target.value;
+        if (!id) return;
+        const lm = campusLandmarks.find(l => l.id === id);
+        if (lm) {
+          map.flyTo({
+            center: [lm.coords[1], lm.coords[0]],
+            zoom: 17.5,
+            pitch: 30,
+            essential: true
+          });
+          // Open popup of landmark
+          const lmMarker = landmarkMarkers.find(m => {
+            const el = m.getElement();
+            return el && el.getAttribute('data-landmark-id') === lm.id;
+          });
+          if (lmMarker) lmMarker.togglePopup();
+        }
+      });
+
+      // HUD Layer Toggles
+      const toggleRingBtn = document.getElementById('toggle-ring-btn');
+      if (toggleRingBtn) {
+        toggleRingBtn.addEventListener('click', () => {
+          showPerimeterRing = !showPerimeterRing;
+          toggleRingBtn.classList.toggle('active', showPerimeterRing);
+          const visibility = showPerimeterRing ? 'visible' : 'none';
+          if (map.getLayer('perimeter-fill')) map.setLayoutProperty('perimeter-fill', 'visibility', visibility);
+          if (map.getLayer('perimeter-line')) map.setLayoutProperty('perimeter-line', 'visibility', visibility);
+          if (map.getLayer('perimeter-halo')) map.setLayoutProperty('perimeter-halo', 'visibility', visibility);
+        });
+      }
+
+      const toggleBeaconsBtn = document.getElementById('toggle-beacons-btn');
+      if (toggleBeaconsBtn) {
+        toggleBeaconsBtn.addEventListener('click', () => {
+          showBeacons = !showBeacons;
+          toggleBeaconsBtn.classList.toggle('active', showBeacons);
+          renderItems();
+        });
+      }
+
+      const recenterBtn = document.getElementById('recenter-kuet-btn');
+      if (recenterBtn) {
+        recenterBtn.addEventListener('click', () => {
+          map.flyTo({
+            center: KUET_CENTER,
+            zoom: 16.2,
+            pitch: 0,
+            bearing: 0,
+            essential: true
+          });
+          showToast("🎯 Map recentered to KUET Campus");
+        });
+      }
+
+      // Modal Triggers
+      document.getElementById('open-add-modal-btn').addEventListener('click', openModal);
+      document.getElementById('close-modal-btn').addEventListener('click', closeModal);
+      document.getElementById('cancel-modal-btn').addEventListener('click', closeModal);
+
+      // Modal Type Switcher
+      const typeBtnLend = document.getElementById('type-btn-lend');
+      const typeBtnBorrow = document.getElementById('type-btn-borrow');
+
+      typeBtnLend.addEventListener('click', () => {
+        typeBtnLend.classList.add('active');
+        typeBtnBorrow.classList.remove('active');
+        document.getElementById('modal-heading').textContent = "Log Item to Lend";
+        document.getElementById('condition-group').style.display = "flex";
+      });
+
+      typeBtnBorrow.addEventListener('click', () => {
+        typeBtnBorrow.classList.add('active');
+        typeBtnLend.classList.remove('active');
+        document.getElementById('modal-heading').textContent = "Log Demand Beacon (Need to Borrow)";
+        document.getElementById('condition-group').style.display = "none";
+      });
+
+      // Photo Upload Box and Live Preview
+      const imgUploadBox = document.getElementById('img-upload-box');
+      const fileInput = document.getElementById('file-input');
+      const previewImg = document.getElementById('preview-img');
+      const uploadPlaceholder = document.getElementById('upload-placeholder');
+
+      imgUploadBox.addEventListener('click', () => fileInput.click());
+
+      fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            currentUploadedImage = ev.target.result;
+            previewImg.src = currentUploadedImage;
+            previewImg.style.display = 'block';
+            uploadPlaceholder.style.display = 'none';
+            showToast("Photo loaded for preview!");
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      // "Select Location on Map" pinpoint mode
+      document.getElementById('proceed-pin-btn').addEventListener('click', startPinpointMode);
+      document.getElementById('btn-reselect-location').addEventListener('click', startPinpointMode);
+      document.getElementById('btn-cancel-pin').addEventListener('click', cancelPinpointMode);
+
+      // Direct Save & Post button (requires coordinates or initiates pinpointing)
+      document.getElementById('direct-submit-btn').addEventListener('click', submitItemDirectly);
+    }
+
+    // Modal Helpers
+    function openModal() {
+      updateUserProfileUI();
+      selectedCoords = null;
+      updateCoordDisplay();
+      document.getElementById('add-item-modal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('add-item-modal').classList.remove('active');
+    }
+
+    function updateCoordDisplay() {
+      const coordDisplay = document.getElementById('coord-display');
+      const statusText = document.getElementById('coord-status-text');
+      if (selectedCoords && selectedCoords.lat && selectedCoords.lng) {
+        coordDisplay.textContent = `📍 Lat: ${selectedCoords.lat.toFixed(4)}° N, Lng: ${selectedCoords.lng.toFixed(4)}° E`;
+        if (statusText) {
+          statusText.textContent = "Exchange Spot Selected";
+          statusText.style.color = "var(--lend-color)";
+        }
+      } else {
+        coordDisplay.textContent = `🎯 Click "Select Location on Map" to pinpoint exchange spot`;
+        if (statusText) {
+          statusText.textContent = "100% Manual Pinpointing";
+          statusText.style.color = "var(--primary)";
+        }
+      }
+    }
+
+    // 7. Interactive Map Pinpoint Workflow (100% Manual Click-to-Pin)
+    function startPinpointMode() {
+      // Validate title before entering pinpoint mode
+      const titleInput = document.getElementById('item-title');
+      const title = titleInput.value.trim();
+      if (!title) {
+        showToast("⚠️ Please enter an item title first!");
+        titleInput.focus();
+        return;
+      }
+
+      const isBorrow = document.getElementById('type-btn-borrow').classList.contains('active');
+      const user = CampusAuth.getCurrentUser();
+
+      pendingFormData = {
+        title: title,
+        type: isBorrow ? "borrow" : "lend",
+        category: document.getElementById('item-category').value,
+        condition: isBorrow ? "N/A" : document.getElementById('item-condition').value,
+        user_id: user.id,
+        lender_name: user.name,
+        dept: user.dept,
+        batch: user.batch,
+        roll: user.roll,
+        karma: user.karma,
+        trust_rating: user.trust_rating,
+        total_exchanges: user.total_exchanges,
+        specs: document.getElementById('item-specs').value.trim(),
+        image: currentUploadedImage
+      };
+
+      closeModal();
+      document.body.classList.add('pin-mode');
+      isPinMode = true;
+      showToast("📍 Pinpoint Mode: Click anywhere on KUET campus map to drop item location!");
+    }
+
+    function cancelPinpointMode() {
+      document.body.classList.remove('pin-mode');
+      isPinMode = false;
+      if (temporaryPinMarker) {
+        temporaryPinMarker.remove();
+        temporaryPinMarker = null;
+      }
+      openModal();
+    }
+
+    async function handleMapClick(e) {
+      if (!isPinMode || !pendingFormData) return;
+
+      const lngLat = e.lngLat;
+      selectedCoords = { lat: lngLat.lat, lng: lngLat.lng };
+      updateCoordDisplay();
+
+      // Show temporary draggable confirmation pin
+      if (temporaryPinMarker) temporaryPinMarker.remove();
+
+      const el = document.createElement('div');
+      el.className = 'marker-pin ' + (pendingFormData.type === 'borrow' ? 'marker-beacon' : 'marker-lend');
+      el.innerHTML = pendingFormData.type === 'borrow' ? '⚡' : '📍';
+      el.style.transform = 'scale(1.2)';
+
+      temporaryPinMarker = new maplibregl.Marker({ element: el, draggable: true })
+        .setLngLat([lngLat.lng, lngLat.lat])
+        .addTo(map);
+
+      temporaryPinMarker.on('dragend', () => {
+        const pt = temporaryPinMarker.getLngLat();
+        selectedCoords = { lat: pt.lat, lng: pt.lng };
+        updateCoordDisplay();
+      });
+
+      // Exit pin mode
+      document.body.classList.remove('pin-mode');
+      isPinMode = false;
+
+      // Immediately save and render item
+      await finalizeItemCreation(pendingFormData, selectedCoords);
+    }
+
+    async function submitItemDirectly() {
+      // 100% manual click-to-pin requirement: prompt if no map coordinates chosen
+      if (!selectedCoords) {
+        showToast("📍 Please click 'Select Location on Map' to choose exchange spot!");
+        startPinpointMode();
+        return;
+      }
+
+      const titleInput = document.getElementById('item-title');
+      const title = titleInput.value.trim();
+      if (!title) {
+        showToast("⚠️ Please enter an item title!");
+        titleInput.focus();
+        return;
+      }
+
+      const isBorrow = document.getElementById('type-btn-borrow').classList.contains('active');
+      const user = CampusAuth.getCurrentUser();
+
+      const itemData = {
+        title: title,
+        type: isBorrow ? "borrow" : "lend",
+        category: document.getElementById('item-category').value,
+        condition: isBorrow ? "N/A" : document.getElementById('item-condition').value,
+        user_id: user.id,
+        lender_name: user.name,
+        dept: user.dept,
+        batch: user.batch,
+        roll: user.roll,
+        karma: user.karma,
+        trust_rating: user.trust_rating,
+        total_exchanges: user.total_exchanges,
+        specs: document.getElementById('item-specs').value.trim(),
+        image: currentUploadedImage
+      };
+
+      closeModal();
+      await finalizeItemCreation(itemData, selectedCoords);
+    }
+
+    // Finalize item creation: post to API, update map and sidebar instantly
+    async function finalizeItemCreation(data, coords) {
+      const user = CampusAuth.getCurrentUser();
+      const newItem = {
+        id: "item_" + Date.now(),
+        user_id: data.user_id || user.id,
+        type: data.type,
+        title: data.title,
+        category: data.category,
+        lat: coords.lat,
+        lng: coords.lng,
+        lender_name: data.lender_name || user.name,
+        dept: data.dept || user.dept,
+        batch: data.batch || user.batch,
+        roll: data.roll || user.roll,
+        karma: data.karma || user.karma,
+        trust_rating: data.trust_rating || user.trust_rating,
+        total_exchanges: data.total_exchanges || user.total_exchanges,
+        user_badge: user.badge || "KUET Student",
+        status: data.type === 'borrow' ? 'beacon' : 'available',
+        image: data.image || (data.type === 'borrow' ? 'https://images.unsplash.com/photo-1616469829941-c7200edec809?w=400' : 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=400'),
+        condition: data.condition || 'Good',
+        specs: data.specs || 'Available for exchange at campus location.',
+        tags: ["#CampusShare", "#KUET", `#${data.category.replace(/\s+/g, '')}`]
+      };
+
+      // 1. Post to server
+      try {
+        const response = await fetch('/api/items', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newItem)
+        });
+        if (response.ok) {
+          const resData = await response.json();
+          if (resData.item) {
+            newItem.id = resData.item.id;
+          }
+        }
+      } catch (err) {
+        console.warn("Server POST offline, falling back to instant client state:", err);
+      }
+
+      // 2. Add to items array (at top of feed)
+      campusItems.unshift(newItem);
+
+      // 3. Remove temporary pinpoint marker if any
+      if (temporaryPinMarker) {
+        temporaryPinMarker.remove();
+        temporaryPinMarker = null;
+      }
+
+      // 4. Immediately re-render items on map and sidebar without reload
+      renderItems();
+
+      // 5. Fly camera to the newly added pin
+      map.flyTo({
+        center: [coords.lng, coords.lat],
+        zoom: 17.5,
+        pitch: 30,
+        essential: true
+      });
+
+      // 6. Reset form fields and coordinates
+      document.getElementById('item-title').value = '';
+      document.getElementById('item-specs').value = '';
+      document.getElementById('preview-img').style.display = 'none';
+      document.getElementById('upload-placeholder').style.display = 'flex';
+      currentUploadedImage = "";
+      selectedCoords = null;
+      updateCoordDisplay();
+
+      showToast(`🎉 "${newItem.title}" successfully logged and pinned on KUET campus map!`);
+    }
+
+    // Toast Utility
+    function showToast(message) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `<span>⚡</span><span>${message}</span>`;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(15px)';
+        toast.style.transition = 'all 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+  </script>
+</body>
+</html>
