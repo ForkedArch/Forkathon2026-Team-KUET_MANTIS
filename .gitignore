@@ -42,4 +42,5 @@ Thumbs.db
 tmp/
 temp/
 
-*.exe
+*.exe__pycache__/
+*.pyc
