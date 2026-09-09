@@ -279,3 +279,4 @@ with open(os.path.join(ROOT, "judge_report.json"), "w") as f:
 print("\n  Report saved to judge_report.json")
 
 sys.exit(0 if score >= 18 else 1)
+

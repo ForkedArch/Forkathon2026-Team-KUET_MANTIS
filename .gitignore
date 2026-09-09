@@ -44,3 +44,18 @@ temp/
 
 *.exe__pycache__/
 *.pyc
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploads directory
+uploads/
+
+# Agent working directories
+.agents/
+
+# Test artifacts
+adversarial_results.json
+judge_report.json
