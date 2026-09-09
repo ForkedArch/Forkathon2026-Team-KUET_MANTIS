@@ -1,13 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from .database import engine, Base, migrate_db
-from .seed import seed_db
+from .database import migrate_db
 from .routes import auth, items, borrow_requests, chat, transactions, landmarks
 import os
-
-# Create & migrate tables
-migrate_db()
 
 app = FastAPI(title="CampusShare KUET API")
 
@@ -15,7 +11,6 @@ app = FastAPI(title="CampusShare KUET API")
 @app.on_event("startup")
 def on_startup():
     migrate_db()
-    seed_db()
 
 
 # CORS

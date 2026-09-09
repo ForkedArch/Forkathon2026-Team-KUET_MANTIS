@@ -1,5 +1,4 @@
 import re
-from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
@@ -89,48 +88,6 @@ def get_current_user_info(current_user: models.User = Depends(auth.get_current_u
     return current_user
 
 
-@router.get("/current")
-def get_current_user_alias(
-    current_user: Optional[models.User] = Depends(auth.get_current_user_optional),
-    db: Session = Depends(database.get_db)
-):
-    user = current_user or db.query(models.User).first()
-    if user:
-        user_dict = {
-            "id": user.id,
-            "name": user.name,
-            "email": user.email,
-            "dept": user.dept,
-            "batch": user.batch,
-            "roll": user.roll,
-            "karma": getattr(user, "karma", 100),
-            "trust_score": getattr(user, "trust_score", 100.0),
-            "trust_rating": getattr(user, "trust_score", 100.0),
-            "total_lends": getattr(user, "total_lends", 0),
-            "total_borrows": getattr(user, "total_borrows", 0),
-            "total_exchanges": getattr(user, "total_lends", 0) + getattr(user, "total_borrows", 0),
-            "badge": "Verified Student"
-        }
-    else:
-        user_dict = {
-            "id": 1,
-            "name": "Siddique Ahmed",
-            "email": "siddique2307010@stud.kuet.ac.bd",
-            "dept": "07",
-            "batch": "23",
-            "roll": "010",
-            "karma": 100,
-            "trust_score": 100.0,
-            "trust_rating": 100.0,
-            "total_lends": 0,
-            "total_borrows": 0,
-            "total_exchanges": 0,
-            "badge": "Verified Student"
-        }
-    return {
-        "success": True,
-        "authenticated": True,
-        "demo_mode": current_user is None,
-        "user": user_dict,
-        **user_dict
-    }
+@router.get("/current", response_model=schemas.UserOut)
+def get_current_user_alias(current_user: models.User = Depends(auth.get_current_user)):
+    return current_user
