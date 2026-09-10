@@ -1,61 +1,84 @@
-# A .gitignore file to keep the git workflow clean
-# You don't have to touch anything necessarily
+# Byte-compiled / optimized / DLL files
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
 
-.env
-.env.*
-.env.example
+# Virtual Environments
+venv/
+**/venv/
+.venv/
+**/.venv/
+env/
+**/env/
+ENV/
+env.bak/
+venv.bak/
 
+# Node & Frontend dependencies
 node_modules/
+**/node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+# Build outputs
 dist/
+**/dist/
 build/
+**/build/
 out/
 coverage/
+*.apk
+*.aab
+*.jks
+*.keystore
 
-__pycache__/
-*.py[cod]
-.venv/
-venv/
-.pytest_cache/
+# Environment variables & secrets (allow .example files)
+.env
+.env.*
+!.env.example
+!.env.production.example
 
-target/
-*.class
+# Databases & local persistent storage
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+campus_share.db
+**/campus_share.db
 
-*.o
-*.obj
-*.exe
-*.out
+# Uploads directory
+uploads/*
+!uploads/.gitkeep
+backend/uploads/*
+!backend/uploads/.gitkeep
 
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDEs & Editors
 .vscode/
 .idea/
 *.swp
 *.swo
+*~
 
-.DS_Store
-Thumbs.db
-
+# Logs & temp files
 *.log
 tmp/
 temp/
+.pytest_cache/
 
-*.exe__pycache__/
-*.pyc
-
-# Database files
-*.db
-*.sqlite
-*.sqlite3
-
-# Uploads directory
-uploads/
-
-# Agent working directories
+# Agent working directories & test artifacts
 .agents/
-
-# Test artifacts
 adversarial_results.json
 judge_report.json

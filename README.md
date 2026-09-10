@@ -119,9 +119,9 @@ FastAPI REST API
 │   │   ├── database.py
 │   │   ├── main.py
 │   │   ├── models.py
-│   │   ├── schemas.py
-│   │   └── seed.py
+│   │   └── schemas.py
 │   ├── requirements.txt
+│   ├── Dockerfile
 │   └── .env.example
 ├── frontend/
 │   ├── src/
@@ -133,8 +133,13 @@ FastAPI REST API
 │   │   └── main.jsx
 │   ├── package.json
 │   ├── capacitor.config.ts
+│   ├── Dockerfile
+│   ├── nginx.conf
 │   ├── android/                 # Generated Capacitor Android project
 │   └── .env.example
+├── docker-compose.yml
+├── render.yaml
+├── DEPLOYMENT.md
 ├── PROJECT.md
 ├── CONTRIBUTING.md
 └── README.md
@@ -179,20 +184,7 @@ The default development configuration uses SQLite at
 development JWT key. Before deploying, set `ENVIRONMENT` to a non-development
 value and provide a strong `SECRET_KEY`.
 
-### 3. Optionally seed demo data
-
-With the backend virtual environment active and the working directory set to
-`backend`:
-
-```bash
-python -m app.seed
-```
-
-The seed script adds sample KUET students and active listings from
-`backend/app/data/kuet_landmarks.json`. Seed users use the default password
-`kuet1234`; change or remove demo data before using a shared deployment.
-
-### 4. Configure and run the frontend
+### 3. Configure and run the frontend
 
 In a second terminal:
 

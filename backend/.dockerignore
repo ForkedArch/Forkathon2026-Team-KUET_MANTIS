@@ -1,0 +1,17 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+.env
+.env.*
+!.env.example
+!.env.production.example
+venv
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache
+campus_share.db
+uploads/*
+!uploads/.gitkeep

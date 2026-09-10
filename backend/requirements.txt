@@ -11,3 +11,4 @@ qrcode==8.0
 pydantic-settings==2.6.1
 email-validator==2.2.0
 python-dotenv==1.0.1
+typing-extensions>=4.6.0

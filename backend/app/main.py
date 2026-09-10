@@ -14,18 +14,21 @@ def on_startup():
 
 
 # CORS
-allowed_origins = [
-    origin.strip()
-    for origin in os.getenv(
-        "ALLOWED_ORIGINS",
-        "http://localhost:5173,http://localhost",
-    ).split(",")
-    if origin.strip()
-]
+raw_origins = os.getenv(
+    "ALLOWED_ORIGINS",
+    "http://localhost:5173,http://localhost",
+).split(",")
+allowed_origins = []
+for o in raw_origins:
+    cleaned = o.strip().rstrip("/")
+    if cleaned:
+        allowed_origins.append(cleaned)
+
+allow_all = "*" in allowed_origins
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
-    allow_credentials=True,
+    allow_credentials=not allow_all,
     allow_methods=["*"],
     allow_headers=["*"],
 )

@@ -125,7 +125,6 @@ CampusShare KUET is an integrated campus-wide asset sharing and borrowing platfo
 │   │   ├── models.py            (User with karma, Item with type/specs)
 │   │   ├── schemas.py           (BorrowRequestOut with transaction, UserRegister)
 │   │   ├── database.py
-│   │   ├── seed.py              (Campus items & users seed)
 │   │   └── main.py
 ├── frontend/
 │   ├── index.html               (MapLibre GL JS & CSS CDN tags)
@@ -147,6 +146,6 @@ CampusShare KUET is an integrated campus-wide asset sharing and borrowing platfo
 │   │   ├── context/AuthContext.jsx
 │   │   ├── api/client.js
 │   │   └── App.jsx
-├── judge_rubric.py              (20-point Problem Statement Rubric Evaluator)
+├── DEPLOYMENT.md
 └── PROJECT.md
 ```
