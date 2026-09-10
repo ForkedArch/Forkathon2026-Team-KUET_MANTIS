@@ -335,6 +335,7 @@ export default function App() {
           <Route path="/item/:id" element={<ItemDetail />} />
           <Route path="/add" element={<PrivateRoute><AddItem /></PrivateRoute>} />
           <Route path="/requests" element={<PrivateRoute><Requests /></PrivateRoute>} />
+          <Route path="/chat" element={<PrivateRoute><Chat /></PrivateRoute>} />
           <Route path="/chat/:requestId" element={<PrivateRoute><Chat /></PrivateRoute>} />
           <Route path="/transaction/:requestId" element={<PrivateRoute><Transaction /></PrivateRoute>} />
           <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />

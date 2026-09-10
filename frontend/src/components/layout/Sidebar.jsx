@@ -132,6 +132,13 @@ export default function Sidebar({ isOpen, onClose }) {
             </div>
           </NavLink>
 
+          <NavLink to="/chat" className={navLinkClasses} onClick={onClose}>
+            <div className="flex items-center gap-3">
+              <span className="text-base">💬</span>
+              <span>1:1 Messages</span>
+            </div>
+          </NavLink>
+
           <NavLink to="/profile" className={navLinkClasses} onClick={onClose}>
             <div className="flex items-center gap-3">
               <UserIcon />

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { QRCodeSVG } from 'qrcode.react';
 import api from '../api/client';
@@ -8,10 +8,16 @@ import toast from 'react-hot-toast';
 
 export default function Transaction() {
   const { requestId } = useParams();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [otp, setOtp] = useState('');
   const [qrData, setQrData] = useState(null);
   const [karmaResult, setKarmaResult] = useState(null);
+
+  // Review form state
+  const [rating, setRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
+  const [reviewSubmitted, setReviewSubmitted] = useState(false);
 
   // Fetch transaction details if exists
   const { data: request, refetch } = useQuery({
@@ -66,12 +72,43 @@ export default function Transaction() {
     onError: (err) => toast.error(err.response?.data?.detail || 'Failed to process return')
   });
 
+  const reviewMutation = useMutation({
+    mutationFn: (data) => api.post('/reviews', data),
+    onSuccess: () => {
+      toast.success('Thank you for rating your fellow KUETian! ⭐');
+      setReviewSubmitted(true);
+    },
+    onError: (err) => toast.error(err.response?.data?.detail || 'Failed to submit review')
+  });
+
   // Check if user is owner to start handover
   const isOwner = request && user && request.owner_id === user.id;
+  const counterpart = isOwner ? request?.borrower : request?.owner;
+
+  const handleReviewSubmit = (e) => {
+    e.preventDefault();
+    if (!counterpart?.id) return;
+    reviewMutation.mutate({
+      transaction_id: request?.transaction?.id,
+      reviewee_id: counterpart.id,
+      rating,
+      comment: reviewComment.trim()
+    });
+  };
 
   return (
     <div className="max-w-xl mx-auto p-6 space-y-6 h-full overflow-y-auto">
-      <h1 className="text-2xl font-bold text-slate-900">Exchange & Handover</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-slate-900">Exchange & Handover</h1>
+        {counterpart && (
+          <button
+            onClick={() => navigate(`/chat?user=${counterpart.id}`)}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-xl text-xs font-semibold transition"
+          >
+            💬 Chat with {isOwner ? 'Borrower' : 'Owner'}
+          </button>
+        )}
+      </div>
 
       {request && (
         <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-3">
@@ -126,7 +163,7 @@ export default function Transaction() {
           <p className="text-xs text-slate-500">Generate a one-time OTP and QR code to share with the borrower on campus.</p>
           <button
             onClick={() => startMutation.mutate()}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl shadow-xs transition text-sm"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl shadow-xs transition text-sm cursor-pointer"
             disabled={startMutation.isPending}
           >
             {startMutation.isPending ? 'Starting...' : 'Start Handover & Generate OTP'}
@@ -164,7 +201,7 @@ export default function Transaction() {
           />
           <button
             onClick={() => verifyMutation.mutate(otp)}
-            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl shadow-xs transition text-sm"
+            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl shadow-xs transition text-sm cursor-pointer"
             disabled={verifyMutation.isPending || !otp}
           >
             {verifyMutation.isPending ? 'Verifying...' : 'Verify Handover & Receive Item'}
@@ -181,13 +218,68 @@ export default function Transaction() {
           </p>
           <button
             onClick={() => returnMutation.mutate()}
-            className="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2.5 rounded-xl shadow-xs transition text-sm"
+            className="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2.5 rounded-xl shadow-xs transition text-sm cursor-pointer"
             disabled={returnMutation.isPending}
           >
             {returnMutation.isPending ? 'Processing...' : 'Confirm Return & Update Karma ⚡'}
           </button>
         </div>
       )}
+
+      {/* Peer Review & Rating Section */}
+      {(request?.status === 'completed' || request?.transaction?.status === 'returned') && counterpart && (
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-slate-800">Rate Your Experience with {counterpart?.name}</h3>
+            <span className="text-xs bg-amber-50 text-amber-700 font-semibold px-2 py-0.5 rounded-md">Verified Review</span>
+          </div>
+
+          {reviewSubmitted ? (
+            <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs text-center font-medium">
+              ✅ Your review has been recorded on {counterpart?.name}'s campus profile. Thank you!
+            </div>
+          ) : (
+            <form onSubmit={handleReviewSubmit} className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1.5">Rating (1 to 5 Stars)</label>
+                <div className="flex items-center gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setRating(star)}
+                      className="text-2xl transition hover:scale-110 focus:outline-none"
+                    >
+                      {star <= rating ? '⭐' : '☆'}
+                    </button>
+                  ))}
+                  <span className="text-xs font-bold text-amber-600 ml-2">{rating} / 5 Stars</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">Feedback / Comment (Optional)</label>
+                <textarea
+                  className="w-full border border-slate-200 rounded-xl p-3 text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none resize-none"
+                  rows={2}
+                  placeholder={`Share how the transaction went with ${counterpart?.name}...`}
+                  value={reviewComment}
+                  onChange={(e) => setReviewComment(e.target.value)}
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={reviewMutation.isPending}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl text-xs shadow-xs transition cursor-pointer"
+              >
+                {reviewMutation.isPending ? 'Submitting Review...' : 'Submit Rating & Feedback ⭐'}
+              </button>
+            </form>
+          )}
+        </div>
+      )}
     </div>
   );
 }
+

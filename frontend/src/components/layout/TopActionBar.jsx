@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import api from '../../api/client';
+import { useAuth } from '../../context/AuthContext';
 
-// Clean inline SVGs (zero external package dependencies)
 const SearchIcon = () => (
   <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -47,6 +50,35 @@ export default function TopActionBar({
   onToggleSidebar,
   totalItems = null
 }) {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  // Notifications query
+  const { data: notifications = [] } = useQuery({
+    queryKey: ['notifications'],
+    queryFn: () => api.get('/notifications').then((res) => res.data),
+    enabled: !!user,
+    refetchInterval: 5000,
+  });
+
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
+
+  const markReadMutation = useMutation({
+    mutationFn: (id) => api.put(`/notifications/${id}/read`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    },
+  });
+
+  const markAllReadMutation = useMutation({
+    mutationFn: () => api.put('/notifications/read-all'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    },
+  });
+
   return (
     <header className="h-16 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 lg:px-6 flex items-center justify-between gap-3 z-20 flex-shrink-0">
       {/* Mobile Sidebar Toggle Button */}
@@ -81,7 +113,7 @@ export default function TopActionBar({
         )}
       </div>
 
-      {/* Segmented Type Filter (All / Lending / Beacons) */}
+      {/* Segmented Type Filter */}
       <div className="hidden sm:flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200/80 text-xs font-semibold">
         <button
           onClick={() => setListingType('ALL')}
@@ -132,8 +164,89 @@ export default function TopActionBar({
         </select>
       </div>
 
-      {/* Right Actions: Primary Add Item Button */}
-      <div className="flex items-center gap-2">
+      {/* Right Actions: Messages, Notifications, Add Item */}
+      <div className="flex items-center gap-2 relative">
+        {user && (
+          <>
+            {/* Direct Chat Link */}
+            <button
+              onClick={() => navigate('/chat')}
+              className="p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition-colors relative"
+              title="1:1 Messages"
+            >
+              <span className="text-lg">💬</span>
+            </button>
+
+            {/* Notification Bell */}
+            <div className="relative">
+              <button
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition-colors relative"
+                title="Notifications"
+              >
+                <span className="text-lg">🔔</span>
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Notification Dropdown */}
+              {showNotifications && (
+                <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-slate-200 py-2 z-50 overflow-hidden">
+                  <div className="px-4 py-2 border-b border-slate-100 flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-800 uppercase tracking-wide">
+                      Notifications
+                    </span>
+                    {unreadCount > 0 && (
+                      <button
+                        onClick={() => markAllReadMutation.mutate()}
+                        className="text-[11px] text-blue-600 hover:underline font-medium"
+                      >
+                        Mark all read
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="max-h-80 overflow-y-auto divide-y divide-slate-100">
+                    {notifications.length === 0 ? (
+                      <p className="text-xs text-slate-400 p-4 text-center">No notifications yet.</p>
+                    ) : (
+                      notifications.map((n) => (
+                        <div
+                          key={n.id}
+                          onClick={() => {
+                            if (!n.is_read) markReadMutation.mutate(n.id);
+                            if (n.link) {
+                              setShowNotifications(false);
+                              navigate(n.link);
+                            }
+                          }}
+                          className={`p-3 text-xs cursor-pointer hover:bg-slate-50 transition ${
+                            n.is_read ? 'opacity-70' : 'bg-blue-50/40 font-medium'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <p className="font-semibold text-slate-800">{n.title}</p>
+                            <span className="text-[10px] text-slate-400">
+                              {new Date(n.created_at).toLocaleTimeString([], {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
+                            </span>
+                          </div>
+                          <p className="text-slate-600 mt-0.5 line-clamp-2">{n.message}</p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
         <button
           id="btn-add-item-top"
           onClick={onOpenAddModal}

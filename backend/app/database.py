@@ -114,3 +114,15 @@ def migrate_db():
             if "zone_id" not in item_cols:
                 conn.exec_driver_sql("ALTER TABLE items ADD COLUMN zone_id VARCHAR")
             conn.commit()
+
+        # 3. Messages table migration
+        msg_cols = [r[1] for r in conn.exec_driver_sql("PRAGMA table_info(messages)").fetchall()]
+        if msg_cols:
+            if "recipient_id" not in msg_cols:
+                conn.exec_driver_sql("ALTER TABLE messages ADD COLUMN recipient_id INTEGER")
+            if "item_id" not in msg_cols:
+                conn.exec_driver_sql("ALTER TABLE messages ADD COLUMN item_id INTEGER")
+            if "is_read" not in msg_cols:
+                conn.exec_driver_sql("ALTER TABLE messages ADD COLUMN is_read BOOLEAN DEFAULT 0")
+            conn.commit()
+

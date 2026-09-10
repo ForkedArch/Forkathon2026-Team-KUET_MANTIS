@@ -201,3 +201,70 @@ def delete_item(
     db.delete(item)
     db.commit()
     return {"detail": "Item deleted"}
+
+
+@router.post("/{item_id}/save")
+def toggle_save_item(
+    item_id: int,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(auth.get_current_user),
+):
+    """Toggle save/bookmark for an item."""
+    item = db.query(models.Item).filter(models.Item.id == item_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    saved = (
+        db.query(models.SavedItem)
+        .filter(models.SavedItem.user_id == current_user.id, models.SavedItem.item_id == item_id)
+        .first()
+    )
+    if saved:
+        db.delete(saved)
+        db.commit()
+        return {"saved": False, "message": "Item removed from wishlist"}
+    else:
+        new_saved = models.SavedItem(user_id=current_user.id, item_id=item_id)
+        db.add(new_saved)
+        db.commit()
+        return {"saved": True, "message": "Item added to wishlist"}
+
+
+@router.get("/saved/all", response_model=List[schemas.ItemOut])
+def get_saved_items(
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(auth.get_current_user),
+):
+    """Get all saved items for the current user."""
+    saved_entries = (
+        db.query(models.SavedItem)
+        .filter(models.SavedItem.user_id == current_user.id)
+        .order_by(models.SavedItem.created_at.desc())
+        .all()
+    )
+    return [entry.item for entry in saved_entries if entry.item]
+
+
+@router.post("/{item_id}/report", response_model=schemas.ReportOut)
+def report_item(
+    item_id: int,
+    report_data: schemas.ReportCreate,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(auth.get_current_user),
+):
+    """Report an inappropriate or broken listing."""
+    item = db.query(models.Item).filter(models.Item.id == item_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    report = models.Report(
+        item_id=item_id,
+        reporter_id=current_user.id,
+        reason=report_data.reason,
+        details=report_data.details,
+    )
+    db.add(report)
+    db.commit()
+    db.refresh(report)
+    return report
+

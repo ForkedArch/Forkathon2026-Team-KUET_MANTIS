@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from .database import migrate_db
-from .routes import auth, items, borrow_requests, chat, transactions, landmarks
+from .routes import auth, items, borrow_requests, chat, transactions, landmarks, notifications, reviews
 import os
 
 app = FastAPI(title="CampusShare KUET API")
@@ -45,6 +45,8 @@ app.include_router(borrow_requests.router)
 app.include_router(chat.router)
 app.include_router(transactions.router)
 app.include_router(landmarks.router)
+app.include_router(notifications.router)
+app.include_router(reviews.router)
 
 @app.get("/")
 def root():
