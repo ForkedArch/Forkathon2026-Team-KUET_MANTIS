@@ -12,30 +12,10 @@ services:
     envVars:
       - key: ENVIRONMENT
         value: production
-      - key: SECRET_KEY
-        generateValue: true
-      - key: DATABASE_URL
-        value: sqlite:///./campus_share.db
+      # SECRET_KEY, DATABASE_URL, ALGORITHM set in Render Dashboard — do NOT override here
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "30"
       - key: UPLOAD_DIR
         value: ./uploads
-      - key: ACCESS_TOKEN_EXPIRE_MINUTES
-        value: "1440"
       - key: ALLOWED_ORIGINS
-        value: http://localhost:5173,http://localhost:3000,http://localhost,https://*.vercel.app,https://campusshare.vercel.app
-
-  # React Frontend Static Site
-  - type: web
-    name: campusshare-frontend
-    env: static
-    region: oregon
-    plan: free
-    rootDir: frontend
-    buildCommand: npm install && npm run build
-    staticPublishPath: dist
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
-    envVars:
-      - key: VITE_API_URL
-        sync: false
+        value: https://campus-share-kuet-43qd.vercel.app,https://campus-share-kuet.vercel.app,http://localhost:5173,http://localhost:3000
