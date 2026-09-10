@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import or_, and_, desc
 from typing import List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from .. import schemas, models, auth, database
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])
@@ -82,7 +82,7 @@ def get_conversations(
             if m.recipient_id == current_user.id and not m.is_read:
                 conversations[peer.id]["unread_count"] += 1
 
-    return sorted(conversations.values(), key=lambda c: c["last_message_at"] or datetime.min, reverse=True)
+    return sorted(conversations.values(), key=lambda c: c["last_message_at"] or datetime.min.replace(tzinfo=timezone.utc), reverse=True)
 
 
 @router.get("/direct/{other_user_id}", response_model=List[schemas.MessageOut])
