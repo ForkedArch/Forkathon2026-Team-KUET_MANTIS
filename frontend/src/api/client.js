@@ -1,9 +1,25 @@
 import axios from 'axios';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+// Determine and normalize API Base URL
+let rawBase = (import.meta.env.VITE_API_URL || '').trim();
 
-// Origin without the trailing /api, used for building URLs to static assets
-// (e.g. uploaded item images) served from the same backend.
+if (!rawBase) {
+  rawBase = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:8000/api'
+    : '/api';
+}
+
+// Remove trailing slashes
+rawBase = rawBase.replace(/\/+$/, '');
+
+// Ensure /api suffix is present
+if (!rawBase.endsWith('/api') && !rawBase.includes('/api/')) {
+  rawBase = `${rawBase}/api`;
+}
+
+const API_BASE = rawBase;
+
+// Origin without the trailing /api, used for building URLs to static assets (uploads)
 export const API_ORIGIN = API_BASE.replace(/\/api\/?$/, '');
 
 const api = axios.create({

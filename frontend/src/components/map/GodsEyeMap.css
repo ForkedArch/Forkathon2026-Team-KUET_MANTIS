@@ -2,6 +2,11 @@
    God's Eye Map Styles: Markers, Pulse Keyframes, Popups, Pin-Mode & HUD
    ========================================================================== */
 
+/* Outer wrapper for MapLibre positioning */
+.marker-pin-outer {
+  cursor: pointer;
+}
+
 /* 1. Custom Circular Markers */
 .marker-pin {
   width: 32px;
@@ -19,8 +24,9 @@
   user-select: none;
 }
 
+.marker-pin-outer:hover .marker-pin,
 .marker-pin:hover {
-  transform: scale(1.2) translateY(-2px);
+  transform: scale(1.15) translateY(-2px);
   z-index: 100 !important;
 }
 
@@ -74,6 +80,88 @@
 .pin-mode #map,
 body.pin-mode #map {
   cursor: crosshair !important;
+}
+
+/* Precise Click-to-Pinpoint Marker with Pixel-Accurate Needle Alignment */
+.custom-pinpoint-container {
+  pointer-events: auto;
+  cursor: grab;
+  position: relative;
+  width: 34px;
+  height: 46px;
+  user-select: none;
+}
+
+.custom-pinpoint-container:active {
+  cursor: grabbing;
+}
+
+.custom-pinpoint-wrapper {
+  position: relative;
+  width: 34px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pinpoint-drop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.custom-pinpoint-svg {
+  display: block;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.4));
+  transition: transform 0.15s ease;
+}
+
+.custom-pinpoint-container:hover .custom-pinpoint-svg {
+  transform: translateY(-4px) scale(1.05);
+}
+
+.custom-pinpoint-pulse {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(37, 99, 235, 0.45);
+  animation: pinpoint-ring 1.8s infinite ease-out;
+  pointer-events: none;
+}
+
+.custom-pinpoint-shadow {
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.3);
+  filter: blur(1px);
+  pointer-events: none;
+}
+
+@keyframes pinpoint-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(-24px) scale(0.6);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pinpoint-ring {
+  0% {
+    transform: translateX(-50%) scale(0.6);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateX(-50%) scale(2.6);
+    opacity: 0;
+  }
 }
 
 .pin-banner {

@@ -50,6 +50,7 @@ export default function GodsEyeMap({
   items = [],
   selectedItemId = null,
   isPinMode = false,
+  pinpointCoords = null,
   onSelectLocation = null,
   onCancelPinMode = null,
   onSelectItem = null,
@@ -247,13 +248,16 @@ export default function GodsEyeMap({
       // Respect beacon visibility toggle
       if (isBeacon && !showBeacons) return;
 
-      // Create Custom Pin Element
+      // Create Custom Pin Element with isolated outer wrapper
       const el = document.createElement('div');
-      el.className = `marker-pin ${isBeacon ? 'marker-beacon' : 'marker-lend'}`;
+      el.className = 'marker-pin-outer';
       el.setAttribute('data-item-id', item.id);
 
+      const inner = document.createElement('div');
+      inner.className = `marker-pin ${isBeacon ? 'marker-beacon' : 'marker-lend'}`;
+
       if (isBeacon) {
-        el.innerHTML = `
+        inner.innerHTML = `
           <div class="beacon-pulse"></div>
           <div class="beacon-pulse-inner"></div>
           <span>⚡</span>
@@ -267,8 +271,9 @@ export default function GodsEyeMap({
         else if (cat.includes('cable') || cat.includes('adapt')) icon = '🔗';
         else if (cat.includes('book') || cat.includes('note')) icon = '📖';
         else if (cat.includes('station') || cat.includes('draw')) icon = '📐';
-        el.innerHTML = `<span>${icon}</span>`;
+        inner.innerHTML = `<span>${icon}</span>`;
       }
+      el.appendChild(inner);
 
       // Build Rich Interactive Popup
       const ownerName = item.owner?.name || item.lender_name || 'KUET Student';
@@ -356,7 +361,7 @@ export default function GodsEyeMap({
         }
       });
 
-      const marker = new maplibregl.Marker({ element: el })
+      const marker = new maplibregl.Marker({ element: el, anchor: 'center' })
         .setLngLat([lng, lat])
         .setPopup(popup)
         .addTo(map);
@@ -392,6 +397,25 @@ export default function GodsEyeMap({
     }
   }, [selectedItemId, items]);
 
+  // Helper to build pixel-accurate needle pin element
+  const createPinpointElement = () => {
+    const el = document.createElement('div');
+    el.className = 'custom-pinpoint-container';
+    el.innerHTML = `
+      <div class="custom-pinpoint-wrapper">
+        <svg class="custom-pinpoint-svg" width="34" height="46" viewBox="0 0 34 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17 0C7.611 0 0 7.611 0 17C0 29.75 17 46 17 46C17 46 34 29.75 34 17C34 7.611 26.389 0 17 0Z" fill="#2563EB"/>
+          <path d="M17 2C8.716 2 2 8.716 2 17C2 28.2 17 43.5 17 43.5C17 43.5 32 28.2 32 17C32 8.716 25.284 2 17 2Z" fill="#1D4ED8"/>
+          <circle cx="17" cy="17" r="8" fill="white"/>
+          <circle cx="17" cy="17" r="4.5" fill="#2563EB"/>
+        </svg>
+        <div class="custom-pinpoint-pulse"></div>
+        <div class="custom-pinpoint-shadow"></div>
+      </div>
+    `;
+    return el;
+  };
+
   // 5. Click-to-Pinpoint Mode Handler
   useEffect(() => {
     const map = mapInstanceRef.current;
@@ -403,17 +427,14 @@ export default function GodsEyeMap({
 
       const { lng, lat } = e.lngLat;
 
-      // Drop/update temporary draggable confirmation pin
+      // Drop/update temporary draggable confirmation pin with exact bottom needle alignment
       if (tempPinMarkerRef.current) {
         tempPinMarkerRef.current.remove();
       }
 
-      const el = document.createElement('div');
-      el.className = 'marker-pin marker-lend';
-      el.innerHTML = '📍';
-      el.style.transform = 'scale(1.25)';
+      const el = createPinpointElement();
 
-      const tempMarker = new maplibregl.Marker({ element: el, draggable: true })
+      const tempMarker = new maplibregl.Marker({ element: el, draggable: true, anchor: 'bottom' })
         .setLngLat([lng, lat])
         .addTo(map);
 
@@ -438,13 +459,35 @@ export default function GodsEyeMap({
     };
   }, [isPinMode, mapLoaded]);
 
-  // Clean up temporary pin when pin mode is turned off
+  // Synchronize pin position if pinpointCoords is provided
   useEffect(() => {
-    if (!isPinMode && tempPinMarkerRef.current) {
+    const map = mapInstanceRef.current;
+    const maplibregl = typeof window !== 'undefined' ? window.maplibregl : null;
+    if (!map || !mapLoaded || !maplibregl) return;
+
+    if (pinpointCoords && pinpointCoords.lat != null && pinpointCoords.lng != null) {
+      if (tempPinMarkerRef.current) {
+        tempPinMarkerRef.current.setLngLat([pinpointCoords.lng, pinpointCoords.lat]);
+      } else {
+        const el = createPinpointElement();
+        const m = new maplibregl.Marker({ element: el, draggable: isPinMode, anchor: 'bottom' })
+          .setLngLat([pinpointCoords.lng, pinpointCoords.lat])
+          .addTo(map);
+
+        m.on('dragend', () => {
+          const pt = m.getLngLat();
+          if (onSelectLocationRef.current) {
+            onSelectLocationRef.current({ lat: pt.lat, lng: pt.lng });
+          }
+        });
+
+        tempPinMarkerRef.current = m;
+      }
+    } else if (!isPinMode && tempPinMarkerRef.current) {
       tempPinMarkerRef.current.remove();
       tempPinMarkerRef.current = null;
     }
-  }, [isPinMode]);
+  }, [pinpointCoords, isPinMode, mapLoaded]);
 
   // 6. HUD Actions
   const handleRecenter = () => {

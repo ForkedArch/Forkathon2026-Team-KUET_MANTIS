@@ -10,6 +10,7 @@ export default function Home() {
     category,
     listingType,
     isPinMode,
+    pinpointCoords,
     onSelectLocation,
     onCancelPinMode,
     onRequestBorrow
@@ -37,6 +38,7 @@ export default function Home() {
           items={items}
           selectedItemId={selectedItemId}
           isPinMode={isPinMode}
+          pinpointCoords={pinpointCoords}
           onSelectLocation={onSelectLocation}
           onCancelPinMode={onCancelPinMode}
           onSelectItem={(item) => setSelectedItemId(item.id)}

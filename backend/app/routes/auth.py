@@ -139,3 +139,13 @@ def get_current_user_info(current_user: models.User = Depends(auth.get_current_u
 @router.get("/current", response_model=schemas.UserOut)
 def get_current_user_alias(current_user: models.User = Depends(auth.get_current_user)):
     return current_user
+
+
+@router.get("/user/{user_id}", response_model=schemas.UserOut)
+def get_user_public_profile(user_id: int, db: Session = Depends(database.get_db)):
+    """Fetch public profile details of a student (for 1:1 chat headers and user badges)."""
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Student not found")
+    return user
+

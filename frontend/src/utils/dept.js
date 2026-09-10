@@ -79,3 +79,4 @@ export function getDeptFullName(dept) {
 
   return str;
 }
+
