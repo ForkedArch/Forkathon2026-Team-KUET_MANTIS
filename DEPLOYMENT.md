@@ -8,7 +8,6 @@ This guide provides step-by-step instructions for deploying the **CampusShare KU
 
 * **Backend:** FastAPI (Python 3.10) with SQLite database and persistent uploads storage.
 * **Frontend:** React 18 SPA (Vite + Tailwind CSS), served via Nginx or static CDN with SPA routing rewrites.
-* **Android:** Hybrid mobile app (Capacitor) consuming the same backend API.
 
 ---
 

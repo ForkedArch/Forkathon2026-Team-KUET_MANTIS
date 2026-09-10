@@ -132,10 +132,8 @@ FastAPI REST API
 │   │   ├── App.jsx
 │   │   └── main.jsx
 │   ├── package.json
-│   ├── capacitor.config.ts
 │   ├── Dockerfile
 │   ├── nginx.conf
-│   ├── android/                 # Generated Capacitor Android project
 │   └── .env.example
 ├── docker-compose.yml
 ├── render.yaml
@@ -210,117 +208,8 @@ npm run build
 npm run preview
 ```
 
-### 5. Run the Android app in parallel
-
-The Android target reuses the same React/Vite frontend through Capacitor. The
-browser workflow above remains unchanged.
-
-#### Prerequisites
-
-- Android Studio with an Android SDK and emulator, or a USB-debuggable Android
-  device
-- A Java/Android toolchain supported by the installed Capacitor version
-- A backend URL reachable from the emulator or device
-
-From `frontend/`, install dependencies and create/synchronize the native
-project:
-
-```bash
-npm install
-npm run android:sync
-```
-
-Open the project in Android Studio or run it on an available device:
-
-```bash
-npm run android:open
-npm run android:run
-```
-
-`android:sync` runs the normal Vite production build first, then copies
-`dist/` into the Android project. After changing frontend code, run it again
-before testing the Android app.
-
-For local API development, use the correct URL for the device:
-
-```dotenv
-# Android emulator
-VITE_API_URL=http://10.0.2.2:8000/api
-
-# Physical device on the same LAN (replace with the computer's LAN address)
-VITE_API_URL=http://192.168.1.10:8000/api
-```
-
-When testing from a physical device, bind the development API to the LAN
-interface (for example, `uvicorn app.main:app --host 0.0.0.0 --reload`) and
-allow the port through the development machine's firewall. If Android blocks
-cleartext HTTP on a particular device, use an HTTPS development tunnel; keep
-HTTP disabled for production.
-
-`localhost` inside an Android app refers to the Android device/emulator, not
-the development computer. For a release build, use a deployed HTTPS API URL,
-for example `https://api.example.com/api`, and include the web origin and
-`http://localhost` in the backend `ALLOWED_ORIGINS` value. Do not ship a
-development SQLite database, local upload directory, or backend secret in the
-APK.
-
-To create a debug APK, open the generated `frontend/android/` project in
-Android Studio and use **Build > Build App Bundle(s) / APK(s) > Build APK(s)**.
-Release APK/AAB builds must be signed with a keystore kept outside the
-repository; configure signing only in the local/CI Android build environment.
-
-#### Build and distribute an APK
-
-Before building a file for users, create `frontend/.env.production` with the
-public HTTPS API URL. Vite embeds this value into the Android web assets during
-the build:
-
-```dotenv
-VITE_API_URL=https://api.example.com/api
-```
-
-Build an installable debug APK from the repository root:
-
-```bash
-cd frontend
-npm install
-npm run android:sync
-cd android
-./gradlew assembleDebug
-```
-
-The resulting file is:
-
-```text
-frontend/android/app/build/outputs/apk/debug/app-debug.apk
-```
-
-This debug APK is suitable for internal testing and can be sent to Android
-users for sideloading after they allow installation from that source. It is
-not the right artifact for a public production release.
-
-For a production APK, create a signing keystore once and keep it outside the
-repository:
-
-```bash
-keytool -genkeypair -v \
-  -keystore campusshare-release.jks \
-  -alias campusshare \
-  -keyalg RSA -keysize 2048 -validity 10000
-```
-
-In Android Studio, choose **Build > Generate Signed Bundle / APK**, select
-**APK** (for direct download) or **Android App Bundle** (for Google Play), and
-select the keystore. The signed APK is generated under:
-
-```text
-frontend/android/app/build/outputs/apk/release/
-```
-
-Do not commit the `.jks` file, passwords, or signed build artifacts. For direct
-downloads, attach the signed APK to a GitHub Release, an organization website,
-or an internal distribution service. For Google Play, upload the signed AAB
-through Play Console; Play App Signing is recommended.
+> [!NOTE]
+> **Android Mobile App:** Experimental Android/Capacitor support is archived in the dedicated `AndroidApp` branch. The `main` branch is optimized strictly for web deployment.
 
 ## Configuration
 
@@ -333,7 +222,7 @@ through Play Console; Play App Signing is recommended.
 | `ALGORITHM` | `HS256` | JWT signing algorithm |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | `30` | Access-token lifetime |
 | `DATABASE_URL` | SQLite in `backend/campus_share.db` | SQLAlchemy database URL |
-| `ALLOWED_ORIGINS` | `http://localhost:5173,http://localhost` | Comma-separated browser and Android CORS origins |
+| `ALLOWED_ORIGINS` | `http://localhost:5173,http://localhost` | Comma-separated allowed CORS origins |
 | `UPLOAD_DIR` | `./uploads` | Directory for uploaded item images |
 
 Do not commit `.env` files, credentials, database files, uploads, or build

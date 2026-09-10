@@ -4,4 +4,3 @@ dist
 .env.*
 !.env.example
 !.env.production.example
-android
