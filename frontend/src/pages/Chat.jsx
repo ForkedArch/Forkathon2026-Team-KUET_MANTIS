@@ -6,14 +6,6 @@ import { useAuth } from '../context/AuthContext';
 import { formatDept } from '../utils/dept';
 import toast from 'react-hot-toast';
 
-// Default campus demo contacts to ensure users can always start a 1:1 chat instantly
-const CAMPUS_STUDENTS = [
-  { id: 2, name: 'Anik Sen', dept: 'EEE', roll: '021', karma: 110 },
-  { id: 3, name: 'Farhan Kabir', dept: 'ME', roll: '015', karma: 120 },
-  { id: 4, name: 'Sadia Afrin', dept: 'CE', roll: '045', karma: 105 },
-  { id: 1, name: 'Tanvir Rahman', dept: 'CSE', roll: '028', karma: 100 },
-];
-
 export default function Chat() {
   const { requestId } = useParams();
   const [searchParams] = useSearchParams();
@@ -28,6 +20,8 @@ export default function Chat() {
   const [activeUserId, setActiveUserId] = useState(targetUserId || null);
   const [message, setMessage] = useState('');
   const [localMessages, setLocalMessages] = useState([]);
+  // Mobile: 'list' shows sidebar, 'chat' shows message panel
+  const [mobileView, setMobileView] = useState(targetUserId || requestId ? 'chat' : 'list');
   const queryClient = useQueryClient();
   const bottomRef = useRef(null);
 
@@ -50,7 +44,7 @@ export default function Chat() {
     return Array.isArray(rawConversations) ? rawConversations : [];
   }, [rawConversations]);
 
-  // Fetch campus items to discover other students who have active listings
+  // Fetch campus items to discover other students
   const { data: rawItems = [] } = useQuery({
     queryKey: ['items-students'],
     queryFn: async () => {
@@ -64,24 +58,17 @@ export default function Chat() {
     staleTime: 1000 * 60 * 5,
   });
 
-  // Extract unique campus peers from items & fallback
+  // Extract unique campus peers from items
   const campusPeers = useMemo(() => {
     const peersMap = new Map();
-    // Add known campus peers
-    CAMPUS_STUDENTS.forEach((s) => {
-      if (!user || s.id !== user.id) {
-        peersMap.set(s.id, s);
-      }
-    });
-    // Add active listing owners
     if (Array.isArray(rawItems)) {
       rawItems.forEach((item) => {
-        if (item.owner && (!user || item.owner.id !== user.id)) {
+        if (item.owner && item.owner.id && (!user || item.owner.id !== user.id)) {
           peersMap.set(item.owner.id, {
             id: item.owner.id,
-            name: item.owner.name,
-            dept: item.owner.dept,
-            roll: item.owner.roll,
+            name: item.owner.name || 'KUET Student',
+            dept: item.owner.dept || 'KUET',
+            roll: item.owner.roll || '???',
             karma: item.owner.karma || 100,
           });
         }
@@ -90,21 +77,21 @@ export default function Chat() {
     return Array.from(peersMap.values());
   }, [rawItems, user]);
 
-  // If targetUserId is set via query param, ensure activeUserId matches
+  // Sync activeUserId from URL param
   useEffect(() => {
     if (targetUserId) {
       setActiveUserId(targetUserId);
+      setMobileView('chat');
     } else if (!activeUserId && !requestId && conversations.length > 0) {
       setActiveUserId(conversations[0].contact?.id);
     }
-  }, [targetUserId, conversations, activeUserId, requestId]);
+  }, [targetUserId, conversations]);
 
-  // Messages Query: Either by direct user or by request_id
+  // Messages Query
   const {
     data: rawMessages = [],
     isLoading: loadingMessages,
     isError,
-    error,
   } = useQuery({
     queryKey: ['messages', requestId || `user-${activeUserId}`],
     queryFn: async () => {
@@ -126,23 +113,19 @@ export default function Chat() {
     enabled: !!requestId || (!!activeUserId && !isNaN(activeUserId)),
   });
 
-  // Load local storage messages as safety fallback
+  // Load local storage messages as offline fallback
   useEffect(() => {
     if (activeUserId) {
       try {
         const stored = localStorage.getItem(`offline_chat_${activeUserId}`);
-        if (stored) {
-          setLocalMessages(JSON.parse(stored));
-        } else {
-          setLocalMessages([]);
-        }
+        setLocalMessages(stored ? JSON.parse(stored) : []);
       } catch {
         setLocalMessages([]);
       }
     }
   }, [activeUserId]);
 
-  // Combine server messages and local optimistic messages
+  // Combine server + local optimistic messages
   const messages = useMemo(() => {
     const serverMsgs = Array.isArray(rawMessages) ? rawMessages : [];
     const serverIds = new Set(serverMsgs.map((m) => m.id));
@@ -150,7 +133,7 @@ export default function Chat() {
     return [...serverMsgs, ...pendingLocal];
   }, [rawMessages, localMessages]);
 
-  // Fetch target user public profile if not yet in conversations list
+  // Resolve active contact info
   const activeConversation = conversations.find((c) => c.contact?.id === activeUserId);
   const knownPeer = campusPeers.find((p) => p.id === activeUserId);
 
@@ -164,9 +147,9 @@ export default function Chat() {
     activeConversation?.contact ||
     knownPeer ||
     targetUserProfile ||
-    (messages.length > 0 && messages[0].sender_id !== user?.id
-      ? messages[0].sender
-      : messages[0]?.recipient);
+    (messages.length > 0
+      ? (messages[0].sender_id !== user?.id ? messages[0].sender : messages[0].recipient)
+      : null);
 
   // Send Mutation with Optimistic & Offline Fallback
   const sendMutation = useMutation({
@@ -180,7 +163,7 @@ export default function Chat() {
           item_id: targetItemId ? parseInt(targetItemId, 10) : undefined,
         });
       } catch (err) {
-        // If network error, create local optimistic message
+        // Offline fallback
         const optimisticMsg = {
           id: `local_${Date.now()}`,
           sender_id: user?.id || 999,
@@ -191,9 +174,7 @@ export default function Chat() {
         };
         const updated = [...localMessages, optimisticMsg];
         setLocalMessages(updated);
-        try {
-          localStorage.setItem(`offline_chat_${activeUserId}`, JSON.stringify(updated));
-        } catch {}
+        try { localStorage.setItem(`offline_chat_${activeUserId}`, JSON.stringify(updated)); } catch {}
         return { data: optimisticMsg };
       }
     },
@@ -203,7 +184,7 @@ export default function Chat() {
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
     },
     onError: (err) => {
-      toast.error(err.response?.data?.detail || 'Message saved locally.');
+      toast.error(err.response?.data?.detail || 'Failed to send message');
     },
   });
 
@@ -218,103 +199,77 @@ export default function Chat() {
     }
   };
 
+  const selectConversation = (userId) => {
+    setActiveUserId(userId);
+    setMobileView('chat');
+    navigate(`/chat?user=${userId}`);
+  };
+
   const isChattingWithSelf = user && activeUserId && activeUserId === user.id;
-  const hasActiveInConversations = conversations.some((c) => c.contact?.id === activeUserId);
+  const hasActiveChat = !!activeUserId || !!requestId;
 
-  return (
-    <div className="h-[calc(100vh-5rem)] max-w-6xl mx-auto p-2 sm:p-4 flex gap-4">
-      {/* Left Sidebar: Conversations list & Quick Campus Student Picker */}
-      <div className="w-full md:w-80 bg-white border border-slate-200 rounded-2xl flex flex-col shrink-0 shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-          <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-            <span>💬</span> Messages
-          </h2>
-          <span className="text-xs bg-blue-100 text-blue-700 font-semibold px-2 py-0.5 rounded-full">
-            {conversations.length + (!hasActiveInConversations && activeUserId ? 1 : 0)}
-          </span>
-        </div>
+  // ── SIDEBAR PANEL ──────────────────────────────────────────────────────────
+  const SidebarPanel = () => (
+    <div className="flex flex-col h-full bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+      <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
+          💬 Messages
+        </h2>
+        <span className="text-xs bg-blue-100 text-blue-700 font-semibold px-2 py-0.5 rounded-full">
+          {conversations.length}
+        </span>
+      </div>
 
-        <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
-          {/* If actively chatting with a new contact not yet in history, show pin card at top */}
-          {!hasActiveInConversations && activeUserId && activeContact && (
-            <div className="w-full text-left p-3.5 flex items-start gap-3 bg-blue-50/90 border-l-4 border-blue-600">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold flex items-center justify-center shrink-0 text-sm shadow-sm">
-                {activeContact?.name?.[0]?.toUpperCase() || 'U'}
+      <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
+        {loadingConversations && conversations.length === 0 && (
+          <p className="text-sm text-slate-400 p-4 text-center">Loading...</p>
+        )}
+
+        {conversations.map((conv) => {
+          const isSelected = activeUserId === conv.contact?.id;
+          return (
+            <button
+              key={conv.contact?.id}
+              onClick={() => selectConversation(conv.contact?.id)}
+              className={`w-full text-left p-3.5 flex items-start gap-3 transition-colors hover:bg-slate-50 ${
+                isSelected ? 'bg-blue-50/80 border-l-4 border-blue-600' : ''
+              }`}
+            >
+              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold flex items-center justify-center shrink-0 text-sm">
+                {(conv.contact?.name?.[0] || 'U').toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold text-slate-800 truncate">
-                    {activeContact?.name || `Student #${activeUserId}`}
-                  </p>
-                  <span className="text-[10px] text-blue-700 font-bold bg-blue-100 px-1.5 py-0.5 rounded">
-                    Active
+                  <p className="text-sm font-semibold text-slate-800 truncate">{conv.contact?.name}</p>
+                  <span className="text-[10px] text-slate-400 shrink-0">
+                    {conv.last_message_at
+                      ? new Date(conv.last_message_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                      : ''}
                   </span>
                 </div>
-                <p className="text-xs font-semibold text-blue-600 truncate mt-0.5">
-                  {activeContact?.dept ? formatDept(activeContact.dept) : 'KUET Student'}
+                <p className="text-xs text-blue-600 font-semibold truncate mt-0.5">
+                  {conv.contact?.dept ? formatDept(conv.contact.dept) : 'KUET Student'}
                 </p>
-                <p className="text-xs text-slate-500 italic truncate mt-1">
-                  Type below to send message...
-                </p>
+                <p className="text-xs text-slate-500 truncate mt-0.5">{conv.last_message}</p>
               </div>
-            </div>
-          )}
+              {conv.unread_count > 0 && (
+                <span className="w-5 h-5 rounded-full bg-blue-600 text-white text-[10px] font-bold flex items-center justify-center shrink-0">
+                  {conv.unread_count}
+                </span>
+              )}
+            </button>
+          );
+        })}
 
-          {loadingConversations && conversations.length === 0 && !activeUserId && (
-            <p className="text-sm text-slate-400 p-4 text-center">Loading conversations...</p>
-          )}
+        {conversations.length === 0 && !loadingConversations && campusPeers.length === 0 && (
+          <p className="text-xs text-slate-400 p-4 text-center">No conversations yet. Browse items and send a request to start chatting!</p>
+        )}
 
-          {/* Active Conversations */}
-          {conversations.map((conv) => {
-            const isSelected = activeUserId === conv.contact?.id;
-            return (
-              <button
-                key={conv.contact?.id}
-                onClick={() => {
-                  setActiveUserId(conv.contact?.id);
-                  navigate(`/chat?user=${conv.contact?.id}`);
-                }}
-                className={`w-full text-left p-3.5 flex items-start gap-3 transition-colors hover:bg-slate-50 ${
-                  isSelected ? 'bg-blue-50/80 border-l-4 border-blue-600' : ''
-                }`}
-              >
-                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold flex items-center justify-center shrink-0 text-sm shadow-sm">
-                  {conv.contact?.name?.[0]?.toUpperCase() || 'U'}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-semibold text-slate-800 truncate">
-                      {conv.contact?.name}
-                    </p>
-                    <span className="text-[10px] text-slate-400 shrink-0">
-                      {conv.last_message_at
-                        ? new Date(conv.last_message_at).toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })
-                        : ''}
-                    </span>
-                  </div>
-                  <p className="text-xs font-semibold text-blue-600 truncate mt-0.5">
-                    {conv.contact?.dept ? formatDept(conv.contact.dept) : 'KUET Student'}
-                  </p>
-                  <p className="text-xs text-slate-600 truncate mt-1">
-                    {conv.last_message}
-                  </p>
-                </div>
-                {conv.unread_count > 0 && (
-                  <span className="w-5 h-5 rounded-full bg-blue-600 text-white text-[10px] font-bold flex items-center justify-center shrink-0">
-                    {conv.unread_count}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-
-          {/* Always Available: Quick Campus Directory */}
+        {/* Campus peers from listings */}
+        {campusPeers.length > 0 && (
           <div className="p-3 bg-slate-50/60">
             <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-1 mb-2">
-              KUET Campus Students
+              Campus Students
             </p>
             <div className="space-y-1">
               {campusPeers.map((peer) => {
@@ -322,29 +277,22 @@ export default function Chat() {
                 return (
                   <button
                     key={peer.id}
-                    onClick={() => {
-                      setActiveUserId(peer.id);
-                      navigate(`/chat?user=${peer.id}`);
-                    }}
+                    onClick={() => selectConversation(peer.id)}
                     className={`w-full text-left p-2 rounded-xl flex items-center gap-2.5 transition text-xs ${
                       isSelected
-                        ? 'bg-blue-600 text-white font-semibold shadow-xs'
+                        ? 'bg-blue-600 text-white font-semibold'
                         : 'hover:bg-slate-200/60 text-slate-700'
                     }`}
                   >
-                    <div
-                      className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                        isSelected ? 'bg-white text-blue-600' : 'bg-blue-100 text-blue-700'
-                      }`}
-                    >
-                      {peer.name[0]}
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                      isSelected ? 'bg-white text-blue-600' : 'bg-blue-100 text-blue-700'
+                    }`}>
+                      {(peer.name[0] || 'U').toUpperCase()}
                     </div>
                     <span className="truncate flex-1 font-medium">{peer.name}</span>
-                    <span
-                      className={`text-[10px] px-1.5 py-0.5 rounded ${
-                        isSelected ? 'bg-blue-700 text-blue-100' : 'bg-slate-100 text-slate-500'
-                      }`}
-                    >
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+                      isSelected ? 'bg-blue-700 text-blue-100' : 'bg-slate-100 text-slate-500'
+                    }`}>
                       {formatDept(peer.dept)}
                     </span>
                   </button>
@@ -352,150 +300,140 @@ export default function Chat() {
               })}
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Right Chat Panel */}
-      <div className="flex-1 bg-white border border-slate-200 rounded-2xl flex flex-col shadow-sm overflow-hidden">
-        {activeUserId || requestId ? (
-          <>
-            {/* Chat Header */}
-            <div className="p-3.5 px-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-sm shadow-2xs">
-                  {activeContact?.name?.[0]?.toUpperCase() || 'S'}
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-slate-800">
-                    {activeContact?.name || `Student #${activeUserId || ''}`}
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    {activeContact?.roll ? `Roll: ${activeContact.roll}` : 'KUET Student'}
-                    {activeContact?.dept && ` · ${formatDept(activeContact.dept)}`}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-200">
-                  ⚡ {activeContact?.karma || 100} Karma
-                </span>
-              </div>
-            </div>
-
-            {/* Messages Scroll Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/30">
-              {loadingMessages && messages.length === 0 && (
-                <div className="h-full flex items-center justify-center text-sm text-slate-400">
-                  Loading chat history...
-                </div>
-              )}
-
-              {isError && (
-                <div className="p-3 bg-amber-50 text-amber-800 rounded-xl text-xs text-center border border-amber-200">
-                  Server connecting... Messages will save locally and sync when back online.
-                </div>
-              )}
-
-              {!loadingMessages && messages.length === 0 && (
-                <div className="h-full flex flex-col items-center justify-center text-slate-400 text-sm py-12">
-                  <span className="text-3xl mb-2">👋</span>
-                  <p className="font-semibold text-slate-700">No messages yet with {activeContact?.name || 'this student'}.</p>
-                  <p className="text-xs text-slate-400 mt-1">Send a message below to coordinate handover or ask questions.</p>
-                </div>
-              )}
-
-              {messages.map((msg, idx) => {
-                const isMine = msg.sender_id === user?.id || String(msg.id).startsWith('local_');
-                return (
-                  <div
-                    key={msg.id || idx}
-                    className={`flex flex-col ${isMine ? 'items-end' : 'items-start'}`}
-                  >
-                    <div
-                      className={`px-4 py-2.5 rounded-2xl max-w-[80%] text-sm shadow-sm ${
-                        isMine
-                          ? 'bg-blue-600 text-white rounded-br-xs'
-                          : 'bg-white text-slate-800 border border-slate-200 rounded-bl-xs'
-                      }`}
-                    >
-                      <p className="break-words leading-relaxed">{msg.content}</p>
-                    </div>
-                    <span className="text-[10px] text-slate-400 px-1 mt-1">
-                      {msg.created_at
-                        ? new Date(msg.created_at).toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })
-                        : 'Just now'}
-                    </span>
-                  </div>
-                );
-              })}
-              <div ref={bottomRef} />
-            </div>
-
-            {/* Message Input Bar or Self Notification */}
-            {isChattingWithSelf ? (
-              <div className="p-4 border-t border-amber-100 bg-amber-50 text-amber-800 text-xs font-medium text-center">
-                ℹ️ You are viewing your own profile. 1:1 chat is for messaging other students.
-              </div>
-            ) : (
-              <form onSubmit={handleSend} className="p-3 border-t border-slate-100 flex gap-2 bg-white">
-                <input
-                  type="text"
-                  className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-                  placeholder={`Message ${activeContact?.name || 'student'}...`}
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  autoFocus
-                />
-                <button
-                  type="submit"
-                  disabled={sendMutation.isPending || !message.trim()}
-                  className="bg-blue-600 text-white px-5 py-2.5 rounded-xl hover:bg-blue-700 disabled:opacity-50 text-sm font-semibold transition shadow-sm"
-                >
-                  {sendMutation.isPending ? 'Sending...' : 'Send'}
-                </button>
-              </form>
-            )}
-          </>
-        ) : (
-          /* Empty State with Direct Student Picker */
-          <div className="h-full flex flex-col items-center justify-center text-slate-500 p-6">
-            <span className="text-4xl mb-3">💬</span>
-            <h3 className="font-bold text-slate-800 text-base">Select a Student to Chat</h3>
-            <p className="text-xs text-slate-400 mt-1 max-w-sm text-center">
-              Choose a student below to start an instant 1:1 campus chat:
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6 w-full max-w-md">
-              {campusPeers.map((peer) => (
-                <button
-                  key={peer.id}
-                  onClick={() => {
-                    setActiveUserId(peer.id);
-                    navigate(`/chat?user=${peer.id}`);
-                  }}
-                  className="p-3 bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 rounded-2xl flex items-center gap-3 text-left transition group shadow-2xs"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 font-bold flex items-center justify-center shrink-0 text-sm group-hover:bg-blue-600 group-hover:text-white transition">
-                    {peer.name[0]}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-bold text-slate-800 group-hover:text-blue-700 truncate">
-                      {peer.name}
-                    </p>
-                    <p className="text-[10px] text-slate-500 truncate">
-                      {formatDept(peer.dept)} · Roll {peer.roll}
-                    </p>
-                    <span className="text-[10px] text-amber-600 font-semibold block mt-0.5">
-                      ⚡ {peer.karma} Karma
-                    </span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
         )}
+      </div>
+    </div>
+  );
+
+  // ── CHAT PANEL ─────────────────────────────────────────────────────────────
+  const ChatPanel = () => (
+    <div className="flex flex-col h-full bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+      {hasActiveChat ? (
+        <>
+          {/* Header */}
+          <div className="p-3 px-4 border-b border-slate-100 flex items-center gap-3 bg-slate-50/50">
+            {/* Back button on mobile */}
+            <button
+              onClick={() => setMobileView('list')}
+              className="md:hidden p-1.5 rounded-lg hover:bg-slate-200 text-slate-600 shrink-0"
+              aria-label="Back to conversations"
+            >
+              ←
+            </button>
+            <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-sm shrink-0">
+              {(activeContact?.name?.[0] || 'S').toUpperCase()}
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-sm font-bold text-slate-800 truncate">
+                {activeContact?.name || (requestId ? `Request #${requestId}` : 'Select a student')}
+              </h3>
+              <p className="text-xs text-slate-500 truncate">
+                {activeContact?.roll ? `Roll: ${activeContact.roll}` : 'KUET Student'}
+                {activeContact?.dept && ` · ${formatDept(activeContact.dept)}`}
+              </p>
+            </div>
+            <span className="inline-flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-200 shrink-0">
+              ⚡ {activeContact?.karma || 100}
+            </span>
+          </div>
+
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/30">
+            {loadingMessages && messages.length === 0 && (
+              <div className="h-full flex items-center justify-center text-sm text-slate-400">
+                Loading messages...
+              </div>
+            )}
+
+            {isError && (
+              <div className="p-3 bg-amber-50 text-amber-800 rounded-xl text-xs text-center border border-amber-200">
+                Connection issue — messages will sync when back online.
+              </div>
+            )}
+
+            {!loadingMessages && messages.length === 0 && (
+              <div className="h-full flex flex-col items-center justify-center text-slate-400 text-sm py-12">
+                <span className="text-3xl mb-2">👋</span>
+                <p className="font-semibold text-slate-700">No messages yet.</p>
+                <p className="text-xs text-slate-400 mt-1">Send a message below to get started.</p>
+              </div>
+            )}
+
+            {messages.map((msg, idx) => {
+              const isMine = msg.sender_id === user?.id || String(msg.id).startsWith('local_');
+              return (
+                <div key={msg.id || idx} className={`flex flex-col ${isMine ? 'items-end' : 'items-start'}`}>
+                  <div className={`px-4 py-2.5 rounded-2xl max-w-[80%] text-sm shadow-sm ${
+                    isMine
+                      ? 'bg-blue-600 text-white rounded-br-sm'
+                      : 'bg-white text-slate-800 border border-slate-200 rounded-bl-sm'
+                  }`}>
+                    <p className="break-words leading-relaxed">{msg.content}</p>
+                  </div>
+                  <span className="text-[10px] text-slate-400 px-1 mt-1">
+                    {msg.created_at
+                      ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                      : 'Just now'}
+                  </span>
+                </div>
+              );
+            })}
+            <div ref={bottomRef} />
+          </div>
+
+          {/* Input */}
+          {isChattingWithSelf ? (
+            <div className="p-4 border-t border-amber-100 bg-amber-50 text-amber-800 text-xs font-medium text-center">
+              ℹ️ You cannot message yourself.
+            </div>
+          ) : (
+            <form onSubmit={handleSend} className="p-3 border-t border-slate-100 flex gap-2 bg-white">
+              <input
+                type="text"
+                className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                placeholder={`Message ${activeContact?.name?.split(' ')[0] || 'student'}...`}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                autoFocus
+              />
+              <button
+                type="submit"
+                disabled={sendMutation.isPending || !message.trim()}
+                className="bg-blue-600 text-white px-5 py-2.5 rounded-xl hover:bg-blue-700 disabled:opacity-50 text-sm font-semibold transition shadow-sm"
+              >
+                {sendMutation.isPending ? '...' : 'Send'}
+              </button>
+            </form>
+          )}
+        </>
+      ) : (
+        <div className="h-full flex flex-col items-center justify-center text-slate-500 p-6">
+          <span className="text-4xl mb-3">💬</span>
+          <h3 className="font-bold text-slate-800 text-base">Select a Conversation</h3>
+          <p className="text-xs text-slate-400 mt-1 text-center max-w-xs">
+            Choose a student from the list or message someone from your Borrow Requests.
+          </p>
+          {/* Mobile: show list button */}
+          <button
+            onClick={() => setMobileView('list')}
+            className="mt-4 md:hidden px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold"
+          >
+            View Conversations
+          </button>
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="h-full w-full p-2 sm:p-4 flex gap-4 overflow-hidden">
+      {/* Desktop: show both panels side by side */}
+      {/* Mobile: show only the active panel */}
+      <div className={`w-full md:w-72 shrink-0 ${mobileView === 'list' ? 'flex' : 'hidden'} md:flex flex-col`}>
+        <SidebarPanel />
+      </div>
+      <div className={`flex-1 min-w-0 ${mobileView === 'chat' ? 'flex' : 'hidden'} md:flex flex-col`}>
+        <ChatPanel />
       </div>
     </div>
   );
