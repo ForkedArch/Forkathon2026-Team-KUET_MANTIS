@@ -24,7 +24,7 @@ raw_origins = os.getenv(
     "ALLOWED_ORIGINS",
     "http://localhost:5173,http://localhost:3000,http://localhost",
 ).split(",")
-allowed_origins = [o.strip().rstrip("/") for o in raw_origins if o.strip()]
+allowed_origins = [o.strip().rstrip("/") for o in raw_origins if o.strip() and o.strip() != "*"]
 
 app.add_middleware(
     CORSMiddleware,

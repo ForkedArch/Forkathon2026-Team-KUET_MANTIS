@@ -1,5 +1,5 @@
 services:
-  # FastAPI Backend Service
+  # 1. FastAPI Backend Web Service
   - type: web
     name: campusshare-backend
     env: python
@@ -12,10 +12,26 @@ services:
     envVars:
       - key: ENVIRONMENT
         value: production
-      # SECRET_KEY, DATABASE_URL, ALGORITHM set in Render Dashboard — do NOT override here
       - key: ACCESS_TOKEN_EXPIRE_MINUTES
-        value: "30"
+        value: "1440"
       - key: UPLOAD_DIR
         value: ./uploads
       - key: ALLOWED_ORIGINS
-        value: https://campus-share-kuet-43qd.vercel.app,https://campus-share-kuet.vercel.app,http://localhost:5173,http://localhost:3000
+        value: https://*.onrender.com,https://*.vercel.app,http://localhost:5173,http://localhost:3000
+
+  # 2. React Frontend Static Site (100% Free on Render - No credit card required!)
+  - type: web
+    name: campusshare-frontend
+    env: static
+    region: oregon
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        value: https://forkathon2026-team-kuet-mantis-2.onrender.com/api
