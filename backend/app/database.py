@@ -7,6 +7,11 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 load_dotenv()
 
 db_url = os.getenv("DATABASE_URL", "sqlite:///./campus_share.db")
+
+# Some hosts give postgres:// — SQLAlchemy needs postgresql://
+if db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
+
 if db_url.startswith("sqlite:///./") or db_url == "sqlite:///campus_share.db":
     backend_dir = Path(__file__).resolve().parent.parent
     db_file = backend_dir / "campus_share.db"
@@ -14,9 +19,12 @@ if db_url.startswith("sqlite:///./") or db_url == "sqlite:///campus_share.db":
 else:
     SQLALCHEMY_DATABASE_URL = db_url
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
+# check_same_thread is SQLite-only. Postgres crashes if this is always set.
+connect_args = {}
+if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
+    connect_args = {"check_same_thread": False}
+
+engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args=connect_args)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
@@ -31,7 +39,13 @@ def get_db():
 
 
 def migrate_db():
+    """Create tables. SQLite keeps old PRAGMA migrations; Postgres only create_all."""
     Base.metadata.create_all(bind=engine)
+
+    # PRAGMA / sqlite_master only work on SQLite
+    if not SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
+        return
+
     with engine.connect() as conn:
         # 1. Users table migration
         user_cols = [r[1] for r in conn.exec_driver_sql("PRAGMA table_info(users)").fetchall()]
@@ -40,8 +54,9 @@ def migrate_db():
                 conn.exec_driver_sql("ALTER TABLE users ADD COLUMN karma INTEGER DEFAULT 100")
                 conn.commit()
 
-            # Check if UNIQUE (roll) constraint exists in users table definition
-            res = conn.exec_driver_sql("SELECT sql FROM sqlite_master WHERE type='table' AND name='users'").fetchone()
+            res = conn.exec_driver_sql(
+                "SELECT sql FROM sqlite_master WHERE type='table' AND name='users'"
+            ).fetchone()
             if res and "UNIQUE (roll)" in res[0]:
                 conn.exec_driver_sql("PRAGMA foreign_keys=off")
                 conn.exec_driver_sql("""
@@ -63,14 +78,23 @@ def migrate_db():
                 )
                 """)
                 conn.exec_driver_sql("""
-                INSERT INTO users_migrated (id, email, name, dept, batch, roll, hashed_password, is_verified, karma, trust_score, total_lends, total_borrows, created_at)
-                SELECT id, email, name, dept, batch, roll, hashed_password, is_verified, COALESCE(karma, 100), COALESCE(trust_score, 100.0), total_lends, total_borrows, created_at
+                INSERT INTO users_migrated (
+                    id, email, name, dept, batch, roll, hashed_password, is_verified,
+                    karma, trust_score, total_lends, total_borrows, created_at
+                )
+                SELECT id, email, name, dept, batch, roll, hashed_password, is_verified,
+                       COALESCE(karma, 100), COALESCE(trust_score, 100.0),
+                       total_lends, total_borrows, created_at
                 FROM users
                 """)
                 conn.exec_driver_sql("DROP TABLE users")
                 conn.exec_driver_sql("ALTER TABLE users_migrated RENAME TO users")
-                conn.exec_driver_sql("CREATE UNIQUE INDEX IF NOT EXISTS ix_users_email ON users (email)")
-                conn.exec_driver_sql("CREATE INDEX IF NOT EXISTS ix_users_id ON users (id)")
+                conn.exec_driver_sql(
+                    "CREATE UNIQUE INDEX IF NOT EXISTS ix_users_email ON users (email)"
+                )
+                conn.exec_driver_sql(
+                    "CREATE INDEX IF NOT EXISTS ix_users_id ON users (id)"
+                )
                 conn.exec_driver_sql("PRAGMA foreign_keys=on")
                 conn.commit()
 
@@ -84,7 +108,9 @@ def migrate_db():
             if "tags" not in item_cols:
                 conn.exec_driver_sql("ALTER TABLE items ADD COLUMN tags JSON DEFAULT '[]'")
             if "status" not in item_cols:
-                conn.exec_driver_sql("ALTER TABLE items ADD COLUMN status VARCHAR DEFAULT 'available'")
+                conn.exec_driver_sql(
+                    "ALTER TABLE items ADD COLUMN status VARCHAR DEFAULT 'available'"
+                )
             if "zone_id" not in item_cols:
                 conn.exec_driver_sql("ALTER TABLE items ADD COLUMN zone_id VARCHAR")
             conn.commit()
