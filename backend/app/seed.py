@@ -197,3 +197,4 @@ def seed_db(db: Session):
     db.add(msg1)
     db.add(msg2)
     db.commit()
+
