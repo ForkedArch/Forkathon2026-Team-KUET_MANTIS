@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">CampusShare KUET</string>
+    <string name="title_activity_main">CampusShare KUET</string>
+    <string name="package_name">ac.bd.kuet.campusshare</string>
+    <string name="custom_url_scheme">ac.bd.kuet.campusshare</string>
+</resources>
