@@ -277,6 +277,59 @@ Android Studio and use **Build > Build App Bundle(s) / APK(s) > Build APK(s)**.
 Release APK/AAB builds must be signed with a keystore kept outside the
 repository; configure signing only in the local/CI Android build environment.
 
+#### Build and distribute an APK
+
+Before building a file for users, create `frontend/.env.production` with the
+public HTTPS API URL. Vite embeds this value into the Android web assets during
+the build:
+
+```dotenv
+VITE_API_URL=https://api.example.com/api
+```
+
+Build an installable debug APK from the repository root:
+
+```bash
+cd frontend
+npm install
+npm run android:sync
+cd android
+./gradlew assembleDebug
+```
+
+The resulting file is:
+
+```text
+frontend/android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+This debug APK is suitable for internal testing and can be sent to Android
+users for sideloading after they allow installation from that source. It is
+not the right artifact for a public production release.
+
+For a production APK, create a signing keystore once and keep it outside the
+repository:
+
+```bash
+keytool -genkeypair -v \
+  -keystore campusshare-release.jks \
+  -alias campusshare \
+  -keyalg RSA -keysize 2048 -validity 10000
+```
+
+In Android Studio, choose **Build > Generate Signed Bundle / APK**, select
+**APK** (for direct download) or **Android App Bundle** (for Google Play), and
+select the keystore. The signed APK is generated under:
+
+```text
+frontend/android/app/build/outputs/apk/release/
+```
+
+Do not commit the `.jks` file, passwords, or signed build artifacts. For direct
+downloads, attach the signed APK to a GitHub Release, an organization website,
+or an internal distribution service. For Google Play, upload the signed AAB
+through Play Console; Play App Signing is recommended.
+
 ## Configuration
 
 ### Backend environment variables
