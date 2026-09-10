@@ -37,4 +37,17 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+api.interceptors.response.use(
+  (response) => {
+    // If a static host (like Vercel) rewrites an API route to index.html, it returns HTML with status 200
+    if (typeof response.data === 'string' && response.data.trim().startsWith('<!DOCTYPE') || (typeof response.data === 'string' && response.data.includes('<html'))) {
+      const errorMsg = 'Backend API unreachable: The server returned index.html. Please ensure VITE_API_URL is configured in your deployment settings.';
+      console.error(errorMsg);
+      return Promise.reject(new Error(errorMsg));
+    }
+    return response;
+  },
+  (error) => Promise.reject(error)
+);
+
 export default api;
