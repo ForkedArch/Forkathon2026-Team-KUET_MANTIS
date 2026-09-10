@@ -55,13 +55,23 @@ def decode_dept_code(dept_raw: str) -> str:
 
 
 def decode_kuet_email(email: str):
-    email_clean = email.strip().lower()
-    if not email_clean.endswith("@stud.kuet.ac.bd"):
+    if not email or not isinstance(email, str):
         raise HTTPException(
             status_code=400,
             detail="Only @stud.kuet.ac.bd email addresses are allowed"
         )
-    local_part = email_clean.split("@")[0]
+    email_clean = email.strip().lower()
+    if email_clean.count("@") != 1:
+        raise HTTPException(
+            status_code=400,
+            detail="Only @stud.kuet.ac.bd email addresses are allowed"
+        )
+    local_part, domain = email_clean.split("@")
+    if domain != "stud.kuet.ac.bd" or not local_part:
+        raise HTTPException(
+            status_code=400,
+            detail="Only @stud.kuet.ac.bd email addresses are allowed"
+        )
     match = re.search(r'(\d{2})(\d{2})(\d{3})$', local_part, re.ASCII)
     if not match:
         raise HTTPException(
@@ -69,6 +79,11 @@ def decode_kuet_email(email: str):
             detail="Invalid KUET student email: must end with 7-digit student ID: 2-digit batch, 2-digit dept, 3-digit roll (e.g. siddique2307010@stud.kuet.ac.bd)"
         )
     batch, dept_digits, roll = match.groups()
+    if dept_digits not in KUET_DEPT_MAP:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid KUET department code: '{dept_digits}' is not a recognized department code."
+        )
     dept = decode_dept_code(dept_digits)
     return batch, dept, roll
 
@@ -103,6 +118,8 @@ def register(user: schemas.UserRegister, db: Session = Depends(database.get_db))
         hashed_password=hashed,
         karma=100,
         trust_score=100.0,
+        total_lends=0,
+        total_borrows=0,
     )
     try:
         db.add(new_user)

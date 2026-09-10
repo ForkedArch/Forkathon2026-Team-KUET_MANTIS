@@ -75,7 +75,8 @@ function Login() {
       toast.success('Welcome back to CampusShare KUET!');
       navigate('/');
     } catch (err) {
-      toast.error(err.response?.data?.detail || 'Login failed');
+      const msg = err.response?.data?.detail || err.message || 'Login failed';
+      toast.error(msg, { duration: 6000 });
     } finally {
       setLoading(false);
     }
@@ -122,7 +123,7 @@ function Login() {
             disabled={loading}
             className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold rounded-lg shadow-sm transition-colors text-sm disabled:opacity-50"
           >
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? 'Connecting to server...' : 'Sign In'}
           </button>
         </form>
 
@@ -166,7 +167,7 @@ function Register() {
       toast.success('Registration successful! 100 Base Karma awarded. ⚡');
       navigate('/login');
     } catch (err) {
-      toast.error(err.response?.data?.detail || 'Registration failed');
+      toast.error(err.response?.data?.detail || err.message || 'Registration failed', { duration: 6000 });
     } finally {
       setLoading(false);
     }

@@ -12,7 +12,7 @@ db_url = os.getenv("DATABASE_URL", "sqlite:///./campus_share.db")
 if db_url.startswith("postgres://"):
     db_url = db_url.replace("postgres://", "postgresql://", 1)
 
-if db_url.startswith("sqlite:///./") or db_url == "sqlite:///campus_share.db":
+if db_url in ("sqlite:///./campus_share.db", "sqlite:///campus_share.db"):
     backend_dir = Path(__file__).resolve().parent.parent
     db_file = backend_dir / "campus_share.db"
     SQLALCHEMY_DATABASE_URL = f"sqlite:///{db_file}"
@@ -23,8 +23,17 @@ else:
 connect_args = {}
 if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
     connect_args = {"check_same_thread": False}
+    # Auto-create parent directory for SQLite files to prevent sqlite3.OperationalError
+    db_path_str = SQLALCHEMY_DATABASE_URL.replace("sqlite:///", "", 1)
+    if db_path_str and db_path_str != ":memory:" and not db_path_str.startswith("?"):
+        file_path = db_path_str.split("?")[0]
+        parent_dir = Path(file_path).resolve().parent
+        try:
+            parent_dir.mkdir(parents=True, exist_ok=True)
+        except Exception as e:
+            print(f"Notice: Could not auto-create database directory {parent_dir}: {e}")
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args=connect_args)
+engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args=connect_args, pool_pre_ping=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()

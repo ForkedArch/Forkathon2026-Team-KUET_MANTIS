@@ -24,6 +24,7 @@ export const API_ORIGIN = API_BASE.replace(/\/api\/?$/, '');
 
 const api = axios.create({
   baseURL: API_BASE,
+  timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -37,17 +38,49 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Helper: sleep
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
 api.interceptors.response.use(
   (response) => {
     // If a static host (like Vercel) rewrites an API route to index.html, it returns HTML with status 200
-    if (typeof response.data === 'string' && response.data.trim().startsWith('<!DOCTYPE') || (typeof response.data === 'string' && response.data.includes('<html'))) {
-      const errorMsg = 'Backend API unreachable: The server returned index.html. Please ensure VITE_API_URL is configured in your deployment settings.';
+    if (
+      typeof response.data === 'string' &&
+      (response.data.trim().startsWith('<!DOCTYPE') || response.data.includes('<html'))
+    ) {
+      const errorMsg =
+        'Backend API unreachable: The server returned index.html. Please ensure VITE_API_URL is configured in your deployment settings.';
       console.error(errorMsg);
       return Promise.reject(new Error(errorMsg));
     }
     return response;
   },
-  (error) => Promise.reject(error)
+  async (error) => {
+    const config = error.config;
+    // Retry on 404 or 503 (Render cold-start) up to 3 times with 3s delay
+    const status = error.response?.status;
+    const isRetryable = status === 404 || status === 503 || !error.response;
+    config._retryCount = config._retryCount || 0;
+
+    if (isRetryable && config._retryCount < 3) {
+      config._retryCount += 1;
+      console.warn(
+        `Backend may be waking up (attempt ${config._retryCount}/3). Retrying in 3s...`
+      );
+      await sleep(3000);
+      return api(config);
+    }
+
+    // Friendly error for persistent 404 (wrong URL or backend down)
+    if (status === 404) {
+      return Promise.reject(
+        new Error(
+          'Backend server not reachable. It may still be starting up — please wait a moment and try again.'
+        )
+      );
+    }
+    return Promise.reject(error);
+  }
 );
 
 export default api;
