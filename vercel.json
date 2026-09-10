@@ -4,11 +4,11 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://campusshare-backend.onrender.com/api/:path*"
+      "destination": "https://forkathon2026-team-kuet-mantis-2.onrender.com/api/:path*"
     },
     {
       "source": "/uploads/:path*",
-      "destination": "https://campusshare-backend.onrender.com/uploads/:path*"
+      "destination": "https://forkathon2026-team-kuet-mantis-2.onrender.com/uploads/:path*"
     },
     {
       "source": "/(.*)",
