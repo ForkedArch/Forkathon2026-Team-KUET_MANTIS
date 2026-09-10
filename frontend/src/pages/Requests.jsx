@@ -120,23 +120,27 @@ export default function Requests() {
                   </div>
                 </div>
 
-                {/* Handover & Chat Links */}
-                {req.status === 'accepted' && (
-                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                {/* Chat Link — available immediately after request, for any status */}
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                  {req.status === 'accepted' ? (
                     <Link
                       to={`/transaction/${req.id}`}
                       className="font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1"
                     >
-                      <span>🔄 Go to Handover & OTP Verification</span>
+                      <span>🔄 Go to Handover &amp; OTP Verification</span>
                     </Link>
-                    <Link
-                      to={`/chat/${req.id}`}
-                      className="text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg font-medium transition"
-                    >
-                      💬 Open Chat
-                    </Link>
-                  </div>
-                )}
+                  ) : (
+                    <span className="text-slate-400 italic text-[11px]">
+                      {req.status === 'pending' ? 'Awaiting response — coordinate via chat below' : `Request ${req.status}`}
+                    </span>
+                  )}
+                  <Link
+                    to={`/chat?user=${otherParty?.id}&item=${req.item?.id}`}
+                    className="text-slate-600 hover:text-blue-700 bg-slate-100 hover:bg-blue-50 hover:border-blue-200 border border-transparent px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5"
+                  >
+                    💬 Message {otherParty?.name?.split(' ')[0] || 'them'}
+                  </Link>
+                </div>
               </div>
             );
           })}
