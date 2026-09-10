@@ -425,9 +425,18 @@ def test_15_report_item(db, student_b, item):
 
 
 def test_16_login_register_decoder(db):
-    # Test valid student email decoding
+    # Test valid student email decoding to official department acronyms
     batch, dept, roll = auth_route.decode_kuet_email("tanvir2107001@stud.kuet.ac.bd")
-    assert batch == "21" and dept == "07" and roll == "001"
+    assert batch == "21" and dept == "CSE" and roll == "001"
+
+    _, dept_eee, _ = auth_route.decode_kuet_email("student2203050@stud.kuet.ac.bd")
+    assert dept_eee == "EEE"
+
+    _, dept_ce, _ = auth_route.decode_kuet_email("student2201010@stud.kuet.ac.bd")
+    assert dept_ce == "CE"
+
+    _, dept_me, _ = auth_route.decode_kuet_email("student2205020@stud.kuet.ac.bd")
+    assert dept_me == "ME"
 
     # Test rejection of external domain
     try:

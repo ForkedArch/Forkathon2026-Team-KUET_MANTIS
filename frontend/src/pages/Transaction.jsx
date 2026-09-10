@@ -4,6 +4,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { QRCodeSVG } from 'qrcode.react';
 import api from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { formatDept } from '../utils/dept';
 import toast from 'react-hot-toast';
 
 export default function Transaction() {
@@ -120,8 +121,8 @@ export default function Transaction() {
           </div>
 
           <div className="text-xs text-slate-600 space-y-1">
-            <p><strong>Owner:</strong> {request.owner?.name || 'KUET Student'} ({request.owner?.dept})</p>
-            <p><strong>Borrower:</strong> {request.borrower?.name || 'KUET Student'} ({request.borrower?.dept})</p>
+            <p><strong>Owner:</strong> {request.owner?.name || 'KUET Student'} ({formatDept(request.owner?.dept)})</p>
+            <p><strong>Borrower:</strong> {request.borrower?.name || 'KUET Student'} ({formatDept(request.borrower?.dept)})</p>
             <p><strong>Duration:</strong> {request.duration_hours} hours</p>
             {request.transaction && (
               <p><strong>Transaction Status:</strong> <span className="font-semibold text-emerald-600 capitalize">{request.transaction.status}</span></p>

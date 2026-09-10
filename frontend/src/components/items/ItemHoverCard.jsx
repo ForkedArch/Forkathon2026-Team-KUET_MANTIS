@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { API_ORIGIN } from '../../api/client';
+import { formatDept } from '../../utils/dept';
 
 /**
  * ItemHoverCard
@@ -26,7 +27,7 @@ export default function ItemHoverCard({
 
   const isBeacon = item.type === 'borrow';
   const ownerName = item.owner?.name || item.lender_name || 'KUET Student';
-  const ownerDept = item.owner?.dept || item.dept || 'Engineering';
+  const ownerDept = formatDept(item.owner?.dept || item.dept) || 'KUET';
   const ownerRoll = item.owner?.roll || item.roll || 'Verified';
   const ownerKarma = item.owner?.karma ?? item.karma ?? 100;
   const totalExchanges = (item.owner?.total_lends || 0) + (item.owner?.total_borrows || 0) || item.total_exchanges || 12;

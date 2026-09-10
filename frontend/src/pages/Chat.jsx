@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import api from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { formatDept } from '../utils/dept';
 import toast from 'react-hot-toast';
 
 export default function Chat() {
@@ -150,8 +151,8 @@ export default function Chat() {
                         : ''}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 truncate mt-0.5">
-                    {conv.contact?.dept ? `Dept ${conv.contact.dept}` : 'KUET Student'}
+                  <p className="text-xs font-semibold text-blue-600 truncate mt-0.5">
+                    {conv.contact?.dept ? formatDept(conv.contact.dept) : 'KUET Student'}
                   </p>
                   <p className="text-xs text-slate-600 truncate mt-1">
                     {conv.last_message}
@@ -184,7 +185,7 @@ export default function Chat() {
                   </h3>
                   <p className="text-xs text-slate-500">
                     {activeContact?.roll ? `Roll: ${activeContact.roll}` : 'KUET Campus Member'}
-                    {activeContact?.dept && ` · Dept ${activeContact.dept}`}
+                    {activeContact?.dept && ` · ${formatDept(activeContact.dept)}`}
                   </p>
                 </div>
               </div>

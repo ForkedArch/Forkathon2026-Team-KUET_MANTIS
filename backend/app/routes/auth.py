@@ -7,6 +7,53 @@ from .. import schemas, models, auth, database
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 
+# Official KUET Department Code Mapping
+KUET_DEPT_MAP = {
+    "01": "CE",    # Civil Engineering
+    "02": "EEE",   # Electrical & Electronic Engineering (sequential alias)
+    "03": "EEE",   # Electrical & Electronic Engineering
+    "04": "ME",    # Mechanical Engineering (sequential alias)
+    "05": "ME",    # Mechanical Engineering
+    "06": "ECE",   # Electronics & Communication Engineering (sequential alias)
+    "07": "CSE",   # Computer Science & Engineering
+    "08": "BME",   # Biomedical Engineering (sequential alias)
+    "09": "ECE",   # Electronics & Communication Engineering
+    "10": "TE",    # Textile Engineering (sequential alias)
+    "11": "IEM",   # Industrial Engineering & Management
+    "12": "ESE",   # Energy Science & Engineering (sequential alias)
+    "13": "ESE",   # Energy Science & Engineering
+    "14": "ChE",   # Chemical Engineering (sequential alias)
+    "15": "BME",   # Biomedical Engineering
+    "16": "Arch",  # Architecture (sequential alias)
+    "17": "URP",   # Urban & Regional Planning
+    "18": "URP",   # Urban & Regional Planning (sequential alias)
+    "19": "BECM",  # Building Engineering & Construction Management
+    "20": "BECM",  # Building Engineering & Construction Management (sequential alias)
+    "21": "MSE",   # Materials Science & Engineering
+    "22": "MSE",   # Materials Science & Engineering (sequential alias)
+    "23": "ChE",   # Chemical Engineering
+    "24": "ChE",   # Chemical Engineering (sequential alias)
+    "25": "MTE",   # Mechatronics Engineering
+    "26": "MTE",   # Mechatronics Engineering (sequential alias)
+    "27": "Arch",  # Architecture
+    "28": "Arch",  # Architecture (sequential alias)
+    "29": "LE",    # Leather Engineering
+    "31": "TE",    # Textile Engineering
+}
+
+
+def decode_dept_code(dept_raw: str) -> str:
+    """Converts a 2-digit department number into official KUET acronym (e.g., 07 -> CSE, 03 -> EEE)."""
+    cleaned = str(dept_raw).strip()
+    if cleaned in KUET_DEPT_MAP:
+        return KUET_DEPT_MAP[cleaned]
+    padded = cleaned.zfill(2)
+    if padded in KUET_DEPT_MAP:
+        return KUET_DEPT_MAP[padded]
+    # If already an abbreviation or unknown
+    return cleaned.upper()
+
+
 def decode_kuet_email(email: str):
     email_clean = email.strip().lower()
     if not email_clean.endswith("@stud.kuet.ac.bd"):
@@ -21,7 +68,8 @@ def decode_kuet_email(email: str):
             status_code=400,
             detail="Invalid KUET student email: must end with 7-digit student ID: 2-digit batch, 2-digit dept, 3-digit roll (e.g. siddique2307010@stud.kuet.ac.bd)"
         )
-    batch, dept, roll = match.groups()
+    batch, dept_digits, roll = match.groups()
+    dept = decode_dept_code(dept_digits)
     return batch, dept, roll
 
 

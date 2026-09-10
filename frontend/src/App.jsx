@@ -12,26 +12,7 @@ import Chat from './pages/Chat';
 import Transaction from './pages/Transaction';
 import Profile from './pages/Profile';
 import api from './api/client';
-
-/**
- * KUET Department Code Directory
- */
-const KUET_DEPTS = {
-  '01': { code: 'CE', name: 'Civil Engineering' },
-  '03': { code: 'EEE', name: 'Electrical & Electronic Engineering' },
-  '05': { code: 'ME', name: 'Mechanical Engineering' },
-  '07': { code: 'CSE', name: 'Computer Science & Engineering' },
-  '09': { code: 'ECE', name: 'Electronics & Communication Engineering' },
-  '11': { code: 'IEM', name: 'Industrial Engineering & Management' },
-  '13': { code: 'ESE', name: 'Energy Science & Engineering' },
-  '15': { code: 'BME', name: 'Biomedical Engineering' },
-  '17': { code: 'URP', name: 'Urban & Regional Planning' },
-  '19': { code: 'BECM', name: 'Building Engineering & Construction' },
-  '21': { code: 'MSE', name: 'Materials Science & Engineering' },
-  '23': { code: 'ChE', name: 'Chemical Engineering' },
-  '25': { code: 'MTE', name: 'Mechatronics Engineering' },
-  '27': { code: 'Arch', name: 'Architecture' }
-};
+import { KUET_DEPTS, formatDept } from './utils/dept';
 
 /**
  * KUET Email & Roll Decoder

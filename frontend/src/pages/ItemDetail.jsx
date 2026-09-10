@@ -5,6 +5,7 @@ import api, { API_ORIGIN } from '../api/client';
 import Loader from '../components/common/Loader';
 import RequestModal from '../components/requests/RequestModal';
 import { useAuth } from '../context/AuthContext';
+import { formatDept } from '../utils/dept';
 import toast from 'react-hot-toast';
 
 export default function ItemDetail() {
@@ -172,7 +173,7 @@ export default function ItemDetail() {
           <p className="text-xs text-slate-400 font-medium">LISTED BY STUDENT</p>
           <p className="text-base font-bold text-slate-800 mt-0.5">{item.owner?.name}</p>
           <p className="text-xs text-slate-500">
-            {item.owner?.dept ? `Dept ${item.owner.dept}` : 'KUET'} · Roll: {item.owner?.roll || 'N/A'}
+            {formatDept(item.owner?.dept)} · Roll: {item.owner?.roll || 'N/A'}
           </p>
         </div>
         {user && !isOwner && (

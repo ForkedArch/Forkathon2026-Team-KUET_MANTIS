@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import './GodsEyeMap.css';
+import { formatDept } from '../../utils/dept';
 
 // KUET Campus Geographic Center [Longitude, Latitude]
 export const KUET_CENTER = [89.5024, 22.9006];
@@ -289,7 +290,7 @@ export default function GodsEyeMap({
 
       const karmaScore = item.owner?.karma ?? item.karma ?? (item.trust_rating ? (item.trust_rating * 20).toFixed(0) : 100);
       const studentRoll = item.owner?.roll || item.roll || 'Verified';
-      const studentDept = item.owner?.dept || item.dept || 'KUET';
+      const studentDept = formatDept(item.owner?.dept || item.dept) || 'KUET';
       const totalExchanges = (item.owner?.total_lends || 0) + (item.owner?.total_borrows || 0) || item.total_exchanges || 12;
 
       const statusBadge = isBeacon

@@ -126,3 +126,20 @@ def migrate_db():
                 conn.exec_driver_sql("ALTER TABLE messages ADD COLUMN is_read BOOLEAN DEFAULT 0")
             conn.commit()
 
+        # 4. Migrate existing numeric department codes to official acronyms (e.g. 07 -> CSE, 03 -> EEE)
+        if user_cols and "dept" in user_cols:
+            dept_map = {
+                "01": "CE", "02": "EEE", "03": "EEE", "04": "ME", "05": "ME",
+                "06": "ECE", "07": "CSE", "08": "BME", "09": "ECE", "10": "TE",
+                "11": "IEM", "12": "ESE", "13": "ESE", "14": "ChE", "15": "BME",
+                "16": "Arch", "17": "URP", "18": "URP", "19": "BECM", "20": "BECM",
+                "21": "MSE", "22": "MSE", "23": "ChE", "24": "ChE", "25": "MTE",
+                "26": "MTE", "27": "Arch", "28": "Arch", "29": "LE", "31": "TE"
+            }
+            for code, name in dept_map.items():
+                conn.exec_driver_sql(
+                    "UPDATE users SET dept = ? WHERE dept = ? OR dept = ?",
+                    (name, code, str(int(code)))
+                )
+            conn.commit()
+

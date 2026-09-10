@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext';
 import api, { API_ORIGIN } from '../api/client';
 import { Link } from 'react-router-dom';
+import { formatDept } from '../utils/dept';
 
 export default function Profile() {
   const { user } = useAuth();
@@ -119,7 +120,7 @@ export default function Profile() {
               </div>
               <div className="flex justify-between py-1.5 border-b border-slate-100">
                 <span className="text-slate-500">Department</span>
-                <span className="font-semibold text-slate-900">{user.dept || 'CSE'}</span>
+                <span className="font-semibold text-slate-900">{formatDept(user.dept)}</span>
               </div>
               <div className="flex justify-between py-1.5 border-b border-slate-100">
                 <span className="text-slate-500">Batch</span>
@@ -209,7 +210,7 @@ export default function Profile() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-bold text-slate-800">{r.reviewer?.name}</span>
-                    <span className="text-xs text-slate-400">({r.reviewer?.dept})</span>
+                    <span className="text-xs text-slate-400">({formatDept(r.reviewer?.dept)})</span>
                   </div>
                   <div className="flex items-center text-amber-500 text-xs">
                     {'⭐'.repeat(r.rating)}

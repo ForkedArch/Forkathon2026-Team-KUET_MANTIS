@@ -40,6 +40,17 @@ class UserOut(UserBase):
     total_borrows: int = 0
     created_at: datetime
 
+    @field_validator("dept", mode="before")
+    @classmethod
+    def normalize_dept(cls, v):
+        if not v:
+            return v
+        cleaned = str(v).strip()
+        if cleaned.isdigit():
+            from .routes.auth import decode_dept_code
+            return decode_dept_code(cleaned)
+        return cleaned
+
 # Token
 class Token(BaseModel):
     access_token: str
@@ -152,6 +163,10 @@ class ItemOut(ItemBase):
             self.batch = self.owner.batch
             self.karma = getattr(self.owner, 'karma', 100)
             self.trust_rating = getattr(self.owner, 'trust_score', 100.0)
+
+        if self.dept and str(self.dept).strip().isdigit():
+            from .routes.auth import decode_dept_code
+            self.dept = decode_dept_code(self.dept)
 
         return self
 

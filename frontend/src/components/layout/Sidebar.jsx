@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { formatDept } from '../../utils/dept';
 
 // Clean inline SVGs for zero-dependency portability
 const MapIcon = () => (
@@ -164,7 +165,7 @@ export default function Sidebar({ isOpen, onClose }) {
                       {user.name}
                     </p>
                     <p className="text-[11px] text-slate-500 truncate">
-                      Roll: {user.roll || 'KUET'} · {user.dept || 'Stud'}
+                      Roll: {user.roll || 'KUET'} · {formatDept(user.dept)}
                     </p>
                   </div>
                 </div>

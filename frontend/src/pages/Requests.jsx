@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import api from '../api/client';
 import Loader from '../components/common/Loader';
 import { useAuth } from '../context/AuthContext';
+import { formatDept } from '../utils/dept';
 import toast from 'react-hot-toast';
 
 export default function Requests() {
@@ -71,8 +72,8 @@ export default function Requests() {
 
                     <p className="text-xs text-slate-600">
                       {isMyRequest
-                        ? `You requested from ${req.owner?.name || 'KUET Student'} (${req.owner?.dept || 'KUET'} • Roll ${req.owner?.roll || 'KUET'})`
-                        : `Request from ${req.borrower?.name || 'KUET Student'} (${req.borrower?.dept || 'KUET'} • Roll ${req.borrower?.roll || 'KUET'})`}
+                        ? `You requested from ${req.owner?.name || 'KUET Student'} (${formatDept(req.owner?.dept)} • Roll ${req.owner?.roll || 'KUET'})`
+                        : `Request from ${req.borrower?.name || 'KUET Student'} (${formatDept(req.borrower?.dept)} • Roll ${req.borrower?.roll || 'KUET'})`}
                     </p>
 
                     <div className="flex flex-wrap gap-2 text-xs text-slate-500 pt-1">
