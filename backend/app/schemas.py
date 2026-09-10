@@ -247,12 +247,15 @@ class MessageOut(BaseModel):
     recipient: Optional[UserOut] = None
 
 class ConversationOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     contact: UserOut
-    last_message: str
-    last_message_at: datetime
+    last_message: Optional[str] = None
+    last_message_at: Optional[datetime] = None
     unread_count: int = 0
     request_id: Optional[int] = None
     item_id: Optional[int] = None
+
 
 # Wishlist / Saved Items schemas
 class SavedItemOut(BaseModel):
