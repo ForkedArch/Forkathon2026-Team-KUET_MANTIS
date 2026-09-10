@@ -82,7 +82,13 @@ def get_conversations(
             if m.recipient_id == current_user.id and not m.is_read:
                 conversations[peer.id]["unread_count"] += 1
 
-    return sorted(conversations.values(), key=lambda c: c["last_message_at"] or datetime.min.replace(tzinfo=timezone.utc), reverse=True)
+    def _conv_time(c):
+        t = c.get("last_message_at")
+        if not t:
+            return datetime.min
+        return t.replace(tzinfo=None) if hasattr(t, "tzinfo") and t.tzinfo else t
+
+    return sorted(conversations.values(), key=_conv_time, reverse=True)
 
 
 @router.get("/direct/{other_user_id}", response_model=List[schemas.MessageOut])
