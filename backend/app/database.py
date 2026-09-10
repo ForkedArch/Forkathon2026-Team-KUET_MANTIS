@@ -39,11 +39,40 @@ def get_db():
 
 
 def migrate_db():
-    """Create tables. SQLite keeps old PRAGMA migrations; Postgres only create_all."""
+    """Create tables. Support both SQLite and PostgreSQL (Neon/Render)."""
     Base.metadata.create_all(bind=engine)
 
-    # PRAGMA / sqlite_master only work on SQLite
+    # PostgreSQL (Neon Database on Render) migrations using ADD COLUMN IF NOT EXISTS
     if not SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
+        with engine.connect() as conn:
+            postgres_alters = [
+                # Messages table
+                "ALTER TABLE messages ADD COLUMN IF NOT EXISTS recipient_id INTEGER",
+                "ALTER TABLE messages ADD COLUMN IF NOT EXISTS item_id INTEGER",
+                "ALTER TABLE messages ADD COLUMN IF NOT EXISTS is_read BOOLEAN DEFAULT FALSE",
+                # Users table
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS karma INTEGER DEFAULT 100",
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS trust_score FLOAT DEFAULT 100.0",
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS total_lends INTEGER DEFAULT 0",
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS total_borrows INTEGER DEFAULT 0",
+                # Items table
+                "ALTER TABLE items ADD COLUMN IF NOT EXISTS type VARCHAR DEFAULT 'lend'",
+                "ALTER TABLE items ADD COLUMN IF NOT EXISTS specs TEXT",
+                "ALTER TABLE items ADD COLUMN IF NOT EXISTS tags JSON DEFAULT '[]'",
+                "ALTER TABLE items ADD COLUMN IF NOT EXISTS status VARCHAR DEFAULT 'available'",
+                "ALTER TABLE items ADD COLUMN IF NOT EXISTS zone_id VARCHAR",
+                # Borrow requests & Transactions
+                "ALTER TABLE borrow_requests ADD COLUMN IF NOT EXISTS pickup_zone VARCHAR",
+                "ALTER TABLE borrow_requests ADD COLUMN IF NOT EXISTS purpose VARCHAR",
+                "ALTER TABLE transactions ADD COLUMN IF NOT EXISTS otp VARCHAR",
+                "ALTER TABLE transactions ADD COLUMN IF NOT EXISTS qr_code TEXT",
+            ]
+            for stmt in postgres_alters:
+                try:
+                    conn.exec_driver_sql(stmt)
+                except Exception as e:
+                    print(f"Postgres migration notice for '{stmt}': {e}")
+            conn.commit()
         return
 
     with engine.connect() as conn:
