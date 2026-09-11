@@ -20,11 +20,19 @@
 
 ## 🎥 Video Presentation & Demonstration
 
-> 📺 **Official Project Presentation Video:**  
-> ### [▶️ Click to Watch Our Video Presentation on YouTube ](https://youtu.be/eO9GICwQhOo)
->drive link: https://drive.google.com/file/d/1Fqm6yo4HoTpyOR-CpZ1VtCBaeMNS5k8D/view?usp=drivesdk
-> 
-> *(Note for Evaluators: Click the link above to watch our team walkthrough demonstrating problem validation, God's Eye Map discovery, instant Messages, and the OTP-verified borrow/return lifecycle).*
+https://github.com/user-attachments/assets/70729056-5be1-45f4-ae16-04bd8d48add5
+
+<p align="center">
+  <a href="https://youtu.be/eO9GICwQhOo" target="_blank">
+    <img src="https://img.shields.io/badge/YouTube-Watch%20on%20YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="Watch on YouTube" />
+  </a>
+  &nbsp;&nbsp;
+  <a href="https://drive.google.com/file/d/1Fqm6yo4HoTpyOR-CpZ1VtCBaeMNS5k8D/view?usp=drivesdk" target="_blank">
+    <img src="https://img.shields.io/badge/Google%20Drive-HD%20Video%20Mirror-4285F4?style=for-the-badge&logo=googledrive&logoColor=white" alt="Google Drive Mirror" />
+  </a>
+</p>
+
+> 💡 **For Evaluators & Visitors:** Press **Play** above to watch our team walkthrough directly inside GitHub! It demonstrates real student problem validation, live God's Eye Map discovery, instant 1:1 chat coordination, and the cryptographically secure OTP handover & Karma reward lifecycle. (External YouTube and Google Drive mirrors are also provided via the badges above).
 
 
 ## 👥 Team
@@ -32,7 +40,7 @@
 | Name | Roll | Department | GitHub | Contributions |
 |------|------|------------|--------|---------------|
 | **Anupoma Sharmin Anonya** | 2K2507009 | CSE | [@anonya25-1](https://github.com/anonya25-1) | Core Idea, Video Editing, Presentation Slides/Images/script, Testing, Review |
-| **Mugdha Sarkar Anik** | 2K2507030 | CSE | [@mugdha-sarkar81](https://github.com/mugdha-sarkar81) | Frontend, Architecture, Deployment, Presentation Voice,initial design |
+| **Mugdha Sarker Anik** | 2K2507030 | CSE | [@mugdha-sarkar81](https://github.com/mugdha-sarker81) | Frontend, Architecture, Deployment, Presentation Voice,initial design |
 | **Tanvir Siddique** | 2K2507028 | CSE | [@siddiquetanvir](https://github.com/siddiquetanvir) | Backend, Branding, Frontend Aesthetic, Map, Debugging, AI ,overall polishing,Readme|
 ---
 
