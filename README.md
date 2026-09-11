@@ -20,7 +20,7 @@
 ## 🎥 Video Presentation & Demonstration
 
 > 📺 **Official Project Presentation Video:**  
-> ### [▶️ Click to Watch Our Video Presentation on YouTube / Google Drive](https://youtu.be/YOUR_VIDEO_LINK_HERE)
+> ### [▶️ Click to Watch Our Video Presentation on YouTube / Google Drive](https://youtu.be/eO9GICwQhOo)
 >
 > *(Note for Evaluators: Click the link above to watch our team walkthrough demonstrating problem validation, God's Eye Map discovery, instant Messages, and the OTP-verified borrow/return lifecycle).*
 
