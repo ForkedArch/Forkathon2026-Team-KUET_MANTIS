@@ -213,10 +213,13 @@ export default function Home() {
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-white mb-2">Still have questions?</h2>
             <a
-              href="mailto:support@stud.kuet.ac.bd?subject=CampusShare%20KUET%20Support%20Inquiry"
-              className="mt-4 inline-block px-6 py-2.5 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white rounded-xl text-sm font-semibold shadow-sm transition-all"
+              href="mailto:siddique52507028@stud.kuet.ac.bd?subject=CampusShare%20KUET%20Support%20Inquiry"
+              className="mt-4 inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white rounded-xl text-sm font-semibold shadow-sm transition-all"
             >
-              Contact Student Support
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              <span>Contact Us</span>
             </a>
           </div>
           <div className="border-t border-slate-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
