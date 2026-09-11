@@ -105,9 +105,6 @@ export default function Sidebar({ isOpen, onClose }) {
               <MapIcon />
               <span>Map View</span>
             </div>
-            <span className="text-[11px] font-bold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">
-              God's Eye
-            </span>
           </NavLink>
 
           <NavLink to="/items" className={navLinkClasses} onClick={onClose}>
@@ -115,7 +112,6 @@ export default function Sidebar({ isOpen, onClose }) {
               <PackageIcon />
               <span>All Items</span>
             </div>
-            <span className="text-[11px] font-semibold text-slate-400">Browse</span>
           </NavLink>
 
           <NavLink to="/requests" className={navLinkClasses} onClick={onClose}>
@@ -137,9 +133,6 @@ export default function Sidebar({ isOpen, onClose }) {
               <UserIcon />
               <span>My Profile</span>
             </div>
-            <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200/60">
-              Karma
-            </span>
           </NavLink>
         </nav>
 
