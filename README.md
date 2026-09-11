@@ -7,7 +7,7 @@ to lend, broadcast items they need, find listings on a God's Eye campus map,
 and complete an exchange with a one-time OTP or QR code.
 
 Built by **KUET_MANTIS** for the ForkedArch Freshers Hackathon 2026.
-https://campus-share-kuet.vercel.app/
+https://forkathon2026-team-kuet-mantis-3.onrender.com/
 
 ## Why CampusShare?
 
