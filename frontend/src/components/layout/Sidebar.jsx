@@ -128,7 +128,7 @@ export default function Sidebar({ isOpen, onClose }) {
           <NavLink to="/chat" className={navLinkClasses} onClick={onClose}>
             <div className="flex items-center gap-3">
               <ChatIcon />
-              <span>1:1 Messages</span>
+              <span>Messages</span>
             </div>
           </NavLink>
 

@@ -184,7 +184,7 @@ export default function TopActionBar({
             <button
               onClick={() => navigate('/chat')}
               className="p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition-colors relative border border-transparent hover:border-slate-200"
-              title="1:1 Messages"
+              title="Messages"
               aria-label="Messages"
             >
               <ChatIcon className="w-5 h-5" />
