@@ -1,5 +1,9 @@
 {
 	"appId": "ac.bd.kuet.campusshare",
 	"appName": "CampusShare KUET",
-	"webDir": "dist"
+	"webDir": "dist",
+	"server": {
+		"url": "https://forkathon2026-team-kuet-mantis-3.onrender.com",
+		"cleartext": true
+	}
 }

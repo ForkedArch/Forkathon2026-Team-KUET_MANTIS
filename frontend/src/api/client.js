@@ -9,14 +9,12 @@ const isCapacitor = typeof window !== 'undefined' && (
   window.location.protocol === 'ionic:'
 );
 
-if (!rawBase) {
-  if (isCapacitor) {
-    rawBase = 'https://forkathon2026-team-kuet-mantis-2.onrender.com/api';
-  } else {
-    rawBase = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-      ? 'http://localhost:8000/api'
-      : 'https://forkathon2026-team-kuet-mantis-2.onrender.com/api';
-  }
+if (isCapacitor && (!rawBase || rawBase.includes('localhost') || rawBase.includes('127.0.0.1'))) {
+  rawBase = 'https://forkathon2026-team-kuet-mantis-2.onrender.com/api';
+} else if (!rawBase) {
+  rawBase = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:8000/api'
+    : 'https://forkathon2026-team-kuet-mantis-2.onrender.com/api';
 }
 
 // Remove trailing slashes
