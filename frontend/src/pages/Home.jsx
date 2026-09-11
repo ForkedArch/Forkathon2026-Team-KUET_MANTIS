@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api/client';
 import GodsEyeMap from '../components/map/GodsEyeMap';
 import { useDashboard } from '../components/layout/DashboardLayout';
+import Logo from '../components/common/Logo';
 
 export default function Home() {
   const {
@@ -189,15 +190,16 @@ export default function Home() {
         <div className="max-w-3xl mx-auto">
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-white mb-2">Still have questions?</h2>
-            <p className="text-sm">We're here to help! Our student support team is ready to assist you.</p>
-            <button className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-500 transition">Contact Support</button>
+            <a
+              href="mailto:support@stud.kuet.ac.bd?subject=CampusShare%20KUET%20Support%20Inquiry"
+              className="mt-4 inline-block px-6 py-2.5 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white rounded-xl text-sm font-semibold shadow-sm transition-all"
+            >
+              Contact Student Support
+            </a>
           </div>
           <div className="border-t border-slate-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
-            <div className="flex items-center gap-2 font-bold text-white">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white">K</div>
-              CampusShare KUET
-            </div>
-            <p>&copy; 2026 KUET_MANTIS. All rights reserved.</p>
+            <Logo size="sm" showText={true} textClassName="text-white" />
+            <p className="text-slate-500">&copy; 2026 KUET_MANTIS. All rights reserved.</p>
           </div>
         </div>
       </div>

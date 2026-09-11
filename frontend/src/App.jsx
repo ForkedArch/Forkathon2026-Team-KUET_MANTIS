@@ -13,6 +13,7 @@ import Transaction from './pages/Transaction';
 import Profile from './pages/Profile';
 import api from './api/client';
 import { KUET_DEPTS, formatDept } from './utils/dept';
+import Logo from './components/common/Logo';
 
 /**
  * KUET Email & Roll Decoder
@@ -85,10 +86,8 @@ function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 font-sans">
       <div className="w-full max-w-md bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-black text-xl flex items-center justify-center shadow-md shadow-blue-500/20">
-            K
-          </div>
+        <div className="flex items-center gap-3.5 mb-6">
+          <Logo size="lg" />
           <div>
             <h1 className="text-xl font-bold text-slate-900">CampusShare KUET</h1>
             <p className="text-xs text-slate-500">Sign in to your student account</p>
@@ -176,10 +175,8 @@ function Register() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 font-sans">
       <div className="w-full max-w-md bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-black text-xl flex items-center justify-center shadow-md shadow-blue-500/20">
-            K
-          </div>
+        <div className="flex items-center gap-3.5 mb-6">
+          <Logo size="lg" />
           <div>
             <h1 className="text-xl font-bold text-slate-900">Student Registration</h1>
             <p className="text-xs text-slate-500">Auto-decodes Batch, Dept & Roll with 100 Base Karma</p>

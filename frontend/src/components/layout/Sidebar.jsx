@@ -2,6 +2,7 @@ import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { formatDept } from '../../utils/dept';
+import Logo from '../common/Logo';
 
 // Clean inline SVGs for zero-dependency portability
 const MapIcon = () => (
@@ -81,22 +82,7 @@ export default function Sidebar({ isOpen, onClose }) {
       >
         {/* Branding Header */}
         <div className="p-5 border-b border-slate-200">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-black text-xl flex items-center justify-center shadow-md shadow-blue-500/20">
-              K
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-bold text-base tracking-tight text-slate-900">
-                  CampusShare
-                </span>
-                <span className="text-[10px] font-bold bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded">
-                  KUET
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 font-medium">Peer-to-Peer Campus Hub</p>
-            </div>
-          </div>
+          <Logo showText={true} />
 
           {/* 700m Campus Perimeter Badge */}
           <div className="mt-3.5 flex items-center gap-2 px-2.5 py-1 rounded-full bg-blue-50/80 border border-blue-200/60 text-blue-700 text-xs font-semibold">
