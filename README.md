@@ -27,14 +27,13 @@
 > *(Note for Evaluators: Click the link above to watch our team walkthrough demonstrating problem validation, God's Eye Map discovery, instant Messages, and the OTP-verified borrow/return lifecycle).*
 
 
-## 👥 Team :
+## 👥 Team
 
-| Name | Roll | Department | GitHub |
-| :--- | :--- | :--- | :--- |
-| **Anupoma Sharmin Anonya** | 2K2507009 | CSE | [@anonya25-1](https://github.com/anonya25-1) |
-| **Mugdha Sarkar Anik** | 2K2507030 | CSE | [@mugdha-sarkar81](https://github.com/mugdha-sarkar81) |
-| **Tanvir Siddique** | 2K2507028 | CSE | [@siddiquetanvir](https://github.com/siddiquetanvir) |
-
+| Name | Roll | Department | GitHub | Contributions |
+|------|------|------------|--------|---------------|
+| **Anupoma Sharmin Anonya** | 2K2507009 | CSE | [@anonya25-1](https://github.com/anonya25-1) | Core Idea, Video Editing, Presentation Slides/Images/script, Testing, Review |
+| **Mugdha Sarkar Anik** | 2K2507030 | CSE | [@mugdha-sarkar81](https://github.com/mugdha-sarkar81) | Frontend, Architecture, Deployment, Presentation Voice |
+| **Tanvir Siddique** | 2K2507028 | CSE | [@siddiquetanvir](https://github.com/siddiquetanvir) | Backend, Branding, Frontend Aesthetic, Map, Debugging, AI |
 ---
 
 ## ❓ Problem
