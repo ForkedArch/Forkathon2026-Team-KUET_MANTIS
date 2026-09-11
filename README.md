@@ -32,8 +32,8 @@
 | Name | Roll | Department | GitHub | Contributions |
 |------|------|------------|--------|---------------|
 | **Anupoma Sharmin Anonya** | 2K2507009 | CSE | [@anonya25-1](https://github.com/anonya25-1) | Core Idea, Video Editing, Presentation Slides/Images/script, Testing, Review |
-| **Mugdha Sarkar Anik** | 2K2507030 | CSE | [@mugdha-sarkar81](https://github.com/mugdha-sarkar81) | Frontend, Architecture, Deployment, Presentation Voice |
-| **Tanvir Siddique** | 2K2507028 | CSE | [@siddiquetanvir](https://github.com/siddiquetanvir) | Backend, Branding, Frontend Aesthetic, Map, Debugging, AI |
+| **Mugdha Sarkar Anik** | 2K2507030 | CSE | [@mugdha-sarkar81](https://github.com/mugdha-sarkar81) | Frontend, Architecture, Deployment, Presentation Voice,initial design |
+| **Tanvir Siddique** | 2K2507028 | CSE | [@siddiquetanvir](https://github.com/siddiquetanvir) | Backend, Branding, Frontend Aesthetic, Map, Debugging, AI ,overall polishing,Readme|
 ---
 
 ## ❓ Problem
