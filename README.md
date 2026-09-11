@@ -13,6 +13,7 @@
 [![Vite](https://img.shields.io/badge/Vite-5.4-646CFF?logo=vite&logoColor=white)](https://vitejs.dev)
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.4-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
 [![Neon Database](https://img.shields.io/badge/PostgreSQL-Neon%20Serverless-00E599?logo=postgresql&logoColor=white)](https://neon.tech)
+[![Android App](https://img.shields.io/badge/Android-Capacitor%20App-3DDC84?logo=android&logoColor=white)](https://github.com/ForkedArch/Forkathon2026-Team-KUET_MANTIS/tree/AndroidApp)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
 ---
@@ -26,14 +27,13 @@
 > *(Note for Evaluators: Click the link above to watch our team walkthrough demonstrating problem validation, God's Eye Map discovery, instant Messages, and the OTP-verified borrow/return lifecycle).*
 
 
-## 👥 Team :
+## 👥 Team
 
-| Name | Roll | Department | GitHub |
-| :--- | :--- | :--- | :--- |
-| **Anupoma Sharmin Anonya** | 2K2507009 | CSE | [@anonya25-1](https://github.com/anonya25-1) |
-| **Mugdha Sarkar Anik** | 2K2507030 | CSE | [@mugdha-sarkar81](https://github.com/mugdha-sarkar81) |
-| **Tanvir Siddique** | 2K2507028 | CSE | [@siddiquetanvir](https://github.com/siddiquetanvir) |
-
+| Name | Roll | Department | GitHub | Contributions |
+|------|------|------------|--------|---------------|
+| **Anupoma Sharmin Anonya** | 2K2507009 | CSE | [@anonya25-1](https://github.com/anonya25-1) | Core Idea, Video Editing, Presentation Slides/Images/script, Testing, Review |
+| **Mugdha Sarkar Anik** | 2K2507030 | CSE | [@mugdha-sarkar81](https://github.com/mugdha-sarkar81) | Frontend, Architecture, Deployment, Presentation Voice,initial design |
+| **Tanvir Siddique** | 2K2507028 | CSE | [@siddiquetanvir](https://github.com/siddiquetanvir) | Backend, Branding, Frontend Aesthetic, Map, Debugging, AI ,overall polishing,Readme|
 ---
 
 ## ❓ Problem
@@ -374,6 +374,52 @@ npm run dev
 - **Live Frontend App:** [https://forkathon2026-team-kuet-mantis-3.onrender.com](https://forkathon2026-team-kuet-mantis-3.onrender.com)
 - **Live Backend API:** [https://forkathon2026-team-kuet-mantis-2.onrender.com](https://forkathon2026-team-kuet-mantis-2.onrender.com)
 - **API Health Check:** [https://forkathon2026-team-kuet-mantis-2.onrender.com/health](https://forkathon2026-team-kuet-mantis-2.onrender.com/health)
+
+---
+
+## 📱 Android Mobile Application (Capacitor) :
+
+To empower KUET students with on-the-go item discovery, demand beacons, and portable mobile access right from their smartphones, **CampusShare KUET** includes a native Android mobile application powered by **Capacitor 8.5**.
+
+> 🌿 **Dedicated Mobile Branch:** The Android application codebase is maintained on its own isolated branch: [`AndroidApp`](https://github.com/ForkedArch/Forkathon2026-Team-KUET_MANTIS/tree/AndroidApp). This cleanly separates native Gradle builds, Android platform configurations, and APK compilation pipelines from the cloud web deployment.
+
+### ⚙️ Mobile Architecture & Capabilities
+- **Native Capacitor Bridge:** Bundles the modern React + Vite application with an optimized Android WebView, providing near-instant launch times and smooth transitions.
+- **Auto-Configured Cloud API Fallback:** The frontend API client automatically detects when running within the native Android Capacitor environment (`window.Capacitor`) and directs all requests to the live Render cloud backend (`https://forkathon2026-team-kuet-mantis-2.onrender.com/api`) without requiring manual `.env` tweaks.
+- **Hardware & Sensor Integrations:**
+  - **Camera & Storage:** Seamlessly snap and upload item photos directly from the phone camera or image gallery.
+  - **GPS Geolocation:** Drop pins and locate items with mobile device accuracy within the 700m KUET campus perimeter.
+  - **QR Code & OTP Verification:** Instant in-person handovers verified directly from the mobile screen.
+- **Cleartext & TLS Support:** Pre-configured `network_security_config.xml` enables both zero-friction local development over local Wi-Fi IP and hardened HTTPS for production cloud backends.
+
+### 🛠️ Building & Running the Android App
+
+To test or compile the Android APK locally:
+
+```bash
+# 1. Switch to the dedicated Android branch
+git checkout AndroidApp
+
+# 2. Install dependencies (including Capacitor CLI and Android runtime)
+cd frontend
+npm install
+
+# 3. Build the web assets and synchronize native Android assets
+npm run android:sync
+
+# 4. Launch in Android Studio (or run directly on an emulator/device)
+npm run android:open
+# or
+npm run android:run
+```
+
+| Parameter | Value |
+| :--- | :--- |
+| **Package Identifier** | `ac.bd.kuet.campusshare` |
+| **App Name** | **CampusShare KUET** |
+| **Target Android SDK** | **API 34 (Android 14)** |
+| **Minimum Android SDK** | **API 22 (Android 5.1 Lollipop)** |
+| **Architecture** | Hybrid Web-Native via Capacitor Android Runtime |
 
 ---
 
