@@ -239,8 +239,10 @@ CampusShare KUET is built with a decoupled client-server architecture designed f
 | **Working Production Deployment** | 100% deployed and fully operational: static frontend on Render CDN connected to Render backend and cloud-hosted Neon PostgreSQL. |
 
 ---
-FOLDER STRUCTURE:
-.campus-share-kuet
+### Folder Structure
+
+```text
+.
 ├── backend/
 │   ├── app/
 │   │   ├── data/
@@ -321,7 +323,6 @@ FOLDER STRUCTURE:
 ├── README.md
 ├── render.yaml
 └── vercel.json
-
 
 
 
