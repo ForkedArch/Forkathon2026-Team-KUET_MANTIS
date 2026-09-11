@@ -40,8 +40,8 @@ https://github.com/user-attachments/assets/70729056-5be1-45f4-ae16-04bd8d48add5
 | Name | Roll | Department | GitHub | Contributions |
 |------|------|------------|--------|---------------|
 | **Anupoma Sharmin Anonya** | 2K2507009 | CSE | [@anonya25-1](https://github.com/anonya25-1) | Core Idea, Video Editing, Presentation Slides/Images/script, Testing, Review |
-| **Mugdha Sarker Anik** | 2K2507030 | CSE | [@mugdha-sarkar81](https://github.com/mugdha-sarker81) | Frontend, Architecture, Deployment, Presentation Voice,initial design |
-| **Tanvir Siddique** | 2K2507028 | CSE | [@siddiquetanvir](https://github.com/siddiquetanvir) | Backend, Branding, Frontend Aesthetic, Map, Debugging, AI ,overall polishing,Readme|
+| **Mugdha Sarker Anik** | 2K2507030 | CSE | [@mugdha-sarkar81](https://github.com/mugdha-sarker81) | Frontend, Architecture, Deployment, Presentation Voice,Initial design |
+| **Tanvir Siddique** | 2K2507028 | CSE | [@siddiquetanvir](https://github.com/siddiquetanvir) | Version control ,Backend, Branding, Frontend Aesthetic, Map, Debugging, AI ,Overall polishing,Readme|
 ---
 
 ## ❓ Problem
