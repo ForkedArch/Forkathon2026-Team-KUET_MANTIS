@@ -39,7 +39,7 @@ export default function AddItem() {
       headers: { 'Content-Type': 'multipart/form-data' }
     }),
     onSuccess: () => {
-      toast.success(type === 'borrow' ? '🚨 Demand Beacon broadcasted!' : '🟢 Item listed successfully!');
+      toast.success(type === 'borrow' ? 'Demand Beacon broadcasted successfully!' : 'Item listed successfully!');
       queryClient.invalidateQueries({ queryKey: ['items'] });
       navigate('/');
     },
