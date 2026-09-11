@@ -2,6 +2,29 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import './GodsEyeMap.css';
 import { formatDept } from '../../utils/dept';
 
+// Vector SVG definitions for map pins (replacing old emojis)
+const MAP_MARKER_SVGS = {
+  beacon: `<svg width="17" height="17" viewBox="0 0 20 20" fill="#ffffff"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/></svg>`,
+  calculator: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2"><rect x="4" y="2" width="16" height="20" rx="3"/><rect x="7" y="5" width="10" height="4" rx="1"/><circle cx="8" cy="12" r="1" fill="#ffffff"/><circle cx="12" cy="12" r="1" fill="#ffffff"/><circle cx="16" cy="12" r="1" fill="#ffffff"/><circle cx="8" cy="16" r="1" fill="#ffffff"/><circle cx="12" cy="16" r="1" fill="#ffffff"/><circle cx="16" cy="16" r="1" fill="#ffffff"/></svg>`,
+  power: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>`,
+  lab: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>`,
+  cables: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>`,
+  books: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>`,
+  stationery: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>`,
+  other: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>`
+};
+
+function getCategoryMarkerSVG(catStr) {
+  const cat = (catStr || '').toLowerCase();
+  if (cat.includes('calc')) return MAP_MARKER_SVGS.calculator;
+  if (cat.includes('elect') || cat.includes('charg') || cat.includes('power')) return MAP_MARKER_SVGS.power;
+  if (cat.includes('lab')) return MAP_MARKER_SVGS.lab;
+  if (cat.includes('cable') || cat.includes('adapt')) return MAP_MARKER_SVGS.cables;
+  if (cat.includes('book') || cat.includes('note')) return MAP_MARKER_SVGS.books;
+  if (cat.includes('station') || cat.includes('draw')) return MAP_MARKER_SVGS.stationery;
+  return MAP_MARKER_SVGS.other;
+}
+
 // KUET Campus Geographic Center [Longitude, Latitude]
 export const KUET_CENTER = [89.5024, 22.9006];
 export const CAMPUS_PERIMETER_RADIUS = 700; // 700 meters perimeter ring
@@ -260,18 +283,11 @@ export default function GodsEyeMap({
         inner.innerHTML = `
           <div class="beacon-pulse"></div>
           <div class="beacon-pulse-inner"></div>
-          <span>⚡</span>
+          <span style="display:flex;align-items:center;justify-content:center;">${MAP_MARKER_SVGS.beacon}</span>
         `;
       } else {
-        let icon = '📦';
-        const cat = (item.category || '').toLowerCase();
-        if (cat.includes('calc')) icon = '🧮';
-        else if (cat.includes('elect') || cat.includes('charg') || cat.includes('power')) icon = '🔌';
-        else if (cat.includes('lab')) icon = '🔬';
-        else if (cat.includes('cable') || cat.includes('adapt')) icon = '🔗';
-        else if (cat.includes('book') || cat.includes('note')) icon = '📖';
-        else if (cat.includes('station') || cat.includes('draw')) icon = '📐';
-        inner.innerHTML = `<span>${icon}</span>`;
+        const svg = getCategoryMarkerSVG(item.category);
+        inner.innerHTML = `<span style="display:flex;align-items:center;justify-content:center;">${svg}</span>`;
       }
       el.appendChild(inner);
 
@@ -299,10 +315,10 @@ export default function GodsEyeMap({
       const totalExchanges = (item.owner?.total_lends || 0) + (item.owner?.total_borrows || 0) || item.total_exchanges || 12;
 
       const statusBadge = isBeacon
-        ? '<span class="popup-status-badge status-badge-beacon">🚨 Active Demand Beacon</span>'
-        : '<span class="popup-status-badge status-badge-lend">🟢 Available to Borrow</span>';
+        ? '<span class="popup-status-badge status-badge-beacon"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#ffffff;margin-right:5px;"></span>Active Demand Beacon</span>'
+        : '<span class="popup-status-badge status-badge-lend"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#a7f3d0;margin-right:5px;"></span>Available to Borrow</span>';
 
-      const actionBtnText = isBeacon ? '⚡ Offer to Lend This Item' : '🤝 Request to Borrow';
+      const actionBtnText = isBeacon ? 'Offer to Lend This Item' : 'Request to Borrow';
 
       const popupNode = document.createElement('div');
       popupNode.className = 'popup-card';
@@ -328,7 +344,12 @@ export default function GodsEyeMap({
               </div>
             </div>
             <div class="popup-trust-box">
-              <div class="popup-trust-score">⚡ ${karmaScore} Karma</div>
+              <div class="popup-trust-score" style="display:flex;align-items:center;gap:4px;">
+                <svg width="12" height="12" viewBox="0 0 20 20" fill="#f59e0b">
+                  <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+                </svg>
+                <span>${karmaScore} Karma</span>
+              </div>
               <div class="popup-trust-label">${totalExchanges} Exchanges</div>
             </div>
           </div>
@@ -508,8 +529,14 @@ export default function GodsEyeMap({
 
       {/* Pinpoint Guidance Top Banner */}
       {isPinMode && (
-        <div id="pin-banner" className="pin-banner">
-          <span>📍 Click anywhere on KUET campus map to drop item exchange location</span>
+        <div id="pin-banner" className="pin-banner flex items-center justify-between">
+          <span className="flex items-center gap-1.5">
+            <svg className="w-4 h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span>Click anywhere on KUET campus map to drop item exchange location</span>
+          </span>
           <button
             id="btn-cancel-pin"
             type="button"
@@ -525,33 +552,44 @@ export default function GodsEyeMap({
       <div className="map-hud">
         <div className="hud-card">
           <span className="hud-label">Layers</span>
-          <div className="hud-layer-toggle">
+          <div className="hud-layer-toggle flex items-center gap-1">
             <button
               id="toggle-ring-btn"
               type="button"
-              className={`layer-btn ${showPerimeterRing ? 'active' : ''}`}
+              className={`layer-btn flex items-center gap-1.5 ${showPerimeterRing ? 'active' : ''}`}
               onClick={() => setShowPerimeterRing(prev => !prev)}
               title="Toggle 700m Campus Perimeter Ring"
             >
-              ⭕ 700m Ring
+              <svg className="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="8" strokeWidth="2.5" strokeDasharray="3 3" />
+              </svg>
+              <span>700m Ring</span>
             </button>
             <button
               id="toggle-beacons-btn"
               type="button"
-              className={`layer-btn ${showBeacons ? 'active' : ''}`}
+              className={`layer-btn flex items-center gap-1.5 ${showBeacons ? 'active' : ''}`}
               onClick={() => setShowBeacons(prev => !prev)}
               title="Toggle Borrow Demand Beacons"
             >
-              🚨 Beacons
+              <svg className="w-3.5 h-3.5 text-rose-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+              </svg>
+              <span>Beacons</span>
             </button>
             <button
               id="recenter-kuet-btn"
               type="button"
-              className="layer-btn"
+              className="layer-btn flex items-center gap-1.5"
               onClick={handleRecenter}
               title="Recenter to KUET Campus"
             >
-              🎯 Recenter
+              <svg className="w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="8" strokeWidth="2" />
+                <path strokeLinecap="round" strokeWidth="2" d="M12 2v4m0 12v4M2 12h4m12 0h4" />
+                <circle cx="12" cy="12" r="2" fill="currentColor" />
+              </svg>
+              <span>Recenter</span>
             </button>
           </div>
         </div>
