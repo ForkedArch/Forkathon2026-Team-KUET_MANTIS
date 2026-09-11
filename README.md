@@ -39,9 +39,9 @@ https://github.com/user-attachments/assets/70729056-5be1-45f4-ae16-04bd8d48add5
 
 | Name | Roll | Department | GitHub | Contributions |
 |------|------|------------|--------|---------------|
-| **Anupoma Sharmin Anonya** | 2K2507009 | CSE | [@anonya25-1](https://github.com/anonya25-1) | Core Idea, Video Editing, Presentation Slides/Images/script, Testing, Review |
+| **Anupoma Sharmin Anonya** | 2K2507009 | CSE | [@anonya25-1](https://github.com/anonya25-1) | Slides, Review |
 | **Mugdha Sarker Anik** | 2K2507030 | CSE | [@mugdha-sarker81](https://github.com/mugdha-sarker81) | Frontend, Architecture, Deployment, Presentation Voice,Initial design, Promotion Video |
-| **Tanvir Siddique** | 2K2507028 | CSE | [@siddiquetanvir](https://github.com/siddiquetanvir) | Version control ,Backend, Branding, Frontend Aesthetic, Map, Debugging, AI ,Overall polishing,Readme|
+| **Tanvir Siddique** | 2K2507028 | CSE | [@siddiquetanvir](https://github.com/siddiquetanvir) | Version control, Backend, Branding, Frontend Aesthetic, Map, Debugging, AI ,Overall polishing,Readme|
 ---
 
 ## ❓ Problem
@@ -85,7 +85,7 @@ Because students have no structured way to discover who owns what nearby, they a
 As 1st-year CSE students residing and studying at KUET, our team (Tanvir, Anik, and Anupoma) has directly experienced this frustration:
 - **Tanvir** was once working on a critical sessional project at the Central Library when his laptop charger failed, leaving him scrambling across halls without knowing anyone in nearby rooms who had a compatible Type-C power brick. He also saw many of his classmates looking for scientific calculator and lab items but there were no database to track it or no trusted agents to go look for.
 - **Anik** had to spend hundreds of takas to purchase specialized tools for engineering that were used for only two laboratory sessions and never touched again.
-- **Anupoma** witnessed multiple batchmates panic before midterm exams because their calculators ran out of battery or were missing the required matrix-solving functions approved by examiners.
+- **Anupoma** witnessed multiple batchmates panic before midterm exams because they didn't have calculators. 
 
 #### **Our Main Goal:**
 Our objective is to transform the KUET campus into a zero-waste, high-trust sharing community. **CampusShare KUET** provides an intuitive, real-time peer-to-peer sharing ecosystem that connects student demand with idle campus resources. By integrating verified academic student credentials, geospatial campus mapping ("God's Eye Map"), direct 1:1 coordination, and a self-governing Karma Protocol with cryptographic OTP verification, we solve the core challenge: **making borrowing feel simple, safe, and organized.**
