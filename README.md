@@ -376,6 +376,21 @@ npm run dev
 
 ---
 
+## 🚀 Future Improvements
+
+- **Real-time notifications** — WebSocket-based live updates for borrow requests, chat messages, and handover status instead of polling.
+- **Push notifications** — Browser / mobile push alerts for request acceptance, OTP ready, and return reminders.
+- **Advanced search & filters** — Full-text search, distance-based ranking, availability calendar, and saved search preferences.
+- **Trust & reputation system** — Expand KUET Karma with peer reviews, dispute resolution, and visible trust badges.
+- **Offline / PWA support** — Progressive Web App so students can browse listings and draft requests with limited connectivity.
+- **Native mobile apps** — Capacitor / React Native builds for Android and iOS (experimental work already started on the `AndroidApp` branch).
+- **Multi-campus expansion** — Configurable campus boundaries and landmark data so the platform can serve other universities.
+- **Analytics dashboard** — Admin insights on popular items, peak exchange times, and zone activity.
+- **Image moderation & optimization** — Automatic compression, CDN delivery, and basic content checks for uploaded photos.
+- **Scheduled availability** — Let owners mark items available only on specific days or time windows.
+
+
+
 ## 📜 License :
 This project is open-sourced under the [MIT License](./LICENSE).
 
