@@ -183,13 +183,28 @@ export default function AddItemModal({
         
         {/* Modal Header */}
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
-          <div>
-            <h2 className="text-lg font-bold text-slate-900">
-              {type === 'borrow' ? '🚨 Broadcast Demand Beacon' : '📦 List Item for Sharing'}
-            </h2>
-            <p className="text-xs text-slate-500">
-              Share with fellow KUET students inside the 700m campus boundary
-            </p>
+          <div className="flex items-center gap-3">
+            <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+              type === 'borrow' ? 'bg-rose-100 text-rose-600' : 'bg-blue-100 text-blue-600'
+            }`}>
+              {type === 'borrow' ? (
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+              )}
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-slate-900">
+                {type === 'borrow' ? 'Broadcast Demand Beacon' : 'List Item for Sharing'}
+              </h2>
+              <p className="text-xs text-slate-500">
+                Share with fellow KUET students inside the 700m campus boundary
+              </p>
+            </div>
           </div>
           <button
             type="button"
@@ -213,25 +228,29 @@ export default function AddItemModal({
                 id="type-btn-lend"
                 type="button"
                 onClick={() => setType('lend')}
-                className={`py-2 px-4 rounded-lg text-xs font-bold transition ${
+                className={`py-2 px-4 rounded-lg text-xs font-bold transition flex items-center justify-center gap-2 ${
                   type === 'lend'
                     ? 'bg-emerald-600 text-white shadow-sm'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                🟢 I have an item to Lend
+                <span className={`w-2 h-2 rounded-full ${type === 'lend' ? 'bg-white' : 'bg-emerald-500'}`}></span>
+                <span>I have an item to Lend</span>
               </button>
               <button
                 id="type-btn-borrow"
                 type="button"
                 onClick={() => setType('borrow')}
-                className={`py-2 px-4 rounded-lg text-xs font-bold transition ${
+                className={`py-2 px-4 rounded-lg text-xs font-bold transition flex items-center justify-center gap-2 ${
                   type === 'borrow'
                     ? 'bg-rose-600 text-white shadow-sm'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                🚨 I need to Borrow (Beacon)
+                <svg className={`w-3.5 h-3.5 ${type === 'borrow' ? 'text-white' : 'text-rose-600'}`} fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                </svg>
+                <span>I need to Borrow (Beacon)</span>
               </button>
             </div>
           </div>
@@ -307,7 +326,11 @@ export default function AddItemModal({
             <div className="flex items-center justify-between">
               <div>
                 <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                  📍 Campus Location & Pinpoint
+                  <svg className="w-4 h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span>Campus Location & Pinpoint</span>
                 </span>
                 <span className="text-[11px] text-slate-500 block">
                   Choose a landmark or click anywhere on the KUET campus map
@@ -319,7 +342,10 @@ export default function AddItemModal({
                 onClick={handlePinpointClick}
                 className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center gap-1.5"
               >
-                <span>📍</span>
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
                 <span>Pinpoint on Map</span>
               </button>
             </div>
@@ -413,7 +439,23 @@ export default function AddItemModal({
                   : 'bg-blue-600 hover:bg-blue-700'
               }`}
             >
-              {mutation.isPending ? 'Publishing...' : (type === 'borrow' ? '🚨 Broadcast Beacon' : '🟢 List Item')}
+              {mutation.isPending ? (
+                'Publishing...'
+              ) : type === 'borrow' ? (
+                <>
+                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                  </svg>
+                  <span>Broadcast Beacon</span>
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
+                  </svg>
+                  <span>List Item</span>
+                </>
+              )}
             </button>
           </div>
         </form>
