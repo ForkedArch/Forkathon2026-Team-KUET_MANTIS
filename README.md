@@ -7,13 +7,14 @@
 > ⚡ **Live API Documentation:** [https://forkathon2026-team-kuet-mantis-2.onrender.com/docs](https://forkathon2026-team-kuet-mantis-2.onrender.com/docs)
 
 [![Live Demo](https://img.shields.io/badge/Render-Live%20Demo-brightgreen?logo=render)](https://forkathon2026-team-kuet-mantis-3.onrender.com)
+[![Android APK](https://img.shields.io/badge/Android%20APK-v1.0.0%20Release-orange?logo=android&logoColor=white)](https://github.com/ForkedArch/Forkathon2026-Team-KUET_MANTIS/releases)
+[![Android App Branch](https://img.shields.io/badge/Android-Capacitor%20App-3DDC84?logo=android&logoColor=white)](https://github.com/ForkedArch/Forkathon2026-Team-KUET_MANTIS/tree/AndroidApp)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)](https://python.org)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://react.dev)
 [![Vite](https://img.shields.io/badge/Vite-5.4-646CFF?logo=vite&logoColor=white)](https://vitejs.dev)
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.4-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
 [![Neon Database](https://img.shields.io/badge/PostgreSQL-Neon%20Serverless-00E599?logo=postgresql&logoColor=white)](https://neon.tech)
-[![Android App](https://img.shields.io/badge/Android-Capacitor%20App-3DDC84?logo=android&logoColor=white)](https://github.com/ForkedArch/Forkathon2026-Team-KUET_MANTIS/tree/AndroidApp)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
 ---
@@ -389,20 +390,37 @@ npm run dev
 
 To empower KUET students with on-the-go item discovery, demand beacons, and portable mobile access right from their smartphones, **CampusShare KUET** includes a native Android mobile application powered by **Capacitor 8.5**.
 
+<p align="center">
+  <a href="https://github.com/ForkedArch/Forkathon2026-Team-KUET_MANTIS/releases" target="_blank">
+    <img src="https://img.shields.io/badge/Download-Android%20APK%20(v1.0.0)-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Download Android APK" />
+  </a>
+  &nbsp;&nbsp;
+  <a href="https://github.com/ForkedArch/Forkathon2026-Team-KUET_MANTIS/tree/AndroidApp" target="_blank">
+    <img src="https://img.shields.io/badge/GitHub-AndroidApp%20Branch-181717?style=for-the-badge&logo=github&logoColor=white" alt="AndroidApp Branch" />
+  </a>
+</p>
+
 > 🌿 **Dedicated Mobile Branch:** The Android application codebase is maintained on its own isolated branch: [`AndroidApp`](https://github.com/ForkedArch/Forkathon2026-Team-KUET_MANTIS/tree/AndroidApp). This cleanly separates native Gradle builds, Android platform configurations, and APK compilation pipelines from the cloud web deployment.
+
+### 📥 Sideload Installation on Physical Android Devices
+Evaluators and students can test the live native app on any physical Android smartphone or emulator without setting up developer tools:
+1. Download **`CampusShare-KUET-debug.apk`** from [GitHub Releases](https://github.com/ForkedArch/Forkathon2026-Team-KUET_MANTIS/releases).
+2. Tap the downloaded `.apk` file on your Android phone.
+3. Tap **Install** (if prompted by Android system settings, allow *"Install unknown apps"* for your browser/file manager).
+4. Launch **CampusShare KUET** — it automatically talks to the live cloud backend!
 
 ### ⚙️ Mobile Architecture & Capabilities
 - **Native Capacitor Bridge:** Bundles the modern React + Vite application with an optimized Android WebView, providing near-instant launch times and smooth transitions.
-- **Auto-Configured Cloud API Fallback:** The frontend API client automatically detects when running within the native Android Capacitor environment (`window.Capacitor`) and directs all requests to the live Render cloud backend (`https://forkathon2026-team-kuet-mantis-2.onrender.com/api`) without requiring manual `.env` tweaks.
+- **Auto-Configured Cloud API Fallback:** The frontend API client automatically detects when running within the native Android Capacitor environment (`window.Capacitor`) and directs all requests to the live Render cloud backend (`https://forkathon2026-team-kuet-mantis-2.onrender.com/api`) with built-in cold-start retry mechanisms.
 - **Hardware & Sensor Integrations:**
   - **Camera & Storage:** Seamlessly snap and upload item photos directly from the phone camera or image gallery.
   - **GPS Geolocation:** Drop pins and locate items with mobile device accuracy within the 700m KUET campus perimeter.
   - **QR Code & OTP Verification:** Instant in-person handovers verified directly from the mobile screen.
-- **Cleartext & TLS Support:** Pre-configured `network_security_config.xml` enables both zero-friction local development over local Wi-Fi IP and hardened HTTPS for production cloud backends.
+- **Cleartext & TLS Support:** Pre-configured network security configurations enable both zero-friction local development and hardened HTTPS for production cloud backends.
 
-### 🛠️ Building & Running the Android App
+### 🛠️ Building & Compiling the Android APK Locally
 
-To test or compile the Android APK locally:
+To compile the Android package from source:
 
 ```bash
 # 1. Switch to the dedicated Android branch
@@ -412,21 +430,27 @@ git checkout AndroidApp
 cd frontend
 npm install
 
-# 3. Build the web assets and synchronize native Android assets
+# 3. Build web assets and synchronize native Android project
 npm run android:sync
 
-# 4. Launch in Android Studio (or run directly on an emulator/device)
+# 4. Compile installable APK via Gradle (Java 21 required)
+cd android
+./gradlew assembleDebug      # Outputs: app/build/outputs/apk/debug/app-debug.apk
+./gradlew assembleRelease    # Outputs: app/build/outputs/apk/release/app-release-unsigned.apk
+
+# 5. Or open in Android Studio
+cd ..
 npm run android:open
-# or
-npm run android:run
 ```
 
 | Parameter | Value |
 | :--- | :--- |
 | **Package Identifier** | `ac.bd.kuet.campusshare` |
 | **App Name** | **CampusShare KUET** |
-| **Target Android SDK** | **API 34 (Android 14)** |
-| **Minimum Android SDK** | **API 22 (Android 5.1 Lollipop)** |
+| **Target Android SDK** | **API 36 (Android 15+)** |
+| **Minimum Android SDK** | **API 24 (Android 7.0 Nougat)** |
+| **Java Toolchain** | **OpenJDK 21** |
+| **Gradle Version** | **8.14.3** |
 | **Architecture** | Hybrid Web-Native via Capacitor Android Runtime |
 
 ---
@@ -438,7 +462,7 @@ npm run android:run
 - **Advanced search & filters** — Full-text search, distance-based ranking, availability calendar, and saved search preferences.
 - **Trust & reputation system** — Expand KUET Karma with peer reviews, dispute resolution, and visible trust badges.
 - **Offline / PWA support** — Progressive Web App so students can browse listings and draft requests with limited connectivity.
-- **Native mobile apps** — Capacitor / React Native builds for Android and iOS (experimental work already started on the `AndroidApp` branch).
+- **Store releases** — Publish the completed Android APK to the Google Play Store and prepare iOS App Store builds.
 - **Multi-campus expansion** — Configurable campus boundaries and landmark data so the platform can serve other universities.
 - **Analytics dashboard** — Admin insights on popular items, peak exchange times, and zone activity.
 - **Image moderation & optimization** — Automatic compression, CDN delivery, and basic content checks for uploaded photos.
