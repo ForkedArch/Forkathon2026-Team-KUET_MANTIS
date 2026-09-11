@@ -1,295 +1,269 @@
-# CampusShare KUET
+<img src="https://i.ibb.co.com/7NrtB6Vv/image.png" alt="Forkathon 2026 Banner" />
 
-CampusShare KUET is a campus-only marketplace for sharing, borrowing, and
-coordinating the handover of student supplies at Khulna University of
-Engineering & Technology (KUET). Students can publish items they are willing
-to lend, broadcast items they need, find listings on a God's Eye campus map,
-and complete an exchange with a one-time OTP or QR code.
+# Forkathon 2026: [CampusShare KUET] by [KUET_MANTIS]
 
-Built by **KUET_MANTIS** for the ForkedArch Freshers Hackathon 2026.
-https://forkathon2026-team-kuet-mantis-3.onrender.com/
+> Built for ForkedArch Freshers Hackathon 2026  
+> 🌐 **Live Production Application:** [https://forkathon2026-team-kuet-mantis-3.onrender.com](https://forkathon2026-team-kuet-mantis-3.onrender.com)
 
-## Why CampusShare?
+---
 
-Students often need a calculator, charger, adapter, lab tool, book, or other
-small item for only a few hours. Existing group chats make those exchanges
-hard to search, difficult to coordinate, and impossible to track reliably.
-CampusShare provides a structured KUET student network where:
+## 👥 Team :
 
-- listings are searchable by category, type, zone, owner, and description;
-- the map shows where items are available within a 700 m KUET perimeter;
-- requests have clear pending, accepted, declined, borrowed, and completed
-  states;
-- owner and borrower identity is tied to a KUET student email;
-- handovers are verified in person with a short-lived OTP/QR flow; and
-- reliable lending and returning is rewarded through KUET Karma.
+| Name | Roll | Department | GitHub |
+| :--- | :--- | :--- | :--- |
+| **Anupoma Sharmin Anonya** | 2K2507009 | CSE | [@anonya25-1](https://github.com/anonya25-1) |
+| **Mugdha Sarkar Anik** | 2K2507030 | CSE | [@mugdha-sarkar81](https://github.com/mugdha-sarkar81) |
+| **Tanvir Siddique** | 2K2507028 | CSE | [@siddiquetanvir](https://github.com/siddiquetanvir) |
 
-## Features
+---
 
-### Student identity and authentication
+## ❓ Problem
 
-- Registration accepts only `@stud.kuet.ac.bd` addresses.
-- The final seven digits of the email local part are decoded into batch,
-  department, and roll (`BB DD RRR`).
-- New accounts start with 100 Karma and receive a JWT access token after login.
-- Passwords are stored as bcrypt hashes; tokens are sent as Bearer tokens.
+### Problem Statement :
 
-### Campus listings
+> #### **The Borrowed Charger**
+>
+> It starts with a simple question:  
+> *"Does anyone have a charger?"*  
+>
+> Someone has one. Someone else has a calculator. Another student has an HDMI cable. Someone has a lab component sitting unused in their bag.  
+>
+> The problem is that nobody knows who has what.  
+>
+> So people buy things they only need once, while perfectly useful items sit unused a few rooms away.  
+>
+> Maybe create a simple system that helps students lend, borrow, and find useful items within their community.  
+>
+> **Users could:**  
+> - Add items they are willing to lend.  
+> - Search for an item they need.  
+> - Request to borrow an item.  
+> - See whether an item is currently available.  
+> - Keep track of borrowed and returned items.  
+>
+> Items could be anything from calculators and books to chargers, cables, lab equipment, or sports gear.  
+>
+> **Brainstorming twist:** *How can you make borrowing something from another student feel simple, safe, and organized?*
 
-- Create lending listings or borrow-demand beacons.
-- Add descriptions, specifications, condition, tags, image, zone, and map
-  coordinates.
-- Upload JPEG, PNG, or WEBP item images up to 5 MB.
-- Search by title, description, specifications, owner name, or department.
-- Filter by category, listing type, zone, and availability.
-- Edit or delete items owned by the authenticated student.
+---
 
-### God's Eye map
+### 🤔 [KUET_MANTIS]'s Understanding :
 
-- MapLibre GL map centered on KUET using OpenStreetMap raster tiles.
-- Interactive 700 m campus perimeter ring.
-- Emerald markers for lending listings and red pulsing markers for borrow
-  beacons.
-- Click-to-pin mode for assigning a precise location while adding an item.
-- Campus landmarks and exchange zones are served by the backend.
+#### **The Main Issue:**
+Across university campuses—and particularly in an intensive technical environment like KUET—students frequently encounter urgent, high-stakes supply shortages. Whether it is an approved scientific calculator an hour before a semester exam, a 65W USB-C charger when a battery is critically dying in the Central Computer Centre, an HDMI dongle for a project presentation, or expensive civil drafting drafters and mechanical tools needed for only a single sessional. 
 
-### Borrowing workflow
+Because students have no structured way to discover who owns what nearby, they are forced to either buy expensive single-use equipment or spam large Messenger/WhatsApp batch groups where urgent cries for help get lost in noise. Meanwhile, perfectly working items sit dormant inside dormitory rooms just 50 meters away.
 
-1. A borrower opens an available listing and submits duration, purpose, pickup
-   zone, and an optional message.
-2. The owner accepts or declines the request. Accepting makes the item
-   unavailable and automatically declines other pending requests for it.
-3. The owner starts the handover and receives a four-digit OTP plus a QR code.
-4. The borrower verifies the OTP in person. The transaction becomes
-   `borrowed`.
-5. The borrower confirms the return. The item becomes available again and the
-   request becomes `completed`.
+#### **Experience:**
+As 1st-year CSE students residing and studying at KUET, our team (Tanvir, Anik, and Anupoma) has directly experienced this frustration:
+- **Tanvir** was once working on a critical sessional project at the Central Library when his laptop charger failed, leaving him scrambling across halls without knowing anyone in nearby rooms who had a compatible Type-C power brick.
+- **Anik** had to spend hundreds of takas to purchase specialized drafting tools for engineering drawing that were used for only two laboratory sessions and never touched again.
+- **Anupoma** witnessed multiple batchmates panic before midterm exams because their calculators ran out of battery or were missing the required matrix-solving functions approved by examiners.
 
-Accepted requests also unlock a request-specific chat between the owner and
-borrower. The frontend polls for new messages every three seconds.
+#### **Our Main Goal:**
+Our objective is to transform the KUET campus into a zero-waste, high-trust sharing community. **CampusShare KUET** provides an intuitive, real-time peer-to-peer sharing ecosystem that connects student demand with idle campus resources. By integrating verified academic student credentials, geospatial campus mapping ("God's Eye Map"), direct 1:1 coordination, and a self-governing Karma Protocol with cryptographic OTP verification, we solve the core challenge: **making borrowing feel simple, safe, and organized.**
 
-### KUET Karma protocol
+---
 
-| Event | Karma change |
-| --- | ---: |
-| Account registration | 100 base Karma |
-| Completed lending transaction | Owner +10 |
-| On-time return | Borrower +5 |
-| Late return | Borrower -30 |
+## 💡 Key Features :
 
-The profile view displays the current score, completed exchanges, and the
-rules above.
+### 🙋‍♂️ For Borrowers :
+- **God's Eye Campus Map:** Explore items across the entire 700m KUET campus perimeter using an interactive MapLibre GL radar map.
+- **Demand Beacons (Urgent Broadcasts):** Can't find an available item? Drop a glowing red "Demand Beacon" on the campus map to alert students nearby about what you need immediately.
+- **Instant 1:1 Campus Chat:** Initiate communication immediately upon submitting a request (even before owner approval) to establish familiarity, agree on meetup points, or ask questions.
+- **Granular Search & Filters:** Search items instantly by keyword, technical specification, department, or categories (Calculators, Chargers, Lab Tools, Books, Cables).
+- **Cryptographic OTP Handover:** Zero awkward disputes—verify handovers securely using a dynamic 4-digit OTP or scannable QR code.
 
-## Architecture
+### 🤝 For Lenders :
+- **Rapid Listing with Pinpoint Mode:** Publish an item in under 30 seconds with photos, specifications, and a precise map drop-pin on campus landmarks (Rokeya Hall, Central Library, ME Building, etc.).
+- **Automated Collision Protection:** Accepting a borrow request automatically reserves the item and notifies or declines conflicting pending requests.
+- **Reputation & Karma Growth:** Earn **+10 KUET Karma** for every successful lending exchange, increasing your public trust score on campus.
+- **Live Inventory Tracking:** Monitor active borrows, handover confirmations, and return deadlines from a clean dashboard.
+
+### 🛡️ Campus Trust & Safety (The Twist) :
+- **Strict KUET Email Decoupling:** Registration is exclusively restricted to official `@stud.kuet.ac.bd` emails. The system auto-decodes Batch, Department, and Roll Number (`BB DD RRR`), eliminating fake accounts and impersonation.
+- **Self-Regulating Karma Protocol:**
+  - **100 Base Karma:** Seeded to every verified KUET student upon registration.
+  - **+10 Karma:** Awarded to lenders for completing an exchange.
+  - **+5 Karma:** Awarded to borrowers for on-time item returns.
+  - **-30 Karma Penalty:** Automatically applied for unreturned or late items.
+- **Physical Proof of Handover:** Transactions do not activate until the borrower physically inspects the item and provides the private OTP to the owner.
+
+### ⚙️ Under the Hood :
+- **Frontend:** React 18, Vite, Tailwind CSS, MapLibre GL JS, Turf.js, TanStack React Query.
+- **Backend:** FastAPI (Python 3.10), SQLAlchemy ORM, Pydantic V2 schemas, Bcrypt password hashing, PyJWT authentication.
+- **Database:** Serverless PostgreSQL via **Neon Database** with connection pooling and automated migration scripts.
+- **Infrastructure:** Frontend deployed on **Render Static Site CDN**; API hosted on **Render Web Services** with universal CORS support.
+
+---
+
+## 🏗️ Architecture :
+
+### 🏛️ CampusShare KUET — Architecture :
+
+CampusShare KUET is built with a decoupled client-server architecture designed for high availability, zero latency geospatial rendering, and strict campus-level authentication.
+
+#### 1. System Overview :
 
 ```text
-React 18 + Vite + Tailwind CSS
-        |
-        | Axios / JSON and multipart requests
-        v
-FastAPI REST API
-        |
-        +-- JWT authentication and bcrypt passwords
-        +-- SQLAlchemy ORM
-        +-- SQLite (default; configurable database URL)
-        +-- Local image uploads
-        +-- QR code generation
-        |
-        v
-  Users, items, requests, transactions, messages
+               ┌─────────────────────────────────────────────────────────┐
+               │                 KUET Student Browser                    │
+               │   (React 18 + Tailwind CSS + MapLibre GL + React Query) │
+               └────────────────────────────┬────────────────────────────┘
+                                            │
+                                            │ HTTPS / REST (JSON + Multipart)
+                                            │ Bearer JWT Auth
+                                            ▼
+               ┌─────────────────────────────────────────────────────────┐
+               │                   FastAPI Backend Server                │
+               │              (Render Cloud Platform, Python)            │
+               ├─────────────────────────────────────────────────────────┤
+               │  • /api/auth       - KUET Email Decoder & JWT Provider   │
+               │  • /api/items      - Campus Inventory & Geo-Coordinates  │
+               │  • /api/requests   - Borrow Workflow & Lifecycle Engine │
+               │  • /api/chat       - 1:1 Direct Messaging & Threads     │
+               │  • /api/transact   - OTP / QR Handover Verification      │
+               │  • /api/landmarks  - KUET Campus Geographic Anchors      │
+               └──────────────┬───────────────────────────┬──────────────┘
+                              │                           │
+                              ▼                           ▼
+               ┌───────────────────────────┐ ┌───────────────────────────┐
+               │    Neon PostgreSQL DB     │ │    Local Upload Storage   │
+               │ (Users, Items, Requests,  │ │   (Item Inspection Photos │
+               │  Messages, Transactions)  │ │      & Campus Media)      │
+               └───────────────────────────┘ └───────────────────────────┘
 ```
 
-### Repository layout
+---
+
+#### 2. Borrowing & Handover State Machine :
 
 ```text
-.
-├── backend/
-│   ├── app/
-│   │   ├── data/kuet_landmarks.json
-│   │   ├── routes/
-│   │   │   ├── auth.py
-│   │   │   ├── borrow_requests.py
-│   │   │   ├── chat.py
-│   │   │   ├── items.py
-│   │   │   ├── landmarks.py
-│   │   │   └── transactions.py
-│   │   ├── utils/
-│   │   │   ├── file_upload.py
-│   │   │   └── qr_code.py
-│   │   ├── auth.py
-│   │   ├── database.py
-│   │   ├── main.py
-│   │   ├── models.py
-│   │   └── schemas.py
-│   ├── requirements.txt
-│   ├── Dockerfile
-│   └── .env.example
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   ├── context/AuthContext.jsx
-│   │   ├── pages/
-│   │   ├── api/client.js
-│   │   ├── App.jsx
-│   │   └── main.jsx
-│   ├── package.json
-│   ├── Dockerfile
-│   ├── nginx.conf
-│   └── .env.example
-├── docker-compose.yml
-├── render.yaml
-├── DEPLOYMENT.md
-├── PROJECT.md
-├── CONTRIBUTING.md
-└── README.md
+[ Borrower creates Request ]
+             │
+             ▼
+      ( Status: PENDING ) ───► [ 1:1 Chat active for negotiation & familiarity ]
+             │
+      ┌──────┴──────┐
+      ▼             ▼
+[ DECLINED ]   [ ACCEPTED ]
+                    │
+                    ▼
+         [ Owner starts Handover ]
+                    │
+                    ▼ Generates 4-digit OTP & QR Code
+         [ In-Person Physical Check ]
+                    │
+                    ▼ Borrower provides OTP to Owner
+         ( Status: BORROWED )
+                    │
+                    ▼ Borrower returns item
+         ( Status: COMPLETED )
+                    │
+                    ├─► Lender awarded +10 KUET Karma ⚡
+                    └─► Borrower awarded +5 KUET Karma ⚡
 ```
 
-## Requirements
+---
 
-- Python 3.10 or newer
-- Node.js 18 or newer and npm
-- A modern browser with JavaScript enabled
+#### 3. Data Model (Entity Relationship) :
 
-The frontend loads MapLibre GL JS, Turf.js, and OpenStreetMap tiles from
-external resources at runtime. An internet connection is therefore needed for
-the full map experience.
+```text
+ ┌────────────────────────┐             ┌────────────────────────┐
+ │         USERS          │ 1         * │         ITEMS          │
+ ├────────────────────────┼─────────────┼────────────────────────┤
+ │ id (PK)                │   owns      │ id (PK)                │
+ │ email (UNIQUE)         │             │ owner_id (FK -> Users) │
+ │ name                   │             │ title                  │
+ │ dept, batch, roll      │             │ type (lend / borrow)   │
+ │ hashed_password        │             │ category               │
+ │ karma (Default: 100)   │             │ lat, lng, zone_id      │
+ │ trust_score            │             │ status (avail/borrowed)│
+ └───────────┬────────────┘             └───────────┬────────────┘
+             │ 1                                    │ 1
+             │                                      │
+             │ creates / receives                   │ relates to
+             ▼ *                                    ▼ *
+ ┌────────────────────────┐             ┌────────────────────────┐
+ │    BORROW_REQUESTS     │ 1         1 │      TRANSACTIONS      │
+ ├────────────────────────┼─────────────┼────────────────────────┤
+ │ id (PK)                │   spawns    │ id (PK)                │
+ │ item_id (FK -> Items)  │             │ request_id (FK)        │
+ │ borrower_id (FK->Users)│             │ otp (4-digit code)     │
+ │ owner_id (FK -> Users) │             │ qr_code                │
+ │ duration_hours         │             │ status                 │
+ │ status (pending/etc.)  │             │ created_at             │
+ └───────────┬────────────┘             └────────────────────────┘
+             │ 1
+             │ references
+             ▼ *
+ ┌────────────────────────┐             ┌────────────────────────┐
+ │        MESSAGES        │             │     NOTIFICATIONS      │
+ ├────────────────────────┤             ├────────────────────────┤
+ │ id (PK)                │             │ id (PK)                │
+ │ sender_id (FK->Users)  │             │ user_id (FK -> Users)  │
+ │ recipient_id (FK->Users│             │ title, message, link   │
+ │ request_id (FK, opt)   │             │ is_read (Boolean)      │
+ │ content, created_at    │             │ created_at             │
+ └────────────────────────┘             └────────────────────────┘
+```
 
-## Local setup
+---
 
-### 1. Clone the repository
+## 🚀 Local Setup & Installation :
 
+### Prerequisites :
+- **Python 3.10+**
+- **Node.js 18+ & npm**
+- **Git**
+
+### 1. Clone the Repository :
 ```bash
 git clone https://github.com/ForkedArch/Forkathon2026-Team-KUET_MANTIS.git
 cd Forkathon2026-Team-KUET_MANTIS
 ```
 
-### 2. Configure and run the backend
-
+### 2. Backend Setup (FastAPI) :
 ```bash
 cd backend
 python3 -m venv .venv
-source .venv/bin/activate        # Windows PowerShell: .venv\Scripts\Activate.ps1
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 cp .env.example .env
-uvicorn app.main:app --reload
+
+# Run FastAPI Development Server
+uvicorn app.main:app --reload --port 8000
 ```
+- API Docs: `http://localhost:8000/docs`
+- Health Endpoint: `http://localhost:8000/health`
 
-The API is available at `http://localhost:8000`. FastAPI's interactive
-documentation is available at `http://localhost:8000/docs`, and the health
-check is `http://localhost:8000/health`.
-
-The default development configuration uses SQLite at
-`backend/campus_share.db`, creates the database tables at startup, and uses a
-development JWT key. Before deploying, set `ENVIRONMENT` to a non-development
-value and provide a strong `SECRET_KEY`.
-
-### 3. Configure and run the frontend
-
-In a second terminal:
-
+### 3. Frontend Setup (React + Vite) :
 ```bash
+# In another terminal window:
 cd frontend
 npm install
 cp .env.example .env
+
+# Start Vite Development Server
 npm run dev
 ```
+- Application: `http://localhost:5173`
 
-Open the URL printed by Vite, normally `http://localhost:5173`.
+---
 
-The frontend reads the backend URL from `VITE_API_URL`:
+## 🌐 Production Deployments :
 
-```dotenv
-VITE_API_URL=http://localhost:8000/api
-```
+- **Live Frontend App:** [https://forkathon2026-team-kuet-mantis-3.onrender.com](https://forkathon2026-team-kuet-mantis-3.onrender.com)
+- **Live Backend API:** [https://forkathon2026-team-kuet-mantis-2.onrender.com](https://forkathon2026-team-kuet-mantis-2.onrender.com)
+- **API Health Check:** [https://forkathon2026-team-kuet-mantis-2.onrender.com/health](https://forkathon2026-team-kuet-mantis-2.onrender.com/health)
 
-For a production build:
+---
 
-```bash
-npm run build
-npm run preview
-```
+## 📜 License :
+This project is open-sourced under the [MIT License](./LICENSE).
 
-> [!NOTE]
-> **Android Mobile App:** Experimental Android/Capacitor support is archived in the dedicated `AndroidApp` branch. The `main` branch is optimized strictly for web deployment.
+---
 
-## Configuration
-
-### Backend environment variables
-
-| Variable | Default | Purpose |
-| --- | --- | --- |
-| `ENVIRONMENT` | `development` | Allows the development JWT fallback only in development |
-| `SECRET_KEY` | development fallback | JWT signing key; required outside development |
-| `ALGORITHM` | `HS256` | JWT signing algorithm |
-| `ACCESS_TOKEN_EXPIRE_MINUTES` | `30` | Access-token lifetime |
-| `DATABASE_URL` | SQLite in `backend/campus_share.db` | SQLAlchemy database URL |
-| `ALLOWED_ORIGINS` | `http://localhost:5173,http://localhost` | Comma-separated allowed CORS origins |
-| `UPLOAD_DIR` | `./uploads` | Directory for uploaded item images |
-
-Do not commit `.env` files, credentials, database files, uploads, or build
-output. The repository's `.gitignore` already excludes these local artifacts.
-
-## API overview
-
-All application endpoints are prefixed with `/api`.
-
-| Area | Endpoints | Authentication |
-| --- | --- | --- |
-| Auth | `POST /auth/register`, `POST /auth/login`, `GET /auth/me`, `GET /auth/current` | Register/login public; profile protected |
-| Items | `GET /items`, `GET /items/{id}`, `POST /items`, `PUT /items/{id}`, `DELETE /items/{id}` | Read public; mutations protected where applicable |
-| Landmarks | `GET /landmarks` | Public |
-| Requests | `POST /requests`, `GET /requests/me`, `PUT /requests/{id}/status` | Protected |
-| Transactions | `POST /transactions/start`, `POST /transactions/verify`, `POST /transactions/return/{id}` | Protected |
-| Chat | `GET/POST /chat/{request_id}/messages` | Protected; request participants only |
-
-`POST /items` accepts either JSON or `multipart/form-data`. Multipart requests
-can include an image file. See the generated OpenAPI documentation at
-`/docs` for request and response schemas.
-
-## Frontend routes
-
-| Route | View |
-| --- | --- |
-| `/login` | Student login |
-| `/register` | KUET registration with live email decoder |
-| `/` | God's Eye campus map |
-| `/items` | Searchable listing grid |
-| `/item/:id` | Listing details |
-| `/add` | Add-item view |
-| `/requests` | Incoming and outgoing requests |
-| `/transaction/:requestId` | OTP/QR handover and return |
-| `/chat/:requestId` | Request chat |
-| `/profile` | Student identity and Karma record |
-
-## Development notes
-
-- The backend uses SQLAlchemy models and performs lightweight schema
-  migrations in `app/database.py` on startup.
-- The default database is local SQLite; use `DATABASE_URL` for another
-  SQLAlchemy-supported database.
-- Images are served from `/uploads` and are restricted to JPEG, PNG, and WEBP
-  files with a 5 MB limit.
-- The map uses `[89.5024, 22.9006]` as the KUET center in
-  `[longitude, latitude]` order. Landmark data uses `[latitude, longitude]`
-  coordinates, as defined in the source JSON.
-- The project currently provides build scripts for the frontend and API
-  documentation through FastAPI. Add automated tests alongside new behavior
-  when extending the application.
-
-## Contributing
-
-Please read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening a change.
-Create a branch, keep changes focused, test the affected backend or frontend
-surface, and use a clear commit message.
-
-## Team
-
-| Name | Roll | Department | GitHub |
-| --- | --- | --- | --- |
-| Anupoma Sharmin Anonya | 2K2507009 | CSE | [@anonya25-1](https://github.com/anonya25-1) |
-| Mugdha Sarkar Anik | 2K2507030 | CSE | [@mugdha-sarkar81](https://github.com/mugdha-sarkar81) |
-| Tanvir Siddique | 2K2507028 | CSE | [@siddiquetanvir](https://github.com/siddiquetanvir) |
-
-## License
-
-This project is released under the [MIT License](./LICENSE).
+<div align="center">
+  <b>Forkathon: Freshers Hackathon 2026 presented by ForkedArch powered by XtendArena</b>
+</div>
