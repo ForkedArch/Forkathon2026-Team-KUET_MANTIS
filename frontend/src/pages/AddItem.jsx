@@ -98,24 +98,28 @@ export default function AddItem() {
             <button
               type="button"
               onClick={() => setType('lend')}
-              className={`py-2 px-4 rounded-lg text-xs font-bold transition ${
+              className={`py-2 px-4 rounded-lg text-xs font-bold transition flex items-center justify-center gap-2 ${
                 type === 'lend'
                   ? 'bg-emerald-600 text-white shadow-sm'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              🟢 I have an item to Lend
+              <span className={`w-2 h-2 rounded-full ${type === 'lend' ? 'bg-white' : 'bg-emerald-500'}`}></span>
+              <span>I have an item to Lend</span>
             </button>
             <button
               type="button"
               onClick={() => setType('borrow')}
-              className={`py-2 px-4 rounded-lg text-xs font-bold transition ${
+              className={`py-2 px-4 rounded-lg text-xs font-bold transition flex items-center justify-center gap-2 ${
                 type === 'borrow'
                   ? 'bg-rose-600 text-white shadow-sm'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              🚨 I need to Borrow (Beacon)
+              <svg className={`w-3.5 h-3.5 ${type === 'borrow' ? 'text-white' : 'text-rose-600'}`} fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+              </svg>
+              <span>I need to Borrow (Beacon)</span>
             </button>
           </div>
         </div>
@@ -201,8 +205,12 @@ export default function AddItem() {
             />
           )}
           {coords && (
-            <p className="text-[11px] text-emerald-600 mt-1 font-medium">
-              📍 Selected Coordinates: {coords.lat.toFixed(4)}°N, {coords.lng.toFixed(4)}°E (within 700m KUET boundary)
+            <p className="text-[11px] text-emerald-600 mt-1 font-medium flex items-center gap-1">
+              <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span>Selected Coordinates: {coords.lat.toFixed(4)}°N, {coords.lng.toFixed(4)}°E (within 700m KUET boundary)</span>
             </p>
           )}
         </div>
@@ -240,11 +248,27 @@ export default function AddItem() {
           <button
             type="submit"
             disabled={mutation.isPending}
-            className={`px-6 py-2.5 text-xs font-bold text-white rounded-xl shadow-xs transition ${
+            className={`px-6 py-2.5 text-xs font-bold text-white rounded-xl shadow-xs transition flex items-center gap-2 ${
               type === 'borrow' ? 'bg-rose-600 hover:bg-rose-700' : 'bg-blue-600 hover:bg-blue-700'
             }`}
           >
-            {mutation.isPending ? 'Publishing...' : (type === 'borrow' ? '🚨 Broadcast Beacon' : '🟢 List Item')}
+            {mutation.isPending ? (
+              'Publishing...'
+            ) : type === 'borrow' ? (
+              <>
+                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                </svg>
+                <span>Broadcast Beacon</span>
+              </>
+            ) : (
+              <>
+                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
+                </svg>
+                <span>List Item</span>
+              </>
+            )}
           </button>
         </div>
       </form>
