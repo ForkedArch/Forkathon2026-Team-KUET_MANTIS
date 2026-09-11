@@ -1,5 +1,5 @@
 services:
-  # FastAPI Backend Service
+  # 1. FastAPI Backend Web Service
   - type: web
     name: campusshare-backend
     env: python
@@ -9,23 +9,17 @@ services:
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
-    disk:
-      name: campusshare-data
-      mountPath: /var/data
-      sizeGB: 1
     envVars:
       - key: ENVIRONMENT
         value: production
-      - key: SECRET_KEY
-        generateValue: true
-      - key: DATABASE_URL
-        value: sqlite:////var/data/campus_share.db
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "1440"
       - key: UPLOAD_DIR
-        value: /var/data/uploads
+        value: ./uploads
       - key: ALLOWED_ORIGINS
-        sync: false
+        value: https://*.onrender.com,https://*.vercel.app,http://localhost:5173,http://localhost:3000
 
-  # React Frontend Static Site
+  # 2. React Frontend Static Site (100% Free on Render - No credit card required!)
   - type: web
     name: campusshare-frontend
     env: static
@@ -40,4 +34,4 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_URL
-        sync: false
+        value: https://forkathon2026-team-kuet-mantis-2.onrender.com/api

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { API_ORIGIN } from '../../api/client';
+import { formatDept } from '../../utils/dept';
+import { KarmaIcon } from '../common/KarmaIcon';
 
 /**
  * ItemHoverCard
@@ -26,7 +28,7 @@ export default function ItemHoverCard({
 
   const isBeacon = item.type === 'borrow';
   const ownerName = item.owner?.name || item.lender_name || 'KUET Student';
-  const ownerDept = item.owner?.dept || item.dept || 'Engineering';
+  const ownerDept = formatDept(item.owner?.dept || item.dept) || 'KUET';
   const ownerRoll = item.owner?.roll || item.roll || 'Verified';
   const ownerKarma = item.owner?.karma ?? item.karma ?? 100;
   const totalExchanges = (item.owner?.total_lends || 0) + (item.owner?.total_borrows || 0) || item.total_exchanges || 12;
@@ -66,12 +68,12 @@ export default function ItemHoverCard({
           {isBeacon ? (
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-600/90 text-white backdrop-blur-md shadow-md animate-pulse">
               <span className="h-2 w-2 rounded-full bg-white"></span>
-              🚨 Demand Beacon
+              Demand Beacon
             </span>
           ) : (
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-600/90 text-white backdrop-blur-md shadow-md">
               <span className="h-2 w-2 rounded-full bg-emerald-200"></span>
-              🟢 Available to Lend
+              Available to Lend
             </span>
           )}
         </div>
@@ -107,7 +109,10 @@ export default function ItemHoverCard({
           {/* 3. Mini-Location Badge */}
           <div className="bg-slate-50 border border-slate-200/70 rounded-xl p-2.5 mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2 min-w-0">
-              <span className="text-base flex-shrink-0">📍</span>
+              <svg className="w-4 h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
               <div className="min-w-0">
                 <div className="text-xs font-semibold text-slate-800 truncate">{zoneName}</div>
                 <div className="text-[10px] text-slate-500 truncate">
@@ -122,10 +127,14 @@ export default function ItemHoverCard({
                   e.stopPropagation();
                   onFocusOnMap([Number(lng), Number(lat)]);
                 }}
-                className="flex-shrink-0 ml-2 px-2 py-1 text-[11px] font-medium text-blue-700 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 rounded-lg transition"
+                className="flex-shrink-0 ml-2 px-2 py-1 text-[11px] font-medium text-blue-700 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 rounded-lg transition flex items-center gap-1"
                 title="Pan map to this location"
               >
-                Focus 🎯
+                <svg className="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" />
+                </svg>
+                <span>Focus</span>
               </button>
             )}
           </div>
@@ -151,7 +160,7 @@ export default function ItemHoverCard({
             {/* KUET Karma Score Pill */}
             <div className="flex flex-col items-end flex-shrink-0">
               <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-900 border border-amber-200 shadow-2xs">
-                <span className="text-amber-500">⚡</span>
+                <KarmaIcon className="w-3 h-3 text-amber-500" />
                 <span>{ownerKarma}</span>
                 <span className="text-[10px] font-medium text-amber-700">Karma</span>
               </div>
@@ -177,7 +186,14 @@ export default function ItemHoverCard({
                   : 'bg-blue-600 hover:bg-blue-700 text-white'
               }`}
             >
-              {isBeacon ? '⚡ Offer to Lend' : '🤝 Request to Borrow'}
+              {isBeacon ? (
+                <>
+                  <KarmaIcon className="w-3.5 h-3.5 text-white" />
+                  <span>Offer to Lend</span>
+                </>
+              ) : (
+                <span>Request to Borrow</span>
+              )}
             </button>
           )}
 
@@ -188,10 +204,12 @@ export default function ItemHoverCard({
                 e.stopPropagation();
                 onChat(item.owner || { name: ownerName });
               }}
-              className="px-3 py-2 border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold transition"
+              className="px-3 py-2 border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold transition flex items-center justify-center"
               title="Chat with owner"
             >
-              💬
+              <svg className="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
             </button>
           )}
         </div>

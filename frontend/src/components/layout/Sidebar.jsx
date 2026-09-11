@@ -1,6 +1,8 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { formatDept } from '../../utils/dept';
+import Logo from '../common/Logo';
 
 // Clean inline SVGs for zero-dependency portability
 const MapIcon = () => (
@@ -27,11 +29,31 @@ const UserIcon = () => (
   </svg>
 );
 
+const ChatIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+  </svg>
+);
+
 const LogoutIcon = () => (
   <svg className="w-4 h-4 text-slate-400 hover:text-rose-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
   </svg>
 );
+
+const PerimeterPinIcon = ({ className = "w-3.5 h-3.5" }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+  </svg>
+);
+
+const KarmaIcon = ({ className = "w-3.5 h-3.5 text-amber-500" }) => (
+  <svg className={className} fill="currentColor" viewBox="0 0 20 20">
+    <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+  </svg>
+);
+
 
 export default function Sidebar({ isOpen, onClose }) {
   const { user, logout } = useAuth();
@@ -74,22 +96,7 @@ export default function Sidebar({ isOpen, onClose }) {
       >
         {/* Branding Header */}
         <div className="p-5 border-b border-slate-200">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-black text-xl flex items-center justify-center shadow-md shadow-blue-500/20">
-              K
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-bold text-base tracking-tight text-slate-900">
-                  CampusShare
-                </span>
-                <span className="text-[10px] font-bold bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded">
-                  KUET
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 font-medium">Peer-to-Peer Campus Hub</p>
-            </div>
-          </div>
+          <Logo showText={true} />
 
           {/* 700m Campus Perimeter Badge */}
           <div className="mt-3.5 flex items-center gap-2 px-2.5 py-1 rounded-full bg-blue-50/80 border border-blue-200/60 text-blue-700 text-xs font-semibold">
@@ -97,7 +104,8 @@ export default function Sidebar({ isOpen, onClose }) {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
             </span>
-            <span>📍 700m Campus Perimeter</span>
+            <PerimeterPinIcon className="w-3.5 h-3.5 text-blue-600" />
+            <span>700m Campus Perimeter</span>
           </div>
         </div>
 
@@ -112,9 +120,6 @@ export default function Sidebar({ isOpen, onClose }) {
               <MapIcon />
               <span>Map View</span>
             </div>
-            <span className="text-[11px] font-bold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">
-              God's Eye
-            </span>
           </NavLink>
 
           <NavLink to="/items" className={navLinkClasses} onClick={onClose}>
@@ -122,7 +127,6 @@ export default function Sidebar({ isOpen, onClose }) {
               <PackageIcon />
               <span>All Items</span>
             </div>
-            <span className="text-[11px] font-semibold text-slate-400">Browse</span>
           </NavLink>
 
           <NavLink to="/requests" className={navLinkClasses} onClick={onClose}>
@@ -132,14 +136,18 @@ export default function Sidebar({ isOpen, onClose }) {
             </div>
           </NavLink>
 
+          <NavLink to="/chat" className={navLinkClasses} onClick={onClose}>
+            <div className="flex items-center gap-3">
+              <ChatIcon />
+              <span>Messages</span>
+            </div>
+          </NavLink>
+
           <NavLink to="/profile" className={navLinkClasses} onClick={onClose}>
             <div className="flex items-center gap-3">
               <UserIcon />
               <span>My Profile</span>
             </div>
-            <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200/60">
-              Karma
-            </span>
           </NavLink>
         </nav>
 
@@ -157,7 +165,7 @@ export default function Sidebar({ isOpen, onClose }) {
                       {user.name}
                     </p>
                     <p className="text-[11px] text-slate-500 truncate">
-                      Roll: {user.roll || 'KUET'} · {user.dept || 'Stud'}
+                      Roll: {user.roll || 'KUET'} · {formatDept(user.dept)}
                     </p>
                   </div>
                 </div>
@@ -174,8 +182,8 @@ export default function Sidebar({ isOpen, onClose }) {
               {/* Karma Score Badge (R4) */}
               <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between">
                 <span className="text-[11px] text-slate-500 font-medium">KUET Karma</span>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 shadow-xs">
-                  <span>⚡</span>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-900 border border-amber-200/80 shadow-2xs">
+                  <KarmaIcon className="w-3.5 h-3.5 text-amber-500" />
                   <span>{user.karma ?? 100} Karma</span>
                 </span>
               </div>

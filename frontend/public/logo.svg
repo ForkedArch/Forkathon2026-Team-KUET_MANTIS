@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <rect width="48" height="48" rx="14" fill="url(#bg-grad)" />
+  <defs>
+    <linearGradient id="bg-grad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+      <stop stopColor="#2563EB" />
+      <stop offset="0.5" stopColor="#4F46E5" />
+      <stop offset="1" stopColor="#7C3AED" />
+    </linearGradient>
+    <linearGradient id="arc-a" x1="8" y1="12" x2="40" y2="36" gradientUnits="userSpaceOnUse">
+      <stop stopColor="#93C5FD" />
+      <stop offset="1" stopColor="#FFFFFF" />
+    </linearGradient>
+    <linearGradient id="arc-b" x1="40" y1="36" x2="8" y2="12" gradientUnits="userSpaceOnUse">
+      <stop stopColor="#FCD34D" />
+      <stop offset="1" stopColor="#FFFFFF" />
+    </linearGradient>
+  </defs>
+
+  <!-- Sharing Loop 1 -->
+  <path d="M18 13.5H31.5C35.6421 13.5 39 16.8579 39 21C39 25.1421 35.6421 28.5 31.5 28.5H28.5" stroke="url(#arc-a)" stroke-width="4.125" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M22.5 9L17.25 13.5L22.5 18" stroke="url(#arc-a)" stroke-width="4.125" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Sharing Loop 2 -->
+  <path d="M30 34.5H16.5C12.3579 34.5 9 31.1421 9 27C9 22.8579 12.3579 19.5 16.5 19.5H19.5" stroke="url(#arc-b)" stroke-width="4.125" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M25.5 39L30.75 34.5L25.5 30" stroke="url(#arc-b)" stroke-width="4.125" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Central Trust Orb -->
+  <circle cx="24" cy="24" r="3.5" fill="#FFFFFF"/>
+</svg>

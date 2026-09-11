@@ -12,26 +12,9 @@ import Chat from './pages/Chat';
 import Transaction from './pages/Transaction';
 import Profile from './pages/Profile';
 import api from './api/client';
-
-/**
- * KUET Department Code Directory
- */
-const KUET_DEPTS = {
-  '01': { code: 'CE', name: 'Civil Engineering' },
-  '03': { code: 'EEE', name: 'Electrical & Electronic Engineering' },
-  '05': { code: 'ME', name: 'Mechanical Engineering' },
-  '07': { code: 'CSE', name: 'Computer Science & Engineering' },
-  '09': { code: 'ECE', name: 'Electronics & Communication Engineering' },
-  '11': { code: 'IEM', name: 'Industrial Engineering & Management' },
-  '13': { code: 'ESE', name: 'Energy Science & Engineering' },
-  '15': { code: 'BME', name: 'Biomedical Engineering' },
-  '17': { code: 'URP', name: 'Urban & Regional Planning' },
-  '19': { code: 'BECM', name: 'Building Engineering & Construction' },
-  '21': { code: 'MSE', name: 'Materials Science & Engineering' },
-  '23': { code: 'ChE', name: 'Chemical Engineering' },
-  '25': { code: 'MTE', name: 'Mechatronics Engineering' },
-  '27': { code: 'Arch', name: 'Architecture' }
-};
+import { KUET_DEPTS, formatDept } from './utils/dept';
+import Logo from './components/common/Logo';
+import { KarmaIcon } from './components/common/KarmaIcon';
 
 /**
  * KUET Email & Roll Decoder
@@ -94,7 +77,8 @@ function Login() {
       toast.success('Welcome back to CampusShare KUET!');
       navigate('/');
     } catch (err) {
-      toast.error(err.response?.data?.detail || 'Login failed');
+      const msg = err.response?.data?.detail || err.message || 'Login failed';
+      toast.error(msg, { duration: 6000 });
     } finally {
       setLoading(false);
     }
@@ -103,10 +87,8 @@ function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 font-sans">
       <div className="w-full max-w-md bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-black text-xl flex items-center justify-center shadow-md shadow-blue-500/20">
-            K
-          </div>
+        <div className="flex items-center gap-3.5 mb-6">
+          <Logo size="lg" />
           <div>
             <h1 className="text-xl font-bold text-slate-900">CampusShare KUET</h1>
             <p className="text-xs text-slate-500">Sign in to your student account</p>
@@ -141,7 +123,7 @@ function Login() {
             disabled={loading}
             className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold rounded-lg shadow-sm transition-colors text-sm disabled:opacity-50"
           >
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? 'Connecting to server...' : 'Sign In'}
           </button>
         </form>
 
@@ -185,7 +167,7 @@ function Register() {
       toast.success('Registration successful! 100 Base Karma awarded. ⚡');
       navigate('/login');
     } catch (err) {
-      toast.error(err.response?.data?.detail || 'Registration failed');
+      toast.error(err.response?.data?.detail || err.message || 'Registration failed', { duration: 6000 });
     } finally {
       setLoading(false);
     }
@@ -194,10 +176,8 @@ function Register() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 font-sans">
       <div className="w-full max-w-md bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-black text-xl flex items-center justify-center shadow-md shadow-blue-500/20">
-            K
-          </div>
+        <div className="flex items-center gap-3.5 mb-6">
+          <Logo size="lg" />
           <div>
             <h1 className="text-xl font-bold text-slate-900">Student Registration</h1>
             <p className="text-xs text-slate-500">Auto-decodes Batch, Dept & Roll with 100 Base Karma</p>
@@ -237,11 +217,15 @@ function Register() {
               <div className="mt-2.5 p-3 bg-blue-50 border border-blue-200 rounded-xl space-y-1 text-xs text-blue-900 animate-fade-in shadow-xs">
                 <div className="flex items-center justify-between font-bold text-blue-800">
                   <span className="flex items-center gap-1.5">
-                    <span>🎓</span>
+                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 14l9-5-9-5-9 5 9 5z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
                     <span>KUET Credentials Decoded</span>
                   </span>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
-                    ⚡ 100 Base Karma
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                    <KarmaIcon className="w-3 h-3 text-amber-600" />
+                    <span>100 Base Karma</span>
                   </span>
                 </div>
                 <div className="grid grid-cols-3 gap-2 pt-1 text-center font-medium">
@@ -263,14 +247,18 @@ function Register() {
 
             {decoded.status === 'invalid_domain' && (
               <div className="mt-2 p-2 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-700 flex items-center gap-1.5">
-                <span>⚠️</span>
+                <svg className="w-4 h-4 shrink-0 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
                 <span>{decoded.message}</span>
               </div>
             )}
 
             {decoded.status === 'invalid_format' && (
               <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 flex items-center gap-1.5">
-                <span>ℹ️</span>
+                <svg className="w-4 h-4 shrink-0 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
                 <span>{decoded.message}</span>
               </div>
             )}
@@ -295,9 +283,10 @@ function Register() {
           <button
             type="submit"
             disabled={loading || decoded.status !== 'valid'}
-            className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
           >
-            {loading ? 'Registering...' : 'Register & Claim 100 Base Karma ⚡'}
+            <span>{loading ? 'Registering...' : 'Register & Claim 100 Base Karma'}</span>
+            {!loading && <KarmaIcon className="w-3.5 h-3.5 text-amber-300" />}
           </button>
         </form>
 
@@ -335,6 +324,7 @@ export default function App() {
           <Route path="/item/:id" element={<ItemDetail />} />
           <Route path="/add" element={<PrivateRoute><AddItem /></PrivateRoute>} />
           <Route path="/requests" element={<PrivateRoute><Requests /></PrivateRoute>} />
+          <Route path="/chat" element={<PrivateRoute><Chat /></PrivateRoute>} />
           <Route path="/chat/:requestId" element={<PrivateRoute><Chat /></PrivateRoute>} />
           <Route path="/transaction/:requestId" element={<PrivateRoute><Transaction /></PrivateRoute>} />
           <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />

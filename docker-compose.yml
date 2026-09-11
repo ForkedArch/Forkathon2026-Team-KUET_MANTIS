@@ -11,8 +11,9 @@ services:
       - "8000:8000"
     environment:
       - ENVIRONMENT=production
-      - SECRET_KEY=${SECRET_KEY:-e94e24a732bd8b84931f822f30689bcfc70a8d67566e138a2e58c973a9712a76}
-      - DATABASE_URL=sqlite:////app/data/campus_share.db
+      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
+      # For local dev only — set DATABASE_URL in .env to use Neon PostgreSQL for production parity
+      - DATABASE_URL=${DATABASE_URL:-sqlite:////app/data/campus_share.db}
       - UPLOAD_DIR=/app/uploads
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost,http://localhost:80,http://localhost:5173,http://127.0.0.1}
     volumes:

@@ -4,7 +4,46 @@ import { Link } from 'react-router-dom';
 import api from '../api/client';
 import Loader from '../components/common/Loader';
 import { useAuth } from '../context/AuthContext';
+import { formatDept } from '../utils/dept';
+import { KarmaIcon } from '../components/common/KarmaIcon';
 import toast from 'react-hot-toast';
+
+const ClockIcon = ({ className = "w-3.5 h-3.5" }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+);
+
+const MapPinIcon = ({ className = "w-3.5 h-3.5" }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+  </svg>
+);
+
+const TargetIcon = ({ className = "w-3.5 h-3.5" }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+  </svg>
+);
+
+const HandoverIcon = ({ className = "w-4 h-4" }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+  </svg>
+);
+
+const ChatBubbleIcon = ({ className = "w-3.5 h-3.5" }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+  </svg>
+);
+
+const InboxEmptyIcon = ({ className = "w-6 h-6" }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+  </svg>
+);
 
 export default function Requests() {
   const { user } = useAuth();
@@ -41,8 +80,8 @@ export default function Requests() {
 
       {requests?.length === 0 ? (
         <div className="bg-white border border-dashed border-slate-300 rounded-2xl p-12 text-center max-w-md mx-auto shadow-xs">
-          <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-3 text-2xl">
-            📬
+          <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-3 shadow-2xs">
+            <InboxEmptyIcon className="w-6 h-6" />
           </div>
           <h3 className="font-bold text-slate-800 text-base mb-1">No Active Requests</h3>
           <p className="text-xs text-slate-500">
@@ -63,26 +102,36 @@ export default function Requests() {
                     <div className="flex items-center gap-2">
                       <h3 className="font-bold text-slate-900 text-base">{req.item?.title}</h3>
                       {otherParty && (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200 shadow-2xs">
-                          ⚡ {karmaScore} Karma
+                        <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200 shadow-2xs">
+                          <KarmaIcon className="w-3 h-3 text-amber-500" />
+                          <span>{karmaScore} Karma</span>
                         </span>
                       )}
                     </div>
 
                     <p className="text-xs text-slate-600">
                       {isMyRequest
-                        ? `You requested from ${req.owner?.name || 'KUET Student'} (${req.owner?.dept || 'KUET'} • Roll ${req.owner?.roll || 'KUET'})`
-                        : `Request from ${req.borrower?.name || 'KUET Student'} (${req.borrower?.dept || 'KUET'} • Roll ${req.borrower?.roll || 'KUET'})`}
+                        ? `You requested from ${req.owner?.name || 'KUET Student'} (${formatDept(req.owner?.dept)} • Roll ${req.owner?.roll || 'KUET'})`
+                        : `Request from ${req.borrower?.name || 'KUET Student'} (${formatDept(req.borrower?.dept)} • Roll ${req.borrower?.roll || 'KUET'})`}
                     </p>
 
-                    <div className="flex flex-wrap gap-2 text-xs text-slate-500 pt-1">
-                      <span>⏱️ <strong>Duration:</strong> {req.duration_hours}h</span>
+                    <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 pt-1">
+                      <span className="flex items-center gap-1.5">
+                        <ClockIcon className="w-3.5 h-3.5 text-slate-400" />
+                        <span><strong>Duration:</strong> {req.duration_hours}h</span>
+                      </span>
                       <span>·</span>
-                      <span>📍 <strong>Pickup:</strong> {req.pickup_zone || 'Campus'}</span>
+                      <span className="flex items-center gap-1.5">
+                        <MapPinIcon className="w-3.5 h-3.5 text-slate-400" />
+                        <span><strong>Pickup:</strong> {req.pickup_zone || 'Campus'}</span>
+                      </span>
                       {req.purpose && (
                         <>
                           <span>·</span>
-                          <span>🎯 <strong>Purpose:</strong> {req.purpose}</span>
+                          <span className="flex items-center gap-1.5">
+                            <TargetIcon className="w-3.5 h-3.5 text-slate-400" />
+                            <span><strong>Purpose:</strong> {req.purpose}</span>
+                          </span>
                         </>
                       )}
                     </div>
@@ -119,23 +168,29 @@ export default function Requests() {
                   </div>
                 </div>
 
-                {/* Handover & Chat Links */}
-                {req.status === 'accepted' && (
-                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                {/* Chat Link — available immediately after request, for any status */}
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                  {req.status === 'accepted' ? (
                     <Link
                       to={`/transaction/${req.id}`}
-                      className="font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                      className="font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1.5"
                     >
-                      <span>🔄 Go to Handover & OTP Verification</span>
+                      <HandoverIcon className="w-4 h-4" />
+                      <span>Go to Handover &amp; OTP Verification</span>
                     </Link>
-                    <Link
-                      to={`/chat/${req.id}`}
-                      className="text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg font-medium transition"
-                    >
-                      💬 Open Chat
-                    </Link>
-                  </div>
-                )}
+                  ) : (
+                    <span className="text-slate-400 italic text-[11px]">
+                      {req.status === 'pending' ? 'Awaiting response — coordinate via chat below' : `Request ${req.status}`}
+                    </span>
+                  )}
+                  <Link
+                    to={`/chat?user=${otherParty?.id}&item=${req.item?.id}`}
+                    className="text-slate-600 hover:text-blue-700 bg-slate-100 hover:bg-blue-50 hover:border-blue-200 border border-transparent px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5"
+                  >
+                    <ChatBubbleIcon className="w-3.5 h-3.5" />
+                    <span>Message {otherParty?.name?.split(' ')[0] || 'them'}</span>
+                  </Link>
+                </div>
               </div>
             );
           })}

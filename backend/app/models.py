@@ -101,10 +101,72 @@ class Message(Base):
     __tablename__ = "messages"
 
     id = Column(Integer, primary_key=True, index=True)
-    request_id = Column(Integer, ForeignKey("borrow_requests.id"))
+    request_id = Column(Integer, ForeignKey("borrow_requests.id"), nullable=True)
     sender_id = Column(Integer, ForeignKey("users.id"))
+    recipient_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    item_id = Column(Integer, ForeignKey("items.id"), nullable=True)
     content = Column(Text, nullable=False)
+    is_read = Column(Boolean, default=False)
     created_at = Column(DateTime, default=utcnow)
 
     request = relationship("BorrowRequest")
-    sender = relationship("User")
+    sender = relationship("User", foreign_keys=[sender_id])
+    recipient = relationship("User", foreign_keys=[recipient_id])
+    item = relationship("Item", foreign_keys=[item_id])
+
+class SavedItem(Base):
+    __tablename__ = "saved_items"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    item_id = Column(Integer, ForeignKey("items.id"), nullable=False, index=True)
+    created_at = Column(DateTime, default=utcnow)
+
+    __table_args__ = (
+        UniqueConstraint('user_id', 'item_id', name='uq_user_saved_item'),
+    )
+
+    user = relationship("User")
+    item = relationship("Item")
+
+class Notification(Base):
+    __tablename__ = "notifications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    title = Column(String, nullable=False)
+    message = Column(Text, nullable=False)
+    link = Column(String, nullable=True)
+    is_read = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=utcnow)
+
+    user = relationship("User")
+
+class Review(Base):
+    __tablename__ = "reviews"
+
+    id = Column(Integer, primary_key=True, index=True)
+    transaction_id = Column(Integer, ForeignKey("transactions.id"), nullable=True)
+    reviewer_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    reviewee_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    rating = Column(Integer, nullable=False)  # 1 to 5
+    comment = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=utcnow)
+
+    reviewer = relationship("User", foreign_keys=[reviewer_id])
+    reviewee = relationship("User", foreign_keys=[reviewee_id])
+
+class Report(Base):
+    __tablename__ = "reports"
+
+    id = Column(Integer, primary_key=True, index=True)
+    item_id = Column(Integer, ForeignKey("items.id"), nullable=False, index=True)
+    reporter_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    reason = Column(String, nullable=False)
+    details = Column(Text, nullable=True)
+    status = Column(String, default="pending")
+    created_at = Column(DateTime, default=utcnow)
+
+    reporter = relationship("User", foreign_keys=[reporter_id])
+    item = relationship("Item", foreign_keys=[item_id])
+

@@ -40,6 +40,17 @@ class UserOut(UserBase):
     total_borrows: int = 0
     created_at: datetime
 
+    @field_validator("dept", mode="before")
+    @classmethod
+    def normalize_dept(cls, v):
+        if not v:
+            return v
+        cleaned = str(v).strip()
+        if cleaned.isdigit():
+            from .routes.auth import decode_dept_code
+            return decode_dept_code(cleaned)
+        return cleaned
+
 # Token
 class Token(BaseModel):
     access_token: str
@@ -153,6 +164,10 @@ class ItemOut(ItemBase):
             self.karma = getattr(self.owner, 'karma', 100)
             self.trust_rating = getattr(self.owner, 'trust_score', 100.0)
 
+        if self.dept and str(self.dept).strip().isdigit():
+            from .routes.auth import decode_dept_code
+            self.dept = decode_dept_code(self.dept)
+
         return self
 
 # Transaction schemas
@@ -214,13 +229,96 @@ class BorrowRequestStatusUpdate(BaseModel):
 # Message schemas
 class MessageCreate(BaseModel):
     content: str
+    recipient_id: Optional[int] = None
+    item_id: Optional[int] = None
 
 class MessageOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    request_id: int
+    request_id: Optional[int] = None
     sender_id: int
+    recipient_id: Optional[int] = None
+    item_id: Optional[int] = None
     content: str
+    is_read: bool = False
     created_at: datetime
     sender: UserOut
+    recipient: Optional[UserOut] = None
+
+class ConversationOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    contact: UserOut
+    last_message: Optional[str] = None
+    last_message_at: Optional[datetime] = None
+    unread_count: int = 0
+    request_id: Optional[int] = None
+    item_id: Optional[int] = None
+
+
+# Wishlist / Saved Items schemas
+class SavedItemOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    user_id: int
+    item_id: int
+    created_at: datetime
+    item: ItemOut
+
+# Notification schemas
+class NotificationOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    user_id: int
+    title: str
+    message: str
+    link: Optional[str] = None
+    is_read: bool = False
+    created_at: datetime
+
+# Review schemas
+class ReviewCreate(BaseModel):
+    reviewee_id: int
+    rating: int = Field(..., ge=1, le=5)
+    comment: Optional[str] = None
+    transaction_id: Optional[int] = None
+
+class ReviewOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    reviewer_id: int
+    reviewee_id: int
+    rating: int
+    comment: Optional[str] = None
+    created_at: datetime
+    reviewer: UserOut
+
+# Report schemas
+class ReportCreate(BaseModel):
+    reason: str
+    details: Optional[str] = None
+
+class ReportOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    item_id: int
+    reporter_id: int
+    reason: str
+    details: Optional[str] = None
+    status: str
+    created_at: datetime
+
+# Item Update schema
+class ItemUpdate(BaseModel):
+    title: Optional[str] = None
+    category: Optional[str] = None
+    type: Optional[str] = None
+    description: Optional[str] = None
+    specs: Optional[str] = None
+    condition: Optional[str] = None
+    zone: Optional[str] = None
+    is_available: Optional[bool] = None
+    status: Optional[str] = None
+    tags: Optional[List[str]] = None
+
