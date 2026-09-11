@@ -20,8 +20,9 @@
 ## 🎥 Video Presentation & Demonstration
 
 > 📺 **Official Project Presentation Video:**  
-> ### [▶️ Click to Watch Our Video Presentation on YouTube / Google Drive](https://youtu.be/eO9GICwQhOo)
->
+> ### [▶️ Click to Watch Our Video Presentation on YouTube ](https://youtu.be/eO9GICwQhOo)
+>drive link: https://drive.google.com/file/d/1Fqm6yo4HoTpyOR-CpZ1VtCBaeMNS5k8D/view?usp=drivesdk
+> 
 > *(Note for Evaluators: Click the link above to watch our team walkthrough demonstrating problem validation, God's Eye Map discovery, instant Messages, and the OTP-verified borrow/return lifecycle).*
 
 
