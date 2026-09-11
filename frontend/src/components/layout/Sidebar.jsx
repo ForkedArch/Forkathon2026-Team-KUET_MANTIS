@@ -41,6 +41,20 @@ const LogoutIcon = () => (
   </svg>
 );
 
+const PerimeterPinIcon = ({ className = "w-3.5 h-3.5" }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+  </svg>
+);
+
+const KarmaIcon = ({ className = "w-3.5 h-3.5 text-amber-500" }) => (
+  <svg className={className} fill="currentColor" viewBox="0 0 20 20">
+    <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+  </svg>
+);
+
+
 export default function Sidebar({ isOpen, onClose }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -90,7 +104,8 @@ export default function Sidebar({ isOpen, onClose }) {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
             </span>
-            <span>📍 700m Campus Perimeter</span>
+            <PerimeterPinIcon className="w-3.5 h-3.5 text-blue-600" />
+            <span>700m Campus Perimeter</span>
           </div>
         </div>
 
@@ -167,8 +182,8 @@ export default function Sidebar({ isOpen, onClose }) {
               {/* Karma Score Badge (R4) */}
               <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between">
                 <span className="text-[11px] text-slate-500 font-medium">KUET Karma</span>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 shadow-xs">
-                  <span>⚡</span>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-900 border border-amber-200/80 shadow-2xs">
+                  <KarmaIcon className="w-3.5 h-3.5 text-amber-500" />
                   <span>{user.karma ?? 100} Karma</span>
                 </span>
               </div>

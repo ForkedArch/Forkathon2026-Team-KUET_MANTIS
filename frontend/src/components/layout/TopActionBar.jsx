@@ -41,14 +41,14 @@ const BellIcon = ({ className = "w-5 h-5" }) => (
 );
 
 const CATEGORIES = [
-  { id: 'ALL', label: 'All Categories', icon: '🏷️' },
-  { id: 'Calculators', label: 'Calculators', icon: '🧮' },
-  { id: 'Electronics & Power', label: 'Power & Chargers', icon: '🔌' },
-  { id: 'Lab Equipment', label: 'Lab Equipment', icon: '🔬' },
-  { id: 'Books & Notes', label: 'Books & Notes', icon: '📖' },
-  { id: 'Cables & Adapters', label: 'Cables & Adapters', icon: '🔗' },
-  { id: 'Stationery & Drawing', label: 'Stationery & Drawing', icon: '📐' },
-  { id: 'Other', label: 'Other Items', icon: '📦' }
+  { id: 'ALL', label: 'All Categories' },
+  { id: 'Calculators', label: 'Calculators' },
+  { id: 'Electronics & Power', label: 'Power & Chargers' },
+  { id: 'Lab Equipment', label: 'Lab Equipment' },
+  { id: 'Books & Notes', label: 'Books & Notes' },
+  { id: 'Cables & Adapters', label: 'Cables & Adapters' },
+  { id: 'Stationery & Drawing', label: 'Stationery & Drawing' },
+  { id: 'Other', label: 'Other Items' }
 ];
 
 export default function TopActionBar({
@@ -170,7 +170,7 @@ export default function TopActionBar({
         >
           {CATEGORIES.map((cat) => (
             <option key={cat.id} value={cat.id}>
-              {cat.icon} {cat.label}
+              {cat.label}
             </option>
           ))}
         </select>

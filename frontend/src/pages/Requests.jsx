@@ -5,6 +5,7 @@ import api from '../api/client';
 import Loader from '../components/common/Loader';
 import { useAuth } from '../context/AuthContext';
 import { formatDept } from '../utils/dept';
+import { KarmaIcon } from '../components/common/KarmaIcon';
 import toast from 'react-hot-toast';
 
 const ClockIcon = ({ className = "w-3.5 h-3.5" }) => (
@@ -101,8 +102,9 @@ export default function Requests() {
                     <div className="flex items-center gap-2">
                       <h3 className="font-bold text-slate-900 text-base">{req.item?.title}</h3>
                       {otherParty && (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200 shadow-2xs">
-                          ⚡ {karmaScore} Karma
+                        <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200 shadow-2xs">
+                          <KarmaIcon className="w-3 h-3 text-amber-500" />
+                          <span>{karmaScore} Karma</span>
                         </span>
                       )}
                     </div>

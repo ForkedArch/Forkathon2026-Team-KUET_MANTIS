@@ -6,6 +6,7 @@ import Loader from '../components/common/Loader';
 import RequestModal from '../components/requests/RequestModal';
 import { useAuth } from '../context/AuthContext';
 import { formatDept } from '../utils/dept';
+import { KarmaIcon } from '../components/common/KarmaIcon';
 import toast from 'react-hot-toast';
 
 export default function ItemDetail() {
@@ -102,10 +103,12 @@ export default function ItemDetail() {
         {user && (
           <button
             onClick={() => saveMutation.mutate()}
-            className="absolute top-4 right-4 bg-white/90 backdrop-blur p-2.5 rounded-full shadow-md hover:bg-white text-rose-600 transition"
+            className="absolute top-4 right-4 bg-white/90 backdrop-blur p-2.5 rounded-full shadow-md hover:bg-white text-rose-500 hover:text-rose-600 transition"
             title="Save to Wishlist"
           >
-            <span className="text-lg">❤️</span>
+            <svg className="w-5 h-5 fill-current" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+            </svg>
           </button>
         )}
       </div>
@@ -113,12 +116,21 @@ export default function ItemDetail() {
       {/* Main Info */}
       <div className="mt-6 flex items-start justify-between gap-4">
         <div>
-          <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 uppercase tracking-wider">
-            {item.type === 'lend' ? '🤝 For Lend' : '📢 Needed (Borrow Beacon)'}
+          <span className={`text-xs font-semibold px-2.5 py-1 rounded-md uppercase tracking-wider inline-flex items-center gap-1.5 ${
+            item.type === 'lend' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : 'bg-rose-50 text-rose-700 border border-rose-200/60'
+          }`}>
+            <span className={`w-2 h-2 rounded-full ${item.type === 'lend' ? 'bg-emerald-500' : 'bg-rose-500 animate-pulse'}`} />
+            {item.type === 'lend' ? 'For Lend' : 'Needed (Borrow Beacon)'}
           </span>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">{item.title}</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            {item.category} · 📍 {item.zone || 'Anywhere on Campus'}
+          <p className="text-sm text-slate-500 mt-1 flex items-center gap-1.5">
+            <span>{item.category}</span>
+            <span>·</span>
+            <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span>{item.zone || 'Anywhere on Campus'}</span>
           </p>
         </div>
 
@@ -132,8 +144,9 @@ export default function ItemDetail() {
           >
             {item.is_available ? 'Available' : 'Currently Borrowed'}
           </span>
-          <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200">
-            ⚡ {item.owner?.karma ?? item.karma ?? 100} Karma
+          <span className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200/80 shadow-2xs">
+            <KarmaIcon className="w-3.5 h-3.5 text-amber-500" />
+            <span>{item.owner?.karma ?? item.karma ?? 100} Karma</span>
           </span>
         </div>
       </div>
@@ -181,7 +194,10 @@ export default function ItemDetail() {
             onClick={() => navigate(`/chat?user=${item.owner_id}&item=${item.id}`)}
             className="bg-white border border-slate-200 text-blue-600 font-semibold px-4 py-2 rounded-xl text-xs shadow-sm hover:bg-blue-50 transition flex items-center gap-1.5"
           >
-            <span>💬</span> Contact Owner
+            <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            <span>Contact Owner</span>
           </button>
         )}
       </div>
@@ -200,7 +216,10 @@ export default function ItemDetail() {
               onClick={() => navigate(`/chat?user=${item.owner_id}&item=${item.id}`)}
               className="bg-slate-100 text-slate-700 py-3.5 px-6 rounded-xl font-bold hover:bg-slate-200 transition text-sm flex items-center justify-center gap-2"
             >
-              <span>💬</span> Chat / Ask Question
+              <svg className="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+              <span>Chat / Ask Question</span>
             </button>
           </>
         )}
@@ -210,9 +229,12 @@ export default function ItemDetail() {
           <div className="flex-1 flex gap-3">
             <button
               onClick={handleOpenEdit}
-              className="flex-1 bg-amber-500 text-white py-3 px-6 rounded-xl font-bold hover:bg-amber-600 transition text-sm flex items-center justify-center gap-1.5"
+              className="flex-1 bg-amber-500 text-white py-3 px-6 rounded-xl font-bold hover:bg-amber-600 transition text-sm flex items-center justify-center gap-1.5 shadow-sm"
             >
-              <span>✏️</span> Edit Listing
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+              <span>Edit Listing</span>
             </button>
             <button
               onClick={() => {
@@ -221,9 +243,12 @@ export default function ItemDetail() {
                 }
               }}
               disabled={deleteMutation.isPending}
-              className="bg-rose-50 text-rose-600 border border-rose-200 py-3 px-6 rounded-xl font-bold hover:bg-rose-100 transition text-sm"
+              className="bg-rose-50 text-rose-600 border border-rose-200 py-3 px-6 rounded-xl font-bold hover:bg-rose-100 transition text-sm flex items-center justify-center gap-1.5"
             >
-              {deleteMutation.isPending ? 'Deleting...' : '🗑️ Delete'}
+              <svg className="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              <span>{deleteMutation.isPending ? 'Deleting...' : 'Delete'}</span>
             </button>
           </div>
         )}
@@ -232,9 +257,12 @@ export default function ItemDetail() {
         {user && !isOwner && (
           <button
             onClick={() => setShowReportModal(true)}
-            className="text-xs text-slate-400 hover:text-rose-600 py-2 text-center transition"
+            className="text-xs text-slate-400 hover:text-rose-600 py-2 text-center transition flex items-center justify-center gap-1"
           >
-            🚨 Report Item
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <span>Report Item</span>
           </button>
         )}
       </div>

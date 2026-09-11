@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useMemo } from 'react';
 import api from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { formatDept } from '../utils/dept';
+import { KarmaIcon } from '../components/common/KarmaIcon';
 import toast from 'react-hot-toast';
 
 // Modern SVG Icons
@@ -434,10 +435,11 @@ export default function Chat() {
                       {peer.context || `${formatDept(peer.dept)} · Roll ${peer.roll}`}
                     </p>
                   </div>
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold flex items-center gap-1 ${
                     isSelected ? 'bg-blue-700 text-blue-100' : 'bg-slate-100 text-slate-500'
                   }`}>
-                    ⚡ {peer.karma || 100}
+                    <KarmaIcon className={`w-3 h-3 ${isSelected ? 'text-amber-300' : 'text-amber-500'}`} />
+                    <span>{peer.karma || 100}</span>
                   </span>
                 </button>
               );
@@ -484,8 +486,9 @@ export default function Chat() {
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-200/80 shadow-2xs">
-                ⚡ {activeContact?.karma || 100} Karma
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-200/80 shadow-2xs">
+                <KarmaIcon className="w-3.5 h-3.5 text-amber-500" />
+                <span>{activeContact?.karma || 100} Karma</span>
               </span>
             </div>
           </div>

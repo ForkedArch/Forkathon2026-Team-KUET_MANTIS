@@ -99,8 +99,13 @@ export default function Home() {
           </div>
           <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             <div className="bg-slate-50 rounded-3xl p-8 border border-slate-100 relative">
-              <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2 mb-6">
-                <span className="text-blue-500">💳</span> Borrowing Items
+              <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2.5 mb-6">
+                <span className="w-8 h-8 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
+                </span>
+                <span>Borrowing Items</span>
               </h3>
               <ul className="space-y-6">
                 <li className="flex gap-4">
@@ -128,8 +133,13 @@ export default function Home() {
             </div>
             
             <div className="bg-indigo-50/50 rounded-3xl p-8 border border-indigo-100 relative">
-              <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2 mb-6">
-                <span className="text-indigo-500">➕</span> Listing Your Items
+              <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2.5 mb-6">
+                <span className="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                  </svg>
+                </span>
+                <span>Listing Your Items</span>
               </h3>
               <ul className="space-y-6">
                 <li className="flex gap-4">
@@ -167,17 +177,29 @@ export default function Home() {
           
           <div className="grid sm:grid-cols-3 gap-8">
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-              <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-xl mb-4">➕</div>
+              <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                </svg>
+              </div>
               <h4 className="font-bold text-slate-800">Earn Karma</h4>
               <p className="text-sm text-slate-500 mt-2">Earn +10 Karma when others borrow your items, and +5 Karma when you return borrowed items on time.</p>
             </div>
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-              <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto text-xl mb-4">🛡️</div>
+              <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+              </div>
               <h4 className="font-bold text-slate-800">Gain Trust</h4>
               <p className="text-sm text-slate-500 mt-2">Build trust through successful transactions. New verified students start with 100 Base Karma.</p>
             </div>
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-              <div className="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto text-xl mb-4">⚠️</div>
+              <div className="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
               <h4 className="font-bold text-slate-800">Maintain Integrity</h4>
               <p className="text-sm text-slate-500 mt-2">Returning items late incurs a -30 Karma penalty. Keep your score high to borrow seamlessly.</p>
             </div>
