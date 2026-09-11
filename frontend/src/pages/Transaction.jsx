@@ -57,12 +57,12 @@ export default function Transaction() {
         setKarmaResult(karmaInfo);
         if (karmaInfo.is_on_time) {
           toast.success(
-            `🎉 Return complete! Borrower: +${karmaInfo.borrower_change} Karma, Lender: +${karmaInfo.owner_gain} Karma! ⚡`,
+            `Return complete! Borrower: +${karmaInfo.borrower_change} Karma, Lender: +${karmaInfo.owner_gain} Karma!`,
             { duration: 5000 }
           );
         } else {
           toast.error(
-            `⚠️ Late return! Borrower penalized ${karmaInfo.borrower_change} Karma. Lender: +${karmaInfo.owner_gain} Karma.`,
+            `Late return! Borrower penalized ${karmaInfo.borrower_change} Karma. Lender: +${karmaInfo.owner_gain} Karma.`,
             { duration: 5000 }
           );
         }
@@ -77,7 +77,7 @@ export default function Transaction() {
   const reviewMutation = useMutation({
     mutationFn: (data) => api.post('/reviews', data),
     onSuccess: () => {
-      toast.success('Thank you for rating your fellow KUETian! ⭐');
+      toast.success('Thank you for rating your fellow KUETian!');
       setReviewSubmitted(true);
     },
     onError: (err) => toast.error(err.response?.data?.detail || 'Failed to submit review')

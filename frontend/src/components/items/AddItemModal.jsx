@@ -145,7 +145,7 @@ export default function AddItemModal({
       }
     },
     onSuccess: () => {
-      toast.success(type === 'borrow' ? '🚨 Demand Beacon broadcasted!' : '🟢 Item listed successfully!');
+      toast.success(type === 'borrow' ? 'Demand Beacon broadcasted successfully!' : 'Item listed successfully!');
       queryClient.invalidateQueries({ queryKey: ['items'] });
       resetForm();
       onClose();

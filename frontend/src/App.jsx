@@ -164,7 +164,7 @@ function Register() {
         email: email.trim().toLowerCase(),
         password
       });
-      toast.success('Registration successful! 100 Base Karma awarded. ⚡');
+      toast.success('Registration successful! 100 Base Karma awarded.');
       navigate('/login');
     } catch (err) {
       toast.error(err.response?.data?.detail || err.message || 'Registration failed', { duration: 6000 });
