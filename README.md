@@ -20,11 +20,25 @@
 
 ## 🎥 Video Presentation & Demonstration
 
-> 📺 **Official Project Presentation Video:**  
-> ### [▶️ Click to Watch Our Video Presentation on YouTube ](https://youtu.be/eO9GICwQhOo)
->drive link: https://drive.google.com/file/d/1Fqm6yo4HoTpyOR-CpZ1VtCBaeMNS5k8D/view?usp=drivesdk
-> 
-> *(Note for Evaluators: Click the link above to watch our team walkthrough demonstrating problem validation, God's Eye Map discovery, instant Messages, and the OTP-verified borrow/return lifecycle).*
+<div align="center">
+  <a href="https://youtu.be/eO9GICwQhOo" target="_blank" title="Watch CampusShare KUET Presentation on YouTube">
+    <img src="https://img.youtube.com/vi/eO9GICwQhOo/maxresdefault.jpg" alt="CampusShare KUET Video Walkthrough" width="85%" style="border-radius: 14px; box-shadow: 0 8px 30px rgba(0,0,0,0.15);" />
+  </a>
+
+  <br/><br/>
+
+  <p>
+    <a href="https://youtu.be/eO9GICwQhOo" target="_blank">
+      <img src="https://img.shields.io/badge/YouTube-Watch%20Video%20Walkthrough-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="Watch on YouTube" />
+    </a>
+    &nbsp;&nbsp;
+    <a href="https://drive.google.com/file/d/1Fqm6yo4HoTpyOR-CpZ1VtCBaeMNS5k8D/view?usp=drivesdk" target="_blank">
+      <img src="https://img.shields.io/badge/Google%20Drive-HD%20Video%20Mirror-4285F4?style=for-the-badge&logo=googledrive&logoColor=white" alt="Google Drive Mirror" />
+    </a>
+  </p>
+</div>
+
+> 💡 **For Evaluators & Visitors:** Click the preview above or the badge links to watch our team walkthrough demonstrating real student problem validation, live God's Eye Map discovery, instant 1:1 chat coordination, and the cryptographically secure OTP handover & Karma reward lifecycle.
 
 
 ## 👥 Team
