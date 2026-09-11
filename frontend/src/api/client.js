@@ -3,10 +3,20 @@ import axios from 'axios';
 // Determine and normalize API Base URL
 let rawBase = (import.meta.env.VITE_API_URL || '').trim();
 
+const isCapacitor = typeof window !== 'undefined' && (
+  Boolean(window.Capacitor) ||
+  window.location.protocol === 'capacitor:' ||
+  window.location.protocol === 'ionic:'
+);
+
 if (!rawBase) {
-  rawBase = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? 'http://localhost:8000/api'
-    : 'https://forkathon2026-team-kuet-mantis-2.onrender.com/api';
+  if (isCapacitor) {
+    rawBase = 'https://forkathon2026-team-kuet-mantis-2.onrender.com/api';
+  } else {
+    rawBase = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+      ? 'http://localhost:8000/api'
+      : 'https://forkathon2026-team-kuet-mantis-2.onrender.com/api';
+  }
 }
 
 // Remove trailing slashes
