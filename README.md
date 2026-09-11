@@ -239,6 +239,92 @@ CampusShare KUET is built with a decoupled client-server architecture designed f
 | **Working Production Deployment** | 100% deployed and fully operational: static frontend on Render CDN connected to Render backend and cloud-hosted Neon PostgreSQL. |
 
 ---
+FOLDER STRUCTURE:
+.campus-share-kuet
+├── backend/
+│   ├── app/
+│   │   ├── data/
+│   │   │   └── kuet_landmarks.json
+│   │   ├── routes/
+│   │   │   ├── auth.py
+│   │   │   ├── borrow_requests.py
+│   │   │   ├── chat.py
+│   │   │   ├── items.py
+│   │   │   ├── landmarks.py
+│   │   │   ├── notifications.py
+│   │   │   ├── reviews.py
+│   │   │   └── transactions.py
+│   │   ├── utils/
+│   │   │   ├── file_upload.py
+│   │   │   └── qr_code.py
+│   │   ├── auth.py
+│   │   ├── database.py
+│   │   ├── main.py
+│   │   ├── models.py
+│   │   ├── schemas.py
+│   │   └── seed.py
+│   ├── uploads/
+│   │   └── .gitkeep
+│   ├── .env.example
+│   ├── .env.production.example
+│   ├── Dockerfile
+│   └── requirements.txt
+├── frontend/
+│   ├── public/
+│   │   ├── _redirects
+│   │   └── logo.svg
+│   ├── src/
+│   │   ├── api/
+│   │   │   └── client.js
+│   │   ├── components/
+│   │   │   ├── common/
+│   │   │   │   ├── Loader.jsx
+│   │   │   │   └── Logo.jsx
+│   │   │   ├── items/
+│   │   │   │   ├── AddItemModal.jsx
+│   │   │   │   ├── ItemCard.jsx
+│   │   │   │   └── ItemHoverCard.jsx
+│   │   │   ├── layout/
+│   │   │   │   ├── DashboardLayout.jsx
+│   │   │   │   ├── Sidebar.jsx
+│   │   │   │   └── TopActionBar.jsx
+│   │   │   ├── map/
+│   │   │   │   ├── GodsEyeMap.css
+│   │   │   │   ├── GodsEyeMap.jsx
+│   │   │   │   └── index.js
+│   │   │   └── requests/
+│   │   │       └── RequestModal.jsx
+│   │   ├── context/
+│   │   │   └── AuthContext.jsx
+│   │   ├── pages/
+│   │   │   ├── AddItem.jsx
+│   │   │   ├── AllItems.jsx
+│   │   │   ├── Chat.jsx
+│   │   │   ├── Home.jsx
+│   │   │   ├── ItemDetail.jsx
+│   │   │   └── Profile.jsx
+│   │   ├── utils/
+│   │   ├── App.jsx
+│   │   ├── index.css
+│   │   └── main.jsx
+│   ├── .env.example
+│   ├── .env.production.example
+│   ├── Dockerfile
+│   ├── index.html
+│   ├── nginx.conf
+│   ├── package.json
+│   └── postcss.config.js
+├── .gitignore
+├── docker-compose.yml
+├── LICENSE
+├── package.json
+├── README.md
+├── render.yaml
+└── vercel.json
+
+
+
+
 
 ## 🚀 Local Setup & Installation :
 
