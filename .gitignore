@@ -29,6 +29,8 @@ dist/
 **/dist/
 build/
 **/build/
+.gradle/
+**/.gradle/
 out/
 coverage/
 *.apk
