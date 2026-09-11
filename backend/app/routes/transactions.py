@@ -14,6 +14,11 @@ def start_transaction(
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(auth.get_current_user)
 ):
+    """
+    Initiates physical item handover for an accepted borrow request.
+    Generates a secure 4-digit OTP and scannable QR code for in-person verification.
+    Only the item owner can initiate handover.
+    """
     req = db.query(models.BorrowRequest).filter(models.BorrowRequest.id == data.request_id).first()
     if not req:
         raise HTTPException(status_code=404, detail="Request not found")
@@ -46,6 +51,11 @@ def verify_handover(
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(auth.get_current_user)
 ):
+    """
+    Verifies physical item handover using the borrower-submitted 4-digit OTP.
+    Transitions transaction status to 'borrowed' and clears one-time OTP.
+    Only the designated borrower can verify handover.
+    """
     req = db.query(models.BorrowRequest).filter(models.BorrowRequest.id == data.request_id).first()
     if not req:
         raise HTTPException(status_code=404, detail="Request not found")
@@ -72,6 +82,13 @@ def request_return(
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(auth.get_current_user)
 ):
+    """
+    Completes return of a borrowed item and executes KUET Karma Protocol awards:
+    - Item availability is restored to the campus inventory.
+    - Owner is awarded +10 KUET Karma for successful lending.
+    - Borrower is awarded +5 Karma if returned on-time, or penalized -30 Karma if overdue.
+    - Request lifecycle transitions to 'completed'.
+    """
     req = db.query(models.BorrowRequest).filter(models.BorrowRequest.id == request_id).first()
     if not req:
         raise HTTPException(status_code=404, detail="Request not found")

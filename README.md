@@ -3,9 +3,27 @@
 # Forkathon 2026: [CampusShare KUET] by [KUET_MANTIS]
 
 > Built for ForkedArch Freshers Hackathon 2026  
-> 🌐 **Live Production Application:** [https://forkathon2026-team-kuet-mantis-3.onrender.com](https://forkathon2026-team-kuet-mantis-3.onrender.com)
+> 🌐 **Live Production Application:** [https://forkathon2026-team-kuet-mantis-3.onrender.com](https://forkathon2026-team-kuet-mantis-3.onrender.com)  
+> ⚡ **Live API Documentation:** [https://forkathon2026-team-kuet-mantis-2.onrender.com/docs](https://forkathon2026-team-kuet-mantis-2.onrender.com/docs)
+
+[![Live Demo](https://img.shields.io/badge/Render-Live%20Demo-brightgreen?logo=render)](https://forkathon2026-team-kuet-mantis-3.onrender.com)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.109-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)](https://python.org)
+[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://react.dev)
+[![Vite](https://img.shields.io/badge/Vite-5.4-646CFF?logo=vite&logoColor=white)](https://vitejs.dev)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.4-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
+[![Neon Database](https://img.shields.io/badge/PostgreSQL-Neon%20Serverless-00E599?logo=postgresql&logoColor=white)](https://neon.tech)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
 ---
+
+## 🎥 Video Presentation & Demonstration
+
+> 📺 **Official Project Presentation Video:**  
+> ### [▶️ Click to Watch Our Video Presentation on YouTube / Google Drive](https://youtu.be/YOUR_VIDEO_LINK_HERE)
+>
+> *(Note for Evaluators: Click the link above to watch our team walkthrough demonstrating problem validation, God's Eye Map discovery, instant Messages, and the OTP-verified borrow/return lifecycle).*
+
 
 ## 👥 Team :
 
@@ -207,6 +225,18 @@ CampusShare KUET is built with a decoupled client-server architecture designed f
  │ content, created_at    │             │ created_at             │
  └────────────────────────┘             └────────────────────────┘
 ```
+
+---
+
+## 🏆 Hackathon Judging Criteria Alignment :
+
+| Evaluation Pillar | How CampusShare KUET Solves It |
+| :--- | :--- |
+| **Problem Solving & Relevance** | Directly targets *"The Borrowed Charger"* statement. Solves immediate supply panics (calculators before exams, chargers in labs, drafting tools in sessional) that KUET students face daily. |
+| **The Brainstorming Twist** | Solves safety and trust through a 3-pillar protocol: (1) Verified `@stud.kuet.ac.bd` domain gate with auto-decoded Roll/Batch, (2) Self-regulating KUET Karma Protocol (+10 lend, +5 on-time, -30 penalty), and (3) Dynamic 4-digit OTP/QR physical handover verification. |
+| **Technical Excellence** | Modern decoupled fullstack architecture: Python FastAPI backend with Pydantic V2 validation, Serverless Neon PostgreSQL database with ACID transactions, and React 18 with MapLibre GL geospatial radar. |
+| **User Experience & Polish** | Instant Messages coordination on requests, God's Eye 700m interactive perimeter map with click-to-pin, responsive mobile layout, and zero-setup student onboarding. |
+| **Working Production Deployment** | 100% deployed and fully operational: static frontend on Render CDN connected to Render backend and cloud-hosted Neon PostgreSQL. |
 
 ---
 
