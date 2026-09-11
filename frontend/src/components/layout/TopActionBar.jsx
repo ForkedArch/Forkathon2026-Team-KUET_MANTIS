@@ -28,6 +28,18 @@ const MenuIcon = () => (
   </svg>
 );
 
+const ChatIcon = ({ className = "w-5 h-5" }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+  </svg>
+);
+
+const BellIcon = ({ className = "w-5 h-5" }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+  </svg>
+);
+
 const CATEGORIES = [
   { id: 'ALL', label: 'All Categories', icon: '🏷️' },
   { id: 'Calculators', label: 'Calculators', icon: '🧮' },
@@ -171,22 +183,26 @@ export default function TopActionBar({
             {/* Direct Chat Link */}
             <button
               onClick={() => navigate('/chat')}
-              className="p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition-colors relative"
+              className="p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition-colors relative border border-transparent hover:border-slate-200"
               title="1:1 Messages"
+              aria-label="Messages"
             >
-              <span className="text-lg">💬</span>
+              <ChatIcon className="w-5 h-5" />
             </button>
 
             {/* Notification Bell */}
             <div className="relative">
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
-                className="p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition-colors relative"
+                className={`p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition-colors relative border ${
+                  showNotifications ? 'bg-slate-100 text-blue-600 border-slate-200' : 'border-transparent hover:border-slate-200'
+                }`}
                 title="Notifications"
+                aria-label="Notifications"
               >
-                <span className="text-lg">🔔</span>
+                <BellIcon className="w-5 h-5" />
                 {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                  <span className="absolute top-1.5 right-1.5 min-w-4 h-4 px-1 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-white shadow-2xs">
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </span>
                 )}
